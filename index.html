@@ -889,8 +889,20 @@ function periodFilter(){
   const sh=$("rShift").value, ln=$("rLine").value; if(ln) label+=" · "+ln; if(sh) label+=" · Shift "+sh;
   return { from,to,sh,ln,label,month };
 }
+function dailyReport(f){
+  const months=monthsBetween(f.from,f.to); const M=new Map();
+  months.forEach(m=>dSections(m).forEach(s=>{ if(f.ln && s.name!==f.ln) return;
+    if(!M.has(s.key)) M.set(s.key,{line:"Hard passing",name:s.name,order:s.order||0,n:0,ok:0,rej:0,val:0,rv:0,tq:0,tv:0,parts:new Map(),partList:[],nparts:0});
+    const x=M.get(s.key);
+    (s.days||[]).forEach(d=>{ if(d.date>=f.from && d.date<=f.to && d.a!=null){ x.val+=d.a*1e5; x.n++; } if(f.month && m===f.month) x.tv+=(d.t||0)*1e5; }); }));
+  if(!M.size) return null;
+  const secs=[...M.values()].sort((a,b)=>a.order-b.order);
+  const T={n:0,ok:0,rej:0,val:0,rv:0,tq:0,tv:0,nparts:0}; secs.forEach(s=>{ T.n+=s.n; T.val+=s.val; T.tv+=s.tv; });
+  return { f, secs, lines:["Hard passing"], T, hasTarget: !!f.month && T.tv>0, source:"daily" };
+}
 function computeReport(){
   const f=periodFilter();
+  if(!S.entries.some(x=>x.date>=f.from && x.date<=f.to) && (S.daily||[]).length){ const d=dailyReport(f); if(d) return d; }
   const rows=S.entries.filter(x=>x.date>=f.from && x.date<=f.to && (!f.sh||x.shift===f.sh) && (!f.ln||eLine(x)===f.ln));
   const tg = f.month && !f.sh ? S.targets.filter(t=>t.month===f.month && (!f.ln||t.line===f.ln)) : [];
   const key=(l,s)=>l+"\u0001"+s, M=new Map();
@@ -912,27 +924,27 @@ function renderReport(){
   { const pf=periodFilter(); ensureRange(pf.from,pf.to); }
   $("rDayW").style.display=p==="day"?"":"none"; $("rMonW").style.display=p==="month"?"":"none";
   $("rFromW").style.display=$("rToW").style.display=p==="range"?"":"none";
-  const { f, secs, lines, T, hasTarget } = computeReport();
-  $("rLabel").textContent=f.label; $("rLabelHead").textContent=f.label+" · Including over bill · value = quantity × rate";
-  $("tgtNote").textContent = hasTarget ? "Target = month target value from the uploaded line sheets." : (f.month ? "No targets for this month yet. Upload the line sheets to add them." : "Targets are monthly, so they show when Period is set to Month.");
+  const { f, secs, lines, T, hasTarget, source } = computeReport(); const isD = source==="daily";
+  $("rLabel").textContent=f.label; $("rLabelHead").textContent=f.label+(isD?" · Hard passing · from the Hard Section Production Value sheet":" · Including over bill · value = quantity × rate");
+  $("tgtNote").textContent = isD ? "Achieved and target come from the Hard Section Production Value sheet (hard passing). Achievement here is against the full month target; the Daily T&A tab shows it against the target till date. Upload the 4 line sheets to see quantities and part-wise detail." : hasTarget ? "Target = month target value from the uploaded line sheets." : (f.month ? "No targets for this month yet. Upload the line sheets to add them." : "Targets are monthly, so they show when Period is set to Month.");
   const best = secs.filter(s=>s.val>0).sort((a,b)=>b.val-a.val)[0];
   $("kpis").innerHTML = `<div class="kpi accent"><div class="k">Production Value</div><div class="v">${cr(T.val)}</div><div class="s">${inr(T.val)}</div></div>
     <div class="kpi"><div class="k">Target Value</div><div class="v">${hasTarget?cr(T.tv):"–"}</div><div class="s">${hasTarget?inr(T.tv):"Shown in monthly view"}</div></div>
     <div class="kpi ${hasTarget&&T.val>=T.tv?"good":""}"><div class="k">Achievement</div><div class="v">${hasTarget?pct(T.val,T.tv):"–"}</div>${hasTarget?`<div class="meter"><div style="width:${Math.min(100,T.tv?T.val*100/T.tv:0).toFixed(1)}%"></div></div><div class="s">Balance ${cr(Math.max(0,T.tv-T.val))}</div>`:`<div class="s">&nbsp;</div>`}</div>
-    <div class="kpi"><div class="k">Quantity (incl. OB)</div><div class="v">${num(T.ok)}</div><div class="s">${T.nparts} parts · ${T.n} entries</div></div>
+    <div class="kpi"><div class="k">Quantity (incl. OB)</div><div class="v">${isD?"–":num(T.ok)}</div><div class="s">${isD?"Needs the line sheets":T.nparts+" parts · "+T.n+" entries"}</div></div>
     <div class="kpi"><div class="k">Top Section</div><div class="v" style="font-size:15px;line-height:1.3">${best?esc(best.name):"–"}</div><div class="s">${best?esc(best.line)+" · "+cr(best.val):""}</div></div>`;
   const tv = v => hasTarget ? inr(v) : "–";
   let html="";
   lines.forEach(l=>{
     const ss=secs.filter(s=>s.line===l); const L={ok:0,val:0,tv:0,rej:0,rv:0,np:0}; ss.forEach(s=>{L.ok+=s.ok;L.val+=s.val;L.tv+=s.tv;L.rej+=s.rej;L.rv+=s.rv;L.np+=s.nparts;});
-    html+=`<tr class="lineh"><td colspan="9">${esc(l.toUpperCase())}</td></tr>`;
-    html+=ss.map(s=>`<tr><td><b>${esc(s.name)}</b></td><td class="n">${s.nparts}</td><td class="n">${num(s.ok)}</td><td class="n"><b>${inr(s.val)}</b></td><td class="n">${tv(s.tv)}</td><td class="n">${hasTarget&&s.tv?`<span class="pill ${s.val>=s.tv?"g":s.val/s.tv<0.4?"r":"w"}">${pct(s.val,s.tv)}</span>`:"–"}</td><td class="n">${num(s.rej)}</td><td class="n">${inr(s.rv)}</td><td class="n">${pct(s.val,T.val)}</td></tr>`).join("");
-    if(ss.length>1) html+=`<tr class="sub"><td>${esc(l)} total</td><td class="n">${L.np}</td><td class="n">${num(L.ok)}</td><td class="n">${inr(L.val)}</td><td class="n">${tv(L.tv)}</td><td class="n">${hasTarget?pct(L.val,L.tv):"–"}</td><td class="n">${num(L.rej)}</td><td class="n">${inr(L.rv)}</td><td class="n">${pct(L.val,T.val)}</td></tr>`;
+    html+=`<tr class="lineh"><td colspan="9">${isD?"HARD PASSING · ALL "+ss.length+" LINES":esc(l.toUpperCase())}</td></tr>`;
+    html+=ss.map(s=>`<tr><td><b>${esc(s.name)}</b></td><td class="n">${isD?"–":s.nparts}</td><td class="n">${isD?"–":num(s.ok)}</td><td class="n"><b>${inr(s.val)}</b></td><td class="n">${tv(s.tv)}</td><td class="n">${hasTarget&&s.tv?`<span class="pill ${s.val>=s.tv?"g":s.val/s.tv<0.4?"r":"w"}">${pct(s.val,s.tv)}</span>`:"–"}</td><td class="n">${isD?"–":num(s.rej)}</td><td class="n">${isD?"–":inr(s.rv)}</td><td class="n">${pct(s.val,T.val)}</td></tr>`).join("");
+    if(ss.length>1 && !isD) html+=`<tr class="sub"><td>${esc(l)} total</td><td class="n">${L.np}</td><td class="n">${num(L.ok)}</td><td class="n">${inr(L.val)}</td><td class="n">${tv(L.tv)}</td><td class="n">${hasTarget?pct(L.val,L.tv):"–"}</td><td class="n">${num(L.rej)}</td><td class="n">${inr(L.rv)}</td><td class="n">${pct(L.val,T.val)}</td></tr>`;
   });
-  html+=`<tr class="tot"><td>GRAND TOTAL</td><td class="n">${T.nparts}</td><td class="n">${num(T.ok)}</td><td class="n">${inr(T.val)}</td><td class="n">${tv(T.tv)}</td><td class="n">${hasTarget?pct(T.val,T.tv):"–"}</td><td class="n">${num(T.rej)}</td><td class="n">${inr(T.rv)}</td><td class="n">${T.val?"100%":"–"}</td></tr>`;
-  $("secRows").innerHTML = secs.length ? html : `<tr><td colspan="9" class="empty">No sections yet. Upload your line sheets or add sections in Setup.</td></tr>`;
+  html+=`<tr class="tot"><td>GRAND TOTAL</td><td class="n">${isD?"–":T.nparts}</td><td class="n">${isD?"–":num(T.ok)}</td><td class="n">${inr(T.val)}</td><td class="n">${tv(T.tv)}</td><td class="n">${hasTarget?pct(T.val,T.tv):"–"}</td><td class="n">${isD?"–":num(T.rej)}</td><td class="n">${isD?"–":inr(T.rv)}</td><td class="n">${T.val?"100%":"–"}</td></tr>`;
+  $("secRows").innerHTML = secs.length ? html : `<tr><td colspan="9" class="empty">No data for this period. Upload the line sheets or the Hard Section Production Value workbook.</td></tr>`;
   const mx=Math.max(1,...secs.map(s=>Math.max(s.val,hasTarget?s.tv:0)));
-  $("bars").innerHTML = (T.val||T.tv) ? lines.map(l=>`<div class="lh">${esc(l)}</div>`+secs.filter(s=>s.line===l && (s.val||s.tv)).map(s=>`<div class="b"><div class="nm" title="${esc(s.name)}">${esc(s.name)}</div><div class="t">${hasTarget?`<div class="tg" style="width:${(s.tv*100/mx).toFixed(1)}%"></div>`:""}<div class="f" style="width:${(s.val*100/mx).toFixed(1)}%"></div></div><div class="vl">${cr(s.val)}${hasTarget?` <small>/ ${cr(s.tv)} · ${pct(s.val,s.tv)}</small>`:""}</div></div>`).join("")).join("") : `<div class="empty">No production for ${esc(f.label)}.</div>`;
+  $("bars").innerHTML = (T.val||T.tv) ? lines.map(l=>`<div class="lh">${isD?"Hard passing · all lines":esc(l)}</div>`+secs.filter(s=>s.line===l && (s.val||s.tv)).map(s=>`<div class="b"><div class="nm" title="${esc(s.name)}">${esc(s.name)}</div><div class="t">${hasTarget?`<div class="tg" style="width:${(s.tv*100/mx).toFixed(1)}%"></div>`:""}<div class="f" style="width:${(s.val*100/mx).toFixed(1)}%"></div></div><div class="vl">${cr(s.val)}${hasTarget?` <small>/ ${cr(s.tv)} · ${pct(s.val,s.tv)}</small>`:""}</div></div>`).join("")).join("") : `<div class="empty">No production for ${esc(f.label)}.</div>`;
   const withData=secs.filter(s=>s.partList.length);
   $("detail").innerHTML = withData.length ? withData.map(s=>`<details><summary><span>${esc(s.line)} · ${esc(s.name)}</span><span>${inr(s.val)}${hasTarget?` / ${inr(s.tv)}`:""}</span></summary><div class="tw"><table><thead><tr><th>Part</th><th>MS No</th><th>Customer</th><th class="n">Rate</th><th class="n">${hasTarget?"Target Qty":""}</th><th class="n">OK Qty</th><th class="n">${hasTarget?"Achv %":""}</th><th class="n">Value ₹</th></tr></thead><tbody>${s.partList.map(p=>`<tr><td>${esc(p.part)}${p.partNo?`<div class="note">${esc(p.partNo)}</div>`:""}</td><td>${esc(p.ms)}</td><td>${esc(p.customer)}</td><td class="n">${num(p.rate)}</td><td class="n">${hasTarget?num(p.tq):""}</td><td class="n">${num(p.ok)}</td><td class="n">${hasTarget&&p.tq?pct(p.ok,p.tq):""}</td><td class="n"><b>${inr(p.val)}</b></td></tr>`).join("")}</tbody></table></div></details>`).join("") : `<div class="empty">Nothing to show for this period.</div>`;
 }
@@ -1274,7 +1286,9 @@ $("dlTpl").onclick=()=>{
 function fillLineSelects(){
   const L=linesOrdered([...new Set(S.entries.map(eLine)), ...new Set(S.targets.map(t=>t.line))]);
   const opt=(id,all)=>{ const cur=$(id).value; $(id).innerHTML=(all?`<option value="">${all}</option>`:"")+L.map(l=>`<option>${esc(l)}</option>`).join(""); if(L.includes(cur)||(cur===""&&all)) $(id).value=cur; else if(!all&&L.length) $(id).value=L[0]; };
-  opt("rLine","All lines"); opt("clrLine",null);
+  { const cur=$("rLine").value; const dn=[]; (S.daily||[]).slice().sort((a,b)=>(a.order||0)-(b.order||0)).forEach(d=>{ const n=DTA.NAMES[d.key]||d.name; if(!dn.includes(n)) dn.push(n); });
+    const all=[...L, ...dn.filter(n=>!L.includes(n))]; $("rLine").innerHTML=`<option value="">All lines</option>`+all.map(l=>`<option>${esc(l)}</option>`).join(""); $("rLine").value = all.includes(cur)?cur:""; }
+  opt("clrLine",null);
   $("lineList").innerHTML=L.map(l=>`<option value="${esc(l)}">`).join("");
 }
 function renderSetup(){
