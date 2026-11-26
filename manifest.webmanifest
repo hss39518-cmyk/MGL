@@ -1,7 +1,7 @@
 {
-  "name": "Production Value Report",
-  "short_name": "PVR",
-  "description": "Section-wise production value and target vs achievement",
+  "name": "MGL PPC",
+  "short_name": "MGL PPC",
+  "description": "MGL PPC \u2013 Production Planning & Control: production value, daily target vs achievement",
   "id": "./",
   "start_url": "./#report",
   "scope": "./",

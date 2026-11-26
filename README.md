@@ -1,4 +1,4 @@
-# MGL · Production Value Report
+# MGL PPC · Production Planning & Control
 
 Section-wise production value and target vs achievement, from the line *Target vs Achievement* sheets (Shaft, Bull, Axle, Ring).
 
