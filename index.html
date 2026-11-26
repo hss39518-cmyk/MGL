@@ -583,7 +583,9 @@ const DTA = (() => {
     if(/DEVENDER/.test(u)) return "devender"; if(/SPEED\s*GEAR/.test(u)) return "speed"; if(/BULL/.test(u)) return "bull";
     if(/RING/.test(u)) return "ring"; if(/AXLE/.test(u)) return "axle"; if(/SCAM|CAM\s*SHAFT/.test(u)) return "scam";
     return U(name).toLowerCase().replace(/[^a-z0-9]+/g,"-"); }
-  function clean(name){
+  const NAMES = { bp:"B.P Shaft", jcb:"JCB", jd:"JD", speed:"Speed Gear", devender:"Small Gear & Shaft", bull:"Bull Gear", ring:"Ring Gear", axle:"Axle", scam:"Scam Shaft" };
+  function clean(name){ const k=key(name); if(NAMES[k]) return NAMES[k]; return clean0(name); }
+  function clean0(name){
     let s=String(name).replace(/\(\s*values?\s+in\s+la(c|kh)s?\s*\)/ig,"").replace(/\s+/g," ").trim();
     s=tc(s).replace(/\s*\(\s*/g," (").replace(/\s*\)/g,")");
     return s.replace(/^Shaft Line Mahinder \(B\.P\.?\s*Shaft\)$/i,"Mahinder (B.P Shaft)").replace(/^Shaft Line Mahinder \(JCB Line\)$/i,"Mahinder (JCB)")
@@ -625,7 +627,7 @@ const DTA = (() => {
     const used = sections.filter(s=>s.days.some(d=>d.t||d.a));
     return { month: ym, title, asOf, sheet: sheetName, sections: used };
   }
-  return { parse, key };
+  return { parse, key, NAMES };
 })();
 
 
@@ -1063,7 +1065,7 @@ $("dtaImport").onclick=async()=>{
 const D = { month:"", sec:"" };
 const dKey = (d) => d.date+"|"+d.label;
 function dMonths(){ return [...new Set((S.daily||[]).map(d=>d.month))].sort().reverse(); }
-function dSections(month){ return (S.daily||[]).filter(d=>d.month===month).sort((a,b)=>(a.order||0)-(b.order||0)); }
+function dSections(month){ return (S.daily||[]).filter(d=>d.month===month).map(d=>Object.assign({},d,{ name: DTA.NAMES[d.key]||d.name })).sort((a,b)=>(a.order||0)-(b.order||0)); }
 function combineDays(secs){
   const map=new Map();
   secs.forEach(s=>s.days.forEach(d=>{ const k=dKey(d); if(!map.has(k)) map.set(k,{date:d.date,label:d.label,t:0,a:null});
