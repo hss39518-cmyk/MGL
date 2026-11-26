@@ -1,11 +1,10 @@
-// Paste your Firebase web app settings here.
-// Firebase console > ⚙️ Project settings > General > Your apps > Web app > "SDK setup and configuration" > Config
-// Replace ONLY the text inside the quotes. These values are not secret; your data is protected by the Firestore rules.
+// Firebase web app settings for project "Linetarck" (app nickname: MGL).
+// These values are not secret; your data is protected by login + the Firestore security rules.
 window.FIREBASE_CONFIG = {
-  apiKey: "PASTE_API_KEY",
-  authDomain: "PASTE_PROJECT_ID.firebaseapp.com",
-  projectId: "PASTE_PROJECT_ID",
-  storageBucket: "PASTE_PROJECT_ID.firebasestorage.app",
-  messagingSenderId: "PASTE_SENDER_ID",
-  appId: "PASTE_APP_ID"
+  apiKey: "AIzaSyBc0L-Vg5W3rCd6xVLcFD7q6eDOesXLECA",
+  authDomain: "linetarck-909a9.firebaseapp.com",
+  projectId: "linetarck-909a9",
+  storageBucket: "linetarck-909a9.firebasestorage.app",
+  messagingSenderId: "1073510257213",
+  appId: "1:1073510257213:web:e5d83486fb5b70354a9054"
 };
