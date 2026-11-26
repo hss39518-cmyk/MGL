@@ -157,6 +157,7 @@ footer{text-align:center;color:var(--mut);font-size:11.5px;padding:8px 0 30px}
 </div></div>
 <nav class="tabs"><div class="wrap">
   <a href="#report" data-v="report"><svg class="i" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>Report</a>
+  <a href="#daily" data-v="daily"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M8 14h2M14 14h2M8 18h2"/></svg>Daily T&amp;A</a>
   <a href="#upload" data-v="upload" class="w-only"><svg class="i" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></svg>Upload</a>
   <a href="#entry" data-v="entry" class="w-only"><svg class="i" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>Daily Entry</a>
   <a href="#setup" data-v="setup"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Setup</a>
@@ -200,6 +201,46 @@ footer{text-align:center;color:var(--mut);font-size:11.5px;padding:8px 0 30px}
     </div>
   </section>
 
+  <!-- DAILY -->
+  <section class="view" id="v-daily">
+    <div class="pagehead"><div><h2>Daily Target vs Achieved</h2><p id="dHead">Hard passing · values in ₹ lakh</p></div></div>
+    <div class="card">
+      <h3>Filters</h3>
+      <div class="grid">
+        <div><label>Month</label><select id="dMonth"></select></div>
+        <div><label>Section</label><select id="dSec"></select></div>
+      </div>
+    </div>
+    <div id="dEmpty" class="card empty" style="display:none">No daily target vs achieved data yet. Upload the <b>Hard Section Production Value</b> workbook on the Upload tab.</div>
+    <div id="dBody">
+      <div class="kpis" id="dKpis"></div>
+      <div class="card">
+        <h3>Section-wise <span class="pill" id="dLabel"></span></h3>
+        <div class="tw"><table>
+          <thead><tr><th>Section</th><th class="n">Month Target</th><th class="n">Till-date Target</th><th class="n">Achieved</th><th class="n">Failure</th><th class="n">Achd %</th><th class="n">Asking / day</th><th class="n">Best day</th></tr></thead>
+          <tbody id="dSecRows"></tbody>
+        </table></div>
+        <p class="note">₹ lakh. Achd % = achieved ÷ target for the days entered so far. Asking / day = balance of the month target ÷ remaining working days (combined days like 28/29 count proportionally). Click a section to see its days.</p>
+      </div>
+      <div class="card">
+        <h3>Day-wise <span class="pill" id="dDayLabel"></span></h3>
+        <div class="legend"><span><i style="background:var(--brand)"></i>Achieved</span><span><i style="background:#fed7aa"></i>Target</span></div>
+        <div class="tw"><table>
+          <thead><tr><th>Day</th><th style="min-width:150px"></th><th class="n">Target</th><th class="n">Achieved</th><th class="n">Failure</th><th class="n">Achd %</th><th class="n">Cum. Target</th><th class="n">Cum. Achd</th><th class="n">Cum. %</th></tr></thead>
+          <tbody id="dDayRows"></tbody>
+        </table></div>
+      </div>
+      <div class="card">
+        <h3>Month comparison <span class="pill" id="dCmpLabel"></span></h3>
+        <div class="tw"><table>
+          <thead><tr><th>Month</th><th class="n">Month Target</th><th class="n">Achieved</th><th class="n">% of month target</th><th class="n" id="dSameHdr">Achd till same day</th><th class="n">Best day</th></tr></thead>
+          <tbody id="dCmpRows"></tbody>
+        </table></div>
+        <p class="note">“Till same day” compares every month up to the same date as the latest day entered in the selected month.</p>
+      </div>
+    </div>
+  </section>
+
   <!-- UPLOAD -->
   <section class="view" id="v-upload">
     <div class="pagehead"><div><h2>Upload Data</h2><p>Import line Target vs Achievement sheets or a simple data sheet.</p></div></div>
@@ -208,6 +249,7 @@ footer{text-align:center;color:var(--mut);font-size:11.5px;padding:8px 0 30px}
       <label class="drop" id="drop" for="upFile">
         <svg class="i" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></svg>
         <div><b>Tap to choose</b> or drop your Excel / CSV files here. You can choose several at once.</div>
+        <div class="note" style="margin-top:4px">Also reads the <b>Hard Section Production Value</b> workbook (daily target vs achieved for each section).</div>
         <div class="note" style="margin-top:6px">Line <b>Target vs Achievement</b> sheets (Shaft, Ring, Bull, Axle…) are read automatically: <b>Including Over Bill</b> qty × <b>Rate</b>, with sections from the colour on each MS No.</div>
       </label>
       <input type="file" id="upFile" accept=".xlsx,.xls,.xlsm,.csv" multiple style="display:none">
@@ -229,6 +271,20 @@ footer{text-align:center;color:var(--mut);font-size:11.5px;padding:8px 0 30px}
           <span class="note" id="tvaMsg"></span>
         </div>
         <div class="prog" id="tvaProg"><div></div></div>
+      </div>
+    </div>
+
+    <!-- Daily T&A import -->
+    <div id="dtaBox" style="display:none">
+      <div class="card">
+        <h3>Daily target vs achieved sheets found <span class="pill g" id="dtaSum"></span></h3>
+        <div class="tw"><table><thead><tr><th>Month</th><th>As on</th><th class="n">Sections</th><th class="n">Month Target (L)</th><th class="n">Achieved (L)</th><th class="n">Achd %</th><th>Sheet</th></tr></thead><tbody id="dtaRows"></tbody></table></div>
+        <p class="note">Values in ₹ lakh. Hidden sheets and “Best Month” copies are skipped. Uploading a month again replaces it.</p>
+        <div class="row" style="margin-top:10px">
+          <button class="btn" id="dtaImport">Import</button>
+          <button class="btn ghost" id="dtaCancel">Cancel</button>
+          <span class="note" id="dtaMsg"></span>
+        </div>
       </div>
     </div>
 
@@ -436,7 +492,7 @@ const TVA = (() => {
     const txt = async p => { const f = zip.file(p); return f ? f.async("string") : null; };
     const wbx = await txt("xl/workbook.xml"), rels = await txt("xl/_rels/workbook.xml.rels");
     const relMap = {}; (rels.match(/<Relationship\b[^>]*>/g)||[]).forEach(t => relMap[attr(t,"Id")] = attr(t,"Target"));
-    const sheets = (wbx.match(/<sheet\b[^>]*>/g)||[]).map(t => { let p = relMap[attr(t,"r:id")]||""; p = p.startsWith("/") ? p.slice(1) : "xl/"+p.replace(/^\.\//,""); return { name: dec(attr(t,"name")||""), path: p }; });
+    const sheets = (wbx.match(/<sheet\b[^>]*>/g)||[]).map(t => { let p = relMap[attr(t,"r:id")]||""; p = p.startsWith("/") ? p.slice(1) : "xl/"+p.replace(/^\.\//,""); return { name: dec(attr(t,"name")||""), path: p, hidden: /^(hidden|veryHidden)$/.test(attr(t,"state")||"") }; });
     const ssx = await txt("xl/sharedStrings.xml");
     const ss = ssx ? (ssx.match(/<si>[\s\S]*?<\/si>|<si\/>/g)||[]).map(allT) : [];
     const theme = themeColors(await txt("xl/theme/theme1.xml"));
@@ -516,6 +572,63 @@ const TVA = (() => {
 })();
 
 
+/* Daily Target-vs-Achieved summary sheets ("PRODUCTION TARGET VS ACHIEVEMENT ... (HARD PASSING)", values in lakh) */
+const DTA = (() => {
+  const U = v => String(v==null?"":v).replace(/\s+/g," ").trim().toUpperCase();
+  const num = v => { if(v==null||v==="") return null; if(typeof v==="number") return isFinite(v)?v:null; const n=parseFloat(String(v).replace(/[,₹\s]/g,"")); return isNaN(n)?null:n; };
+  const pad = n => String(n).padStart(2,"0");
+  const tc = s => s.toLowerCase().replace(/\b([a-z])/g,c=>c.toUpperCase()).replace(/\bJd\b/g,"JD").replace(/\bJcb\b/g,"JCB").replace(/\bB\.?p\.?\b/gi,"B.P");
+  function key(name){ const u=U(name);
+    if(/B\.?\s*P\.?\s*SHAFT/.test(u)) return "bp"; if(/JCB/.test(u)) return "jcb"; if(/\(JD\)|\bJD\b/.test(u)) return "jd";
+    if(/DEVENDER/.test(u)) return "devender"; if(/SPEED\s*GEAR/.test(u)) return "speed"; if(/BULL/.test(u)) return "bull";
+    if(/RING/.test(u)) return "ring"; if(/AXLE/.test(u)) return "axle"; if(/SCAM|CAM\s*SHAFT/.test(u)) return "scam";
+    return U(name).toLowerCase().replace(/[^a-z0-9]+/g,"-"); }
+  function clean(name){
+    let s=String(name).replace(/\(\s*values?\s+in\s+la(c|kh)s?\s*\)/ig,"").replace(/\s+/g," ").trim();
+    s=tc(s).replace(/\s*\(\s*/g," (").replace(/\s*\)/g,")");
+    return s.replace(/^Shaft Line Mahinder \(B\.P\.?\s*Shaft\)$/i,"Mahinder (B.P Shaft)").replace(/^Shaft Line Mahinder \(JCB Line\)$/i,"Mahinder (JCB)")
+            .replace(/^(\w+) \(JD\) Line$/,"$1 (JD Line)").replace(/^Devender Sir \(Speed Gear Section\)$/i,"Devender (Speed Gear Section)");
+  }
+  function dateOf(v, fallbackYM){
+    if(typeof v==="number" && v>20000 && v<80000){ const d=new Date(Math.round((v-25569)*86400000)); return { date:`${d.getUTCFullYear()}-${pad(d.getUTCMonth()+1)}-${pad(d.getUTCDate())}`, label:`${pad(d.getUTCDate())}.${pad(d.getUTCMonth()+1)}` }; }
+    const s=String(v??"").trim(); if(!s) return null;
+    const m=s.match(/^((?:\d{1,2}\s*\/\s*)*\d{1,2})\s*[-.\/]\s*(\d{1,2})\s*[-.\/]\s*(\d{2,4})$/);
+    if(m){ const days=m[1].split("/").map(x=>+x.trim()); let y=+m[3]; if(y<100) y+=2000; const d=Math.max(...days);
+      return { date:`${y}-${pad(m[2])}-${pad(d)}`, label: days.length>1 ? days.map(pad).join("/")+"."+pad(m[2]) : pad(d)+"."+pad(m[2]) }; }
+    return null;
+  }
+  /* returns { month, title, asOf, sections:[{key,name,order,days:[{date,label,t,a}]}] } or null */
+  function parse(g, sheetName){
+    let h=0, title="";
+    for(let r=1;r<=8;r++){ (g[r]||[]).forEach(c=>{ if(c && /PRODUCTION TARGET VS ACHIEVEMENT/.test(U(c.v))) title=String(c.v).replace(/\s+/g," ").trim(); }); }
+    for(let r=2;r<=10 && !h;r++){ const row=g[r]||[]; let n=0; row.forEach((c,ci)=>{ if(c && U(c.v)==="TARGET" && /^ACH/.test(U(row[ci+1]&&row[ci+1].v))) n++; }); if(n>=2) h=r; }
+    if(!h || !title) return null;
+    const groups=[];
+    (g[h]||[]).forEach((c,ci)=>{ if(!c || U(c.v)!=="TARGET" || !/^ACH/.test(U((g[h][ci+1]||{}).v))) return;
+      let nm=""; for(let r=h-1;r>=1 && !nm;r--){ const x=(g[r]||[])[ci]; if(x && String(x.v??"").trim()) nm=String(x.v); }
+      if(!nm || /^TOTAL/.test(U(nm))) return; groups.push({ col:ci, raw:nm }); });
+    if(!groups.length) return null;
+    const rows=[];
+    for(let r=h+1;r<g.length;r++){ const row=g[r]; if(!row) continue;
+      const a=U(row[1]&&row[1].v); if(/TILL DATE|ASKING|ACHD|MONTH T/.test(a)) break;
+      const d=dateOf(row[2]&&row[2].v); if(!d) continue; rows.push({ r, ...d }); }
+    if(!rows.length) return null;
+    // the month most rows belong to; fix rows typed with a wrong month (e.g. "19/20-08" inside the September sheet)
+    const cnt={}; rows.forEach(x=>{ const m=x.date.slice(0,7); cnt[m]=(cnt[m]||0)+1; });
+    const ym=Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a])[0];
+    rows.forEach(x=>{ if(x.date.slice(0,7)!==ym){ const dd=x.date.slice(8); x.date=ym+"-"+dd; x.label=x.label.replace(/\.\d{2}$/,"."+ym.slice(5)); x.fixed=true; } });
+    const asOf=(title.match(/AS ON\s*([0-9][0-9.\-\/]+)/i)||[])[1]||"";
+    const sections=groups.map((gr,i)=>({ key:key(gr.raw), name:clean(gr.raw), order:i,
+      days: rows.map(x=>{ const row=g[x.r]; const t=num(row[gr.col]&&row[gr.col].v), a=num(row[gr.col+1]&&row[gr.col+1].v);
+        return { date:x.date, label:x.label, t: t==null?0:Math.round(t*10000)/10000, a: a==null?null:Math.round(a*10000)/10000 }; }) }));
+    // drop sections that are completely empty (e.g. no target and no achievement all month)
+    const used = sections.filter(s=>s.days.some(d=>d.t||d.a));
+    return { month: ym, title, asOf, sheet: sheetName, sections: used };
+  }
+  return { parse, key };
+})();
+
+
 </script>
 <script type="module">
 import { initializeApp, deleteApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -558,7 +671,7 @@ let unsubs=[];
 const pad2 = n => String(n).padStart(2,"0");
 function setConn(txt, ok){ $("conn").textContent = txt; $("conn").style.color = ok ? "#86efac" : "#fdba74"; }
 function normCfg(d){ const c=Object.assign({ name:"",unit:"",sections:[],sectionLine:{},rates:{} }, d||{}); if(!Array.isArray(c.sections)) c.sections=[]; c.sectionLine=c.sectionLine||{}; c.rates=c.rates||{}; return c; }
-S.months={}; S.tmonths={}; S.subs={}; S.users=[]; S.profile=null;
+S.months={}; S.tmonths={}; S.subs={}; S.users=[]; S.profile=null; S.daily=[];
 function rebuild(){ S.entries=[].concat(...Object.values(S.months)); S.targets=[].concat(...Object.values(S.tmonths)); }
 let rT=null; const rerender = () => { clearTimeout(rT); rT=setTimeout(renderAll,120); };
 const monthOf = d => String(d||"").slice(0,7);
@@ -578,7 +691,7 @@ function ensureMonth(ym){
   return S.subs[ym];
 }
 const ensureRange = (from,to) => Promise.all(monthsBetween(from,to).map(ensureMonth));
-function stopAll(){ unsubs.forEach(f=>{ try{f();}catch(e){} }); unsubs=[]; S.months={}; S.tmonths={}; S.subs={}; S.users=[]; rebuild(); }
+function stopAll(){ unsubs.forEach(f=>{ try{f();}catch(e){} }); unsubs=[]; S.months={}; S.tmonths={}; S.subs={}; S.users=[]; S.daily=[]; rebuild(); }
 
 async function saveEntry(e){ await setDoc(doc(db,"entries",e.id), e); }
 async function deleteEntry(id){ await deleteDoc(doc(db,"entries",id)); }
@@ -619,6 +732,7 @@ function applyRole(){
 function startData(){
   unsubs.push(onSnapshot(doc(db,"config","main"), snap => { if(snap.exists()) S.cfg=normCfg(snap.data()); rerender(); }, err=>toast("Couldn't load settings: "+authMsg(err))));
   if(S.profile.role==="admin") unsubs.push(onSnapshot(collection(db,"users"), snap => { S.users=snap.docs.map(d=>Object.assign({},d.data(),{uid:d.id})); renderUsers(); }, ()=>{}));
+  unsubs.push(onSnapshot(query(collection(db,"config"), where("kind","==","daily")), snap => { S.daily=snap.docs.map(d=>Object.assign({},d.data(),{id:d.id})); rerender(); }, err=>toast("Couldn't load daily data: "+authMsg(err))));
   ensureMonth(today().slice(0,7)).then(()=>{ setConn(navigator.onLine?"Live · synced":"Offline", navigator.onLine); });
   const lm=monthOf($("listDate").value); if(lm) ensureMonth(lm);
 }
@@ -696,11 +810,11 @@ $("pwBtn").onclick = async () => {
 };
 
 /* ---------- routing ---------- */
-const VIEWS=["report","upload","entry","setup"];
+const VIEWS=["report","daily","upload","entry","setup"];
 function route(){ const h=(location.hash||"").slice(1); let v=VIEWS.includes(h)?h:"report"; if(document.body.dataset.role==="viewer" && (v==="upload"||v==="entry")) v="report";
   VIEWS.forEach(x=>{ $("v-"+x).classList.toggle("on",x===v); });
   document.querySelectorAll("nav.tabs a").forEach(a=>a.classList.toggle("on",a.dataset.v===v));
-  if (v==="report") renderReport(); }
+  if (v==="report") renderReport(); if (v==="daily") renderDaily(); }
 window.addEventListener("hashchange", route);
 
 /* ---------- entry ---------- */
@@ -917,6 +1031,97 @@ $("tvaImport").onclick=async()=>{
   $("tvaImport").disabled=false; $("tvaCancel").disabled=false; setTimeout(()=>{ pg.style.display="none"; pg.firstElementChild.style.width="0"; },1500);
 };
 
+
+/* ---------- daily target vs achieved ---------- */
+const D2 = { items: [] };
+const fl = n => (n==null?"–":(Math.round(n*100)/100).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2}));
+const lakhCr = n => n==null ? "" : cr(n*1e5);
+function dtaTotals(sections){ let T=0,A=0,TT=0; const withA=new Set(); sections.forEach(s=>s.days.forEach(d=>{ if(d.a!=null) withA.add(d.date+"|"+d.label); }));
+  sections.forEach(s=>s.days.forEach(d=>{ T+=d.t||0; if(d.a!=null) A+=d.a; if(withA.has(d.date+"|"+d.label)) TT+=d.t||0; })); return {T,A,TT}; }
+function renderDta(){
+  if(!D2.items.length){ $("dtaBox").style.display="none"; return; }
+  $("dtaBox").style.display="";
+  const its=D2.items.slice().sort((a,b)=>b.p.month.localeCompare(a.p.month));
+  $("dtaRows").innerHTML=its.map(({file,p})=>{ const t=dtaTotals(p.sections); return `<tr><td><b>${monthName(p.month)}</b></td><td>${esc(p.asOf)}</td><td class="n">${p.sections.length}</td><td class="n">${fl(t.T)}</td><td class="n">${fl(t.A)}</td><td class="n">${pct(t.A,t.TT)}</td><td class="note">${esc(p.sheet)}</td></tr>`; }).join("");
+  $("dtaSum").textContent=`${its.length} month${its.length>1?"s":""}`;
+  $("dtaImport").textContent=`Import ${its.length} month${its.length>1?"s":""}`;
+}
+$("dtaCancel").onclick=()=>{ D2.items=[]; renderDta(); };
+$("dtaImport").onclick=async()=>{
+  const now=Date.now(), ops=[], keep=new Set(), months=new Set();
+  D2.items.forEach(({file,p})=>{ months.add(p.month);
+    p.sections.forEach(sec=>{ const id="daily-"+p.month+"-"+sec.key; keep.add(id);
+      ops.push({col:"config",id,data:{ kind:"daily", month:p.month, key:sec.key, name:sec.name, order:sec.order, days:sec.days, asOf:p.asOf, title:p.title, sheet:p.sheet, file, updatedAt:now }}); }); });
+  (S.daily||[]).filter(d=>months.has(d.month) && !keep.has(d.id)).forEach(d=>ops.push({col:"config",id:d.id,del:true}));
+  $("dtaImport").disabled=true; $("dtaMsg").textContent="Saving…";
+  try{ const r=await bulk(ops); $("dtaMsg").textContent = r.failed ? `${r.failed} failed. Try again.` : "Done.";
+    if(!r.failed){ const m=[...months].sort().pop(); D2.items=[]; renderDta(); toast("Daily target vs achieved imported"); D.month=m; D.sec=""; location.hash="daily"; } }
+  catch(err){ toast("Import stopped: "+authMsg(err)); }
+  $("dtaImport").disabled=false;
+};
+
+const D = { month:"", sec:"" };
+const dKey = (d) => d.date+"|"+d.label;
+function dMonths(){ return [...new Set((S.daily||[]).map(d=>d.month))].sort().reverse(); }
+function dSections(month){ return (S.daily||[]).filter(d=>d.month===month).sort((a,b)=>(a.order||0)-(b.order||0)); }
+function combineDays(secs){
+  const map=new Map();
+  secs.forEach(s=>s.days.forEach(d=>{ const k=dKey(d); if(!map.has(k)) map.set(k,{date:d.date,label:d.label,t:0,a:null});
+    const x=map.get(k); x.t+=d.t||0; if(d.a!=null) x.a=(x.a||0)+d.a; }));
+  return [...map.values()].sort((a,b)=>a.date.localeCompare(b.date)||a.label.localeCompare(b.label));
+}
+function statsOf(days){
+  let T=0,A=0,TT=0,rem=0; const ts=days.map(d=>d.t).filter(x=>x>0).sort((a,b)=>a-b); const med=ts.length?ts[Math.floor(ts.length/2)]:0;
+  let best=null; days.forEach(d=>{ T+=d.t||0; if(d.a!=null){ A+=d.a; TT+=d.t||0; if(!best||d.a>best.a) best=d; } else rem+=d.t||0; });
+  const remDays = med ? rem/med : 0;
+  return { T, A, TT, fail:A-TT, pct: TT?A*100/TT:null, ask: remDays>0.01 ? (T-A)/remDays : null, remDays, best, lastDate: (days.filter(d=>d.a!=null).pop()||{}).date };
+}
+const pctTxt = v => v==null ? "–" : v.toFixed(1)+"%";
+const pctPill = v => v==null ? "–" : `<span class="pill ${v>=100?"g":v<60?"r":"w"}">${v.toFixed(1)}%</span>`;
+function renderDaily(){
+  const months=dMonths();
+  $("dEmpty").style.display=months.length?"none":""; $("dBody").style.display=months.length?"":"none";
+  if(!months.length){ $("dMonth").innerHTML=""; $("dSec").innerHTML=""; return; }
+  if(!months.includes(D.month)) D.month=months[0];
+  $("dMonth").innerHTML=months.map(m=>`<option value="${m}" ${m===D.month?"selected":""}>${monthName(m)}</option>`).join("");
+  const secs=dSections(D.month);
+  if(D.sec && !secs.some(s=>s.key===D.sec)) D.sec="";
+  $("dSec").innerHTML=`<option value="">All sections</option>`+secs.map(s=>`<option value="${esc(s.key)}" ${s.key===D.sec?"selected":""}>${esc(s.name)}</option>`).join("");
+  const asOf=(secs[0]||{}).asOf;
+  $("dHead").textContent=`Hard passing · values in ₹ lakh${asOf?" · as on "+asOf:""}`;
+  const chosen = D.sec ? secs.filter(s=>s.key===D.sec) : secs;
+  const days=combineDays(chosen), st=statsOf(days);
+  const selName = D.sec ? (chosen[0]||{}).name : "All sections";
+  $("dLabel").textContent=monthName(D.month); $("dDayLabel").textContent=selName+" · "+monthName(D.month);
+  $("dKpis").innerHTML=`<div class="kpi accent"><div class="k">Achieved till date</div><div class="v">${fl(st.A)} L</div><div class="s">${lakhCr(st.A)}</div></div>
+    <div class="kpi"><div class="k">Till-date Target</div><div class="v">${fl(st.TT)} L</div><div class="s">Month target ${fl(st.T)} L</div></div>
+    <div class="kpi ${st.pct!=null&&st.pct>=100?"good":""}"><div class="k">Achd %</div><div class="v">${pctTxt(st.pct)}</div><div class="meter"><div style="width:${Math.min(100,st.pct||0).toFixed(1)}%"></div></div><div class="s">Failure ${fl(st.fail)} L</div></div>
+    <div class="kpi"><div class="k">Asking rate / day</div><div class="v">${st.ask==null?"–":fl(st.ask)+" L"}</div><div class="s">${st.ask==null?"Month complete":"Balance "+fl(st.T-st.A)+" L · "+st.remDays.toFixed(1)+" days left"}</div></div>
+    <div class="kpi"><div class="k">Best day</div><div class="v">${st.best?fl(st.best.a)+" L":"–"}</div><div class="s">${st.best?esc(st.best.label):""}</div></div>`;
+  // section table
+  const tot=statsOf(combineDays(secs));
+  $("dSecRows").innerHTML = secs.map(s=>{ const x=statsOf(s.days); return `<tr data-k="${esc(s.key)}" style="cursor:pointer${s.key===D.sec?";background:var(--brand-l)":""}"><td><b>${esc(s.name)}</b></td><td class="n">${fl(x.T)}</td><td class="n">${fl(x.TT)}</td><td class="n"><b>${fl(x.A)}</b></td><td class="n" style="color:${x.fail<0?"var(--bad)":"var(--ok)"}">${fl(x.fail)}</td><td class="n">${pctPill(x.pct)}</td><td class="n">${x.ask==null?"–":fl(x.ask)}</td><td class="n">${x.best?fl(x.best.a)+` <span class="note">${esc(x.best.label)}</span>`:"–"}</td></tr>`; }).join("")
+    + `<tr class="tot"><td>TOTAL</td><td class="n">${fl(tot.T)}</td><td class="n">${fl(tot.TT)}</td><td class="n">${fl(tot.A)}</td><td class="n">${fl(tot.fail)}</td><td class="n">${pctTxt(tot.pct)}</td><td class="n">${tot.ask==null?"–":fl(tot.ask)}</td><td class="n">${tot.best?fl(tot.best.a):"–"}</td></tr>`;
+  // day table
+  const mx=Math.max(1,...days.map(d=>Math.max(d.t||0,d.a||0)));
+  let cT=0,cA=0;
+  $("dDayRows").innerHTML = days.map(d=>{ const has=d.a!=null; if(has){ cT+=d.t; cA+=d.a; }
+    return `<tr${has?"":' style="color:var(--mut)"'}><td><b>${esc(d.label)}</b></td><td><div style="position:relative;height:14px;background:var(--line2);border-radius:3px;overflow:hidden"><div style="position:absolute;inset:0 auto 0 0;width:${(d.t*100/mx).toFixed(1)}%;background:#fed7aa"></div>${has?`<div style="position:absolute;top:3px;bottom:3px;left:0;width:${(d.a*100/mx).toFixed(1)}%;background:${d.a>=d.t?"var(--ok)":"var(--brand)"};border-radius:2px"></div>`:""}</div></td>
+      <td class="n">${fl(d.t)}</td><td class="n">${has?"<b>"+fl(d.a)+"</b>":"–"}</td><td class="n" style="color:${has?(d.a-d.t<0?"var(--bad)":"var(--ok)"):"inherit"}">${has?fl(d.a-d.t):"–"}</td><td class="n">${has?pctPill(d.t?d.a*100/d.t:null):"–"}</td><td class="n">${has?fl(cT):"–"}</td><td class="n">${has?fl(cA):"–"}</td><td class="n">${has?pctTxt(cT?cA*100/cT:null):"–"}</td></tr>`; }).join("")
+    + `<tr class="tot"><td>Total</td><td></td><td class="n">${fl(st.T)}</td><td class="n">${fl(st.A)}</td><td class="n">${fl(st.fail)}</td><td class="n">${pctTxt(st.pct)}</td><td></td><td></td><td></td></tr>`;
+  // month comparison
+  const cutDay = st.lastDate ? +st.lastDate.slice(8) : 31;
+  $("dSameHdr").textContent = `Achd till day ${cutDay}`;
+  $("dCmpLabel").textContent = selName;
+  const rows = months.map(m=>{ const ss=dSections(m).filter(s=>!D.sec||s.key===D.sec); const dd=combineDays(ss); const x=statsOf(dd);
+    const same=dd.filter(d=>d.a!=null && +d.date.slice(8)<=cutDay).reduce((a,d)=>a+d.a,0); return { m, x, same, has: ss.length>0 }; }).filter(r=>r.has);
+  const bestSame=Math.max(...rows.map(r=>r.same)), bestFull=Math.max(...rows.filter(r=>r.x.ask==null).map(r=>r.x.A),0);
+  $("dCmpRows").innerHTML = rows.map(r=>`<tr${r.m===D.month?' style="background:var(--brand-l)"':""}><td><b>${monthName(r.m)}</b>${r.x.ask==null&&r.x.A===bestFull&&bestFull>0?' <span class="pill g">Best month</span>':""}</td><td class="n">${fl(r.x.T)}</td><td class="n"><b>${fl(r.x.A)}</b></td><td class="n">${pctPill(r.x.T?r.x.A*100/r.x.T:null)}</td><td class="n">${fl(r.same)}${r.same===bestSame&&rows.length>1?' <span class="pill g">Top</span>':""}</td><td class="n">${r.x.best?fl(r.x.best.a)+` <span class="note">${esc(r.x.best.label)}</span>`:"–"}</td></tr>`).join("");
+}
+$("dMonth").addEventListener("change",()=>{ D.month=$("dMonth").value; renderDaily(); });
+$("dSec").addEventListener("change",()=>{ D.sec=$("dSec").value; renderDaily(); });
+$("dSecRows").addEventListener("click",ev=>{ const tr=ev.target.closest("tr[data-k]"); if(!tr) return; D.sec = D.sec===tr.dataset.k ? "" : tr.dataset.k; renderDaily(); });
+
 /* ---------- upload: generic sheets ---------- */
 const FIELDS=[
   {k:"date",l:"Date",req:1,al:["date","dt","prod date","production date","entry date"]},
@@ -1003,7 +1208,7 @@ function fillUpSelects(){
 }
 async function readFiles(files){
   files=[...(files||[])]; if(!files.length) return;
-  const names=[]; let generic=null; const found=[];
+  const names=[]; let generic=null; const found=[]; const dFound=[];
   $("upName").textContent="Reading "+files.length+" file(s)…";
   for(const file of files){
     try{
@@ -1011,11 +1216,14 @@ async function readFiles(files){
       if(/\.xls[xm]$/i.test(file.name) && typeof TVA!=="undefined" && typeof JSZip!=="undefined"){
         const wb=await TVA.read(buf);
         for(let i=0;i<wb.sheets.length && !got;i++){ const p=TVA.parse(await wb.grid(i), file.name, wb.sheets[i].name); if(p && p.parts.length){ found.push({file:file.name,p}); got=true; } }
+        if(!got){ for(let i=0;i<wb.sheets.length;i++){ const sh=wb.sheets[i]; if(sh.hidden || /^\s*best/i.test(sh.name)) continue;
+          const d=DTA.parse(await wb.grid(i), sh.name); if(d && d.sections.length){ dFound.push({file:file.name,p:d}); got=true; } } }
       }
       if(!got && !generic) generic={file,buf};
       names.push(file.name);
     }catch(err){ toast("Couldn't read "+file.name+": "+(err.message||err)); }
   }
+  if(dFound.length){ dFound.forEach(it=>{ D2.items=D2.items.filter(x=>x.p.month!==it.p.month); D2.items.push(it); }); renderDta(); }
   if(found.length){ found.forEach(it=>{ T2.items=T2.items.filter(x=>!(x.p.line===it.p.line&&x.p.month===it.p.month)); T2.items.push(it); }); renderTva(); }
   if(generic){
     if(typeof XLSX==="undefined"){ toast("Excel reader didn't load. Check your internet and reload."); }
@@ -1101,7 +1309,7 @@ function renderHeader(){
   $("plantTitle").textContent = S.cfg.name ? S.cfg.name : "Production Value Report";
   $("plantSub").textContent = (S.cfg.unit?S.cfg.unit+" · ":"")+"Section-wise production value · target vs achievement";
 }
-function renderAll(){ renderHeader(); fillSectionSelect(); fillUpSelects(); fillLineSelects(); renderDay(); renderSetup(); const v=(location.hash||"").slice(1); if(v==="report") renderReport(); }
+function renderAll(){ renderHeader(); fillSectionSelect(); fillUpSelects(); fillLineSelects(); renderDay(); renderSetup(); const v=(location.hash||"").slice(1); if(v==="report") renderReport(); if(v==="daily") renderDaily(); }
 
 /* ---------- init ---------- */
 $("fDate").value=today(); $("listDate").value=today(); $("rDay").value=today(); $("rMonth").value=today().slice(0,7); $("rFrom").value=today().slice(0,8)+"01"; $("rTo").value=today(); $("clrMonth").value=today().slice(0,7);
