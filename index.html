@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0f172a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Production Value Report</title>
+<script src="firebase-config.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --brand:#ea580c;--brand-d:#c2410c;--brand-l:#fff7ed;--brand-m:#fdba74;
+  --ink:#0f172a;--ink2:#334155;--mut:#64748b;--line:#e2e8f0;--line2:#f1f5f9;--bg:#f4f6f9;--card:#fff;
+  --navy:#0f172a;--navy2:#1e293b;--ok:#047857;--ok-l:#ecfdf5;--bad:#b91c1c;--bad-l:#fef2f2;--warn:#b45309;--warn-l:#fffbeb;
+  --r:10px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;font-size:14px;-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit}
+svg.i{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+/* header */
+.appbar{background:var(--navy);color:#fff;border-bottom:3px solid var(--brand)}
+.appbar .wrap{max-width:1200px;margin:0 auto;padding:14px 20px;display:flex;align-items:center;gap:14px}
+.logo{width:38px;height:38px;border-radius:8px;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:800;font-size:13px;letter-spacing:.3px}
+h1{margin:0;font-size:17px;font-weight:700;letter-spacing:-.1px}
+.sub{color:#94a3b8;font-size:12.5px;margin-top:1px}
+.meta-r{margin-left:auto;text-align:right;font-size:12px;color:#94a3b8;line-height:1.5}
+#conn{display:inline-flex;align-items:center;gap:6px;font-weight:600}
+#conn::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+nav.tabs{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+nav.tabs .wrap{max-width:1200px;margin:0 auto;padding:0 12px;display:flex;gap:2px;overflow-x:auto}
+nav.tabs a{display:flex;align-items:center;gap:8px;padding:13px 16px;text-decoration:none;color:var(--mut);font-weight:600;font-size:13.5px;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+nav.tabs a:hover{color:var(--ink)}
+nav.tabs a.on{color:var(--brand-d);border-bottom-color:var(--brand)}
+main{max-width:1200px;margin:20px auto 40px;padding:0 20px}
+.pagehead{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin:2px 0 14px;flex-wrap:wrap}
+.pagehead h2{margin:0;font-size:20px;font-weight:700;letter-spacing:-.2px}
+.pagehead p{margin:3px 0 0;color:var(--mut);font-size:13px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px;margin-bottom:16px}
+.card h3{margin:0 0 14px;font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px;flex-wrap:wrap;color:var(--ink)}
+.card h3 .pill:first-of-type{margin-left:auto}
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
+label{display:block;font-size:11.5px;color:var(--mut);font-weight:600;margin-bottom:5px;letter-spacing:.2px}
+input,select{width:100%;padding:9px 11px;border:1px solid #cbd5e1;border-radius:7px;background:#fff;color:var(--ink);height:38px}
+input:focus,select:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px rgba(234,88,12,.12)}
+input[readonly]{background:var(--line2);font-weight:700;color:var(--ink)}
+.btn{display:inline-flex;align-items:center;gap:7px;background:var(--brand);color:#fff;border:1px solid var(--brand);border-radius:7px;padding:0 15px;height:38px;font-weight:600;font-size:13.5px;cursor:pointer}
+.btn:hover{background:var(--brand-d);border-color:var(--brand-d)}
+.btn:disabled{opacity:.5;cursor:default}
+.btn.ghost{background:#fff;color:var(--ink2);border-color:#cbd5e1}
+.btn.ghost:hover{background:var(--line2)}
+.btn.sm{height:32px;padding:0 11px;font-size:12.5px}
+.btn.icon{width:30px;height:30px;padding:0;justify-content:center}
+.btn.del{background:#fff;color:var(--bad);border-color:#fecaca}
+.btn.del:hover{background:var(--bad-l)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.pill{font-size:11.5px;padding:2px 8px;border-radius:5px;background:var(--line2);color:var(--ink2);font-weight:600;font-variant-numeric:tabular-nums}
+.pill.g{background:var(--ok-l);color:var(--ok)}
+.pill.r{background:var(--bad-l);color:var(--bad)}
+.pill.w{background:var(--warn-l);color:var(--warn)}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:9px 10px;border-bottom:1px solid var(--line2);text-align:left;white-space:nowrap}
+th{background:#f8fafc;font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--mut);font-weight:600;border-bottom:1px solid var(--line)}
+tbody tr:hover td{background:#fafbfc}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+tr.tot td{font-weight:700;background:#f8fafc;border-top:2px solid var(--ink);border-bottom:0}
+tr.lineh td{background:var(--navy2);color:#fff;font-weight:700;font-size:11.5px;letter-spacing:.6px;padding:7px 10px}
+tr.sub td{font-weight:700;background:#f8fafc;color:var(--ink2)}
+.sw{display:inline-block;width:11px;height:11px;border-radius:2px;border:1px solid rgba(0,0,0,.2);vertical-align:-1px;margin-right:7px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:16px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px}
+.kpi .k{font-size:11px;color:var(--mut);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.kpi .v{font-size:22px;font-weight:700;margin-top:6px;font-variant-numeric:tabular-nums;letter-spacing:-.3px}
+.kpi .s{font-size:12px;color:var(--mut);margin-top:3px;font-variant-numeric:tabular-nums}
+.kpi.accent{border-top:3px solid var(--brand)}
+.kpi.good .v{color:var(--ok)}.kpi.bad .v{color:var(--bad)}
+.meter{height:6px;background:var(--line2);border-radius:3px;margin-top:9px;overflow:hidden}
+.meter div{height:100%;background:var(--brand)}
+.bars .b{display:grid;grid-template-columns:220px 1fr 200px;gap:12px;align-items:center;margin:7px 0;font-size:13px}
+.bars .t{background:var(--line2);border-radius:4px;height:18px;overflow:hidden;position:relative}
+.bars .tg{position:absolute;top:0;bottom:0;left:0;background:#fed7aa;border-radius:4px}
+.bars .f{position:absolute;top:3px;bottom:3px;left:0;background:var(--brand);border-radius:3px}
+.bars .nm{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink2)}
+.bars .vl{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+.bars .vl small{color:var(--mut);font-weight:500}
+.bars .lh{font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;margin-top:14px;padding-bottom:4px;border-bottom:1px solid var(--line2)}
+.legend{display:flex;gap:16px;font-size:12px;color:var(--mut);margin:-6px 0 8px}
+.legend i{display:inline-block;width:12px;height:8px;border-radius:2px;margin-right:6px}
+details{border:1px solid var(--line);border-radius:8px;margin:8px 0;overflow:hidden}
+summary{padding:10px 14px;cursor:pointer;font-weight:600;display:flex;justify-content:space-between;gap:8px;background:#f8fafc;font-variant-numeric:tabular-nums}
+.empty{color:var(--mut);text-align:center;padding:28px 10px;font-size:13.5px}
+.note{font-size:12px;color:var(--mut)}
+.banner{background:var(--warn-l);color:var(--warn);border:1px solid #fde68a;border-radius:8px;padding:10px 12px;font-size:13px;margin-bottom:14px;display:none}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(90px);background:var(--navy);color:#fff;padding:11px 16px;border-radius:8px;font-size:13.5px;transition:.25s;z-index:50;max-width:90vw;box-shadow:0 8px 24px rgba(15,23,42,.25)}
+.toast.on{transform:translateX(-50%) translateY(0)}
+.view{display:none}.view.on{display:block}
+.sec-list .it{display:flex;gap:6px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line2)}
+.sec-list .it span{flex:1;font-weight:600}
+.sec-list .it em{font-style:normal;font-size:12px;color:var(--mut);font-weight:500}
+.modal{position:fixed;inset:0;background:rgba(15,23,42,.5);display:none;align-items:center;justify-content:center;z-index:40;padding:16px}
+.modal.on{display:flex}
+.modal .box{background:#fff;border-radius:12px;padding:20px;max-width:400px;width:100%}
+.modal .box h3{margin:0 0 8px;font-size:16px}
+.drop{display:flex;flex-direction:column;align-items:center;gap:6px;border:1.5px dashed #cbd5e1;border-radius:var(--r);padding:30px 16px;text-align:center;background:#f8fafc;cursor:pointer;transition:.15s;letter-spacing:0;font-weight:500;font-size:14px;color:var(--ink2)}
+.drop:hover,.drop.hov{border-color:var(--brand);background:var(--brand-l)}
+.drop svg.i{width:28px;height:28px;color:var(--brand)}
+.drop b{color:var(--brand-d)}
+.map{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+tr.bad td{background:var(--bad-l);color:#991b1b}
+tr.dup td{color:var(--mut)}
+.prog{height:6px;background:var(--line2);border-radius:3px;overflow:hidden;margin-top:12px;display:none}
+.prog div{height:100%;width:0;background:var(--brand);transition:width .2s}
+.ok{color:var(--ok);font-weight:600}.err{color:var(--bad);font-weight:600}
+.gate{position:fixed;inset:0;background:var(--navy);z-index:60;display:flex;align-items:center;justify-content:center;padding:18px;overflow:auto}
+.gate[hidden]{display:none}
+.gbox{background:#fff;border-radius:14px;padding:26px 24px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.gbox .logo{margin-bottom:14px}
+.gbox h2{margin:0;font-size:20px}
+.gbox form>div{margin-top:12px}
+.gbox .btn{width:100%;justify-content:center;margin-top:16px}
+.gbox hr{border:0;border-top:1px solid var(--line);margin:20px 0 4px}
+.err{color:var(--bad);font-size:13px;margin-top:10px;min-height:1em}
+.userchip{display:flex;align-items:center;gap:10px;margin-left:12px}
+.userchip .nm{font-size:12.5px;color:#e2e8f0;text-align:right;line-height:1.3}
+.userchip .nm small{color:#94a3b8;display:block;text-transform:capitalize}
+.userchip button{background:transparent;border:1px solid #334155;color:#e2e8f0;border-radius:7px;height:32px;padding:0 10px;font-size:12.5px;cursor:pointer}
+.userchip button:hover{background:#1e293b}
+body[data-role="viewer"] .w-only{display:none!important}
+body:not([data-role="admin"]) .a-only{display:none!important}
+footer{text-align:center;color:var(--mut);font-size:11.5px;padding:8px 0 30px}
+@media (max-width:700px){
+  .userchip .nm{display:none}
+  main{padding:0 12px;margin-top:14px}
+  .meta-r{display:none}
+  nav.tabs a{padding:12px 11px;font-size:13px}
+  .bars .b{grid-template-columns:1fr;gap:3px}
+  .bars .vl{text-align:left}
+  .card{padding:14px}
+}
+</style>
+</head>
+<body>
+<div class="appbar"><div class="wrap">
+  <div class="logo">PVR</div>
+  <div><h1 id="plantTitle">Production Value Report</h1><div class="sub" id="plantSub">Section-wise production value · Target vs achievement</div></div>
+  <div class="meta-r"><div id="clock">--</div><div id="conn">Connecting…</div></div>
+  <div class="userchip"><div class="nm" id="whoName"></div><button id="logoutBtn" type="button">Sign out</button></div>
+</div></div>
+<nav class="tabs"><div class="wrap">
+  <a href="#report" data-v="report"><svg class="i" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>Report</a>
+  <a href="#upload" data-v="upload" class="w-only"><svg class="i" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></svg>Upload</a>
+  <a href="#entry" data-v="entry" class="w-only"><svg class="i" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>Daily Entry</a>
+  <a href="#setup" data-v="setup"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Setup</a>
+</div></nav>
+<main>
+  <div class="banner" id="localBanner">You are offline. Changes are kept on this device and sync when you reconnect.</div>
+
+  <!-- ENTRY -->
+  <section class="view" id="v-entry">
+    <div class="pagehead"><div><h2>Daily Entry</h2><p>Add or correct production by hand.</p></div></div>
+    <div class="card">
+      <h3>Production Entry <span class="pill" id="editTag" style="display:none">Editing</span></h3>
+      <form id="entryForm" autocomplete="off">
+        <div class="grid">
+          <div><label>Date</label><input type="date" id="fDate" required></div>
+          <div><label>Shift</label><select id="fShift"><option>A</option><option>B</option><option>C</option><option>General</option></select></div>
+          <div><label>Section</label><select id="fSection" required></select></div>
+          <div><label>Part No / Description</label><input id="fPart" list="partList" placeholder="e.g. Bull Gear 4521" required></div>
+        </div>
+        <datalist id="partList"></datalist>
+        <div class="grid" style="margin-top:10px">
+          <div><label>OK Qty (incl. over bill)</label><input type="number" id="fOk" min="0" step="1" inputmode="numeric" required></div>
+          <div><label>Rejection Qty</label><input type="number" id="fRej" min="0" step="1" inputmode="numeric" value="0"></div>
+          <div><label>Rate (₹ / pc)</label><input type="number" id="fRate" min="0" step="0.01" inputmode="decimal" required></div>
+          <div><label>Production Value (₹)</label><input id="fVal" readonly value="0"></div>
+        </div>
+        <div style="margin-top:10px"><label>Remarks</label><input id="fRem" placeholder="Optional"></div>
+        <div class="row" style="margin-top:12px">
+          <button class="btn" type="submit" id="saveBtn"><svg class="i" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>Save Entry</button>
+          <button class="btn ghost" type="button" id="cancelEdit" style="display:none">Cancel edit</button>
+          <span class="note">Rate is remembered per part.</span>
+        </div>
+      </form>
+    </div>
+    <div class="card">
+      <h3>Entries for <input type="date" id="listDate" style="width:auto;padding:5px 8px"> <span class="pill" id="dayTotal">₹0</span></h3>
+      <div class="tw"><table>
+        <thead><tr><th>Line · Section</th><th>Part</th><th class="n">OK</th><th class="n">Rej</th><th class="n">Rate</th><th class="n">Value ₹</th><th></th></tr></thead>
+        <tbody id="dayRows"></tbody>
+      </table></div>
+    </div>
+  </section>
+
+  <!-- UPLOAD -->
+  <section class="view" id="v-upload">
+    <div class="pagehead"><div><h2>Upload Data</h2><p>Import line Target vs Achievement sheets or a simple data sheet.</p></div></div>
+    <div class="card">
+      <h3>Upload Files</h3>
+      <label class="drop" id="drop" for="upFile">
+        <svg class="i" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></svg>
+        <div><b>Tap to choose</b> or drop your Excel / CSV files here. You can choose several at once.</div>
+        <div class="note" style="margin-top:6px">Line <b>Target vs Achievement</b> sheets (Shaft, Ring, Bull, Axle…) are read automatically: <b>Including Over Bill</b> qty × <b>Rate</b>, with sections from the colour on each MS No.</div>
+      </label>
+      <input type="file" id="upFile" accept=".xlsx,.xls,.xlsm,.csv" multiple style="display:none">
+      <div class="row" style="margin-top:10px">
+        <button class="btn ghost sm dl" id="dlTpl"><svg class="i" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>Sample sheet</button>
+        <span class="note" id="upName"></span>
+      </div>
+    </div>
+
+    <!-- Target vs Achievement import -->
+    <div id="tvaBox" style="display:none">
+      <div class="card">
+        <h3>Line sheets found <span class="pill g" id="tvaSum"></span></h3>
+        <div id="tvaList"></div>
+        <p class="note">Value = Including Over Bill qty × Rate for every day column. Days written like “01/02.11” are booked on the later date. Uploading the same month again <b>updates</b> those days and doesn't add them twice.</p>
+        <div class="row" style="margin-top:10px">
+          <button class="btn" id="tvaImport">Import</button>
+          <button class="btn ghost" id="tvaCancel">Cancel</button>
+          <span class="note" id="tvaMsg"></span>
+        </div>
+        <div class="prog" id="tvaProg"><div></div></div>
+      </div>
+    </div>
+
+    <!-- Generic import -->
+    <div id="upStep2" style="display:none">
+      <div class="card">
+        <h3>Match your columns <span class="pill" id="upSheetInfo"></span></h3>
+        <div class="grid" style="margin-bottom:10px">
+          <div id="sheetW"><label>Sheet</label><select id="upSheet"></select></div>
+          <div><label>If date is blank, use</label><input type="date" id="upDefDate"></div>
+          <div><label>If section is blank, use</label><select id="upDefSec"></select></div>
+          <div><label>If shift is blank, use</label><select id="upDefShift"><option>A</option><option>B</option><option>C</option><option selected>General</option></select></div>
+        </div>
+        <div class="map" id="upMap"></div>
+        <label style="margin-top:12px;display:flex;align-items:center;gap:8px;text-transform:none;font-size:13.5px;color:var(--ink)"><input type="checkbox" id="upSkipDup" checked style="width:auto"> Skip rows that are already in the app</label>
+      </div>
+      <div class="card">
+        <h3>Preview <span class="pill g" id="upOkCount"></span><span class="pill r" id="upBadCount"></span></h3>
+        <div class="tw" style="max-height:420px;overflow:auto"><table>
+          <thead><tr><th>#</th><th>Date</th><th>Shift</th><th>Section</th><th>Part</th><th class="n">OK</th><th class="n">Rej</th><th class="n">Rate</th><th class="n">Value ₹</th><th>Status</th></tr></thead>
+          <tbody id="upRows"></tbody>
+        </table></div>
+        <div class="row" style="margin-top:12px">
+          <button class="btn" id="upImport">Import rows</button>
+          <button class="btn ghost" id="upCancel">Cancel</button>
+          <span class="note" id="upMsg"></span>
+        </div>
+        <div class="prog" id="upProg"><div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- REPORT -->
+  <section class="view" id="v-report">
+    <div class="pagehead"><div><h2>Section-wise Production Value</h2><p id="rLabelHead">Including over bill · value = quantity × rate</p></div></div>
+    <div class="card">
+      <h3>Filters</h3>
+      <div class="grid">
+        <div><label>Period</label><select id="rPeriod">
+          <option value="day">Day</option><option value="month" selected>Month</option><option value="range">Date range</option>
+        </select></div>
+        <div id="rDayW"><label>Date</label><input type="date" id="rDay"></div>
+        <div id="rMonW"><label>Month</label><input type="month" id="rMonth"></div>
+        <div id="rFromW"><label>From</label><input type="date" id="rFrom"></div>
+        <div id="rToW"><label>To</label><input type="date" id="rTo"></div>
+        <div><label>Line</label><select id="rLine"></select></div>
+        <div><label>Shift</label><select id="rShift"><option value="">All shifts</option><option>A</option><option>B</option><option>C</option><option>General</option></select></div>
+      </div>
+      <div class="row" style="margin-top:12px">
+        <button class="btn ghost sm" id="copyRep"><svg class="i" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy for Excel</button>
+        <button class="btn ghost sm dl" id="dlCsv"><svg class="i" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>CSV</button>
+        <button class="btn ghost sm dl" id="dlRep"><svg class="i" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/></svg>Printable report</button>
+      </div>
+    </div>
+    <div class="kpis" id="kpis"></div>
+    <div class="card">
+      <h3>Section Summary <span class="pill" id="rLabel"></span></h3>
+      <div class="tw"><table>
+        <thead><tr><th>Section</th><th class="n">Parts</th><th class="n">OK Qty</th><th class="n">Prod. Value ₹</th><th class="n">Target ₹</th><th class="n">Achv %</th><th class="n">Rej Qty</th><th class="n">Rej. Value ₹</th><th class="n">Share</th></tr></thead>
+        <tbody id="secRows"></tbody>
+      </table></div>
+      <p class="note" id="tgtNote"></p>
+    </div>
+    <div class="card"><h3>Value vs Target by Section</h3>
+      <div class="legend"><span><i style="background:var(--brand)"></i>Achieved</span><span><i style="background:#fed7aa"></i>Month target</span></div>
+      <div class="bars" id="bars"></div></div>
+    <div class="card"><h3>Part-wise detail by section</h3><div id="detail"></div></div>
+  </section>
+
+  <!-- SETUP -->
+  <section class="view" id="v-setup">
+    <div class="pagehead"><div><h2>Setup</h2><p>Users, your account, plant details, lines & sections.</p></div></div>
+    <div class="card a-only">
+      <h3>Users</h3>
+      <p class="note" style="margin-top:-6px">Colleagues sign in with their employee code (or email) and password. <b>Viewer</b> sees reports; <b>Editor</b> can also upload and enter data; <b>Admin</b> can also manage users and settings.</p>
+      <div class="grid">
+        <div><label>Name</label><input id="nuName" placeholder="e.g. Manish Kumar"></div>
+        <div><label>Employee code or email</label><input id="nuLogin" placeholder="e.g. 10452" autocapitalize="off"></div>
+        <div><label>Password (min 6)</label><input id="nuPass" type="text" autocomplete="new-password"></div>
+        <div><label>Role</label><select id="nuRole"><option value="viewer">Viewer</option><option value="editor" selected>Editor</option><option value="admin">Admin</option></select></div>
+      </div>
+      <div class="row" style="margin-top:10px"><button class="btn" id="nuAdd" type="button">Add user</button><span class="note" id="nuMsg"></span></div>
+      <div class="tw" style="margin-top:12px"><table><thead><tr><th>Name</th><th>Login</th><th>Role</th></tr></thead><tbody id="userRows"></tbody></table></div>
+    </div>
+    <div class="card">
+      <h3>My account</h3>
+      <div class="grid">
+        <div><label>Current password</label><input id="pwOld" type="password" autocomplete="current-password"></div>
+        <div><label>New password (min 6)</label><input id="pwNew" type="password" autocomplete="new-password"></div>
+      </div>
+      <div class="row" style="margin-top:10px"><button class="btn ghost" id="pwBtn" type="button">Change password</button><span class="note" id="pwMsg"></span></div>
+    </div>
+    <div class="card w-only">
+      <h3>Plant details</h3>
+      <div class="grid">
+        <div><label>Company / Plant name</label><input id="sName" placeholder="e.g. Milestone Gear Ltd"></div>
+        <div><label>Unit / Department</label><input id="sUnit" placeholder="e.g. Unit 7"></div>
+      </div>
+      <div class="row" style="margin-top:12px"><button class="btn" id="saveName">Save</button></div>
+    </div>
+    <div class="card w-only">
+      <h3>Lines & Sections</h3>
+      <div class="grid">
+        <div><label>Section name</label><input id="newSec" placeholder="e.g. Mahinder (JCB)"></div>
+        <div><label>Line</label><input id="newSecLine" list="lineList" placeholder="e.g. Shaft Line"></div>
+      </div>
+      <datalist id="lineList"></datalist>
+      <div class="row" style="margin-top:10px"><button class="btn" id="addSec"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add section</button></div>
+      <div class="sec-list" id="secList" style="margin-top:8px"></div>
+      <p class="note">Sections are also added automatically from the colour legend when you upload a line sheet. Removing a section here doesn't delete its old entries.</p>
+    </div>
+    <div class="card w-only">
+      <h3>Part rates (manual entry)</h3>
+      <p class="note" style="margin-top:-4px">Saved when you make a manual entry. Uploaded line sheets use the rate written in the sheet.</p>
+      <div class="tw"><table><thead><tr><th>Part</th><th class="n">Rate ₹</th><th></th></tr></thead><tbody id="rateRows"></tbody></table></div>
+    </div>
+    <div class="card a-only">
+      <h3>Clear uploaded data</h3>
+      <div class="grid">
+        <div><label>Line</label><select id="clrLine"></select></div>
+        <div><label>Month</label><input type="month" id="clrMonth"></div>
+      </div>
+      <div class="row" style="margin-top:10px"><button class="btn del" id="clrBtn">Delete this line's entries & targets for the month</button></div>
+    </div>
+  </section>
+</main>
+<footer>Production Value Report</footer>
+
+<div class="modal" id="confirmM"><div class="box">
+  <h3 id="cTitle">Delete entry?</h3><p class="note" id="cMsg"></p>
+  <div class="row" style="justify-content:flex-end"><button class="btn ghost" id="cNo">Cancel</button><button class="btn" style="background:var(--bad)" id="cYes">Delete</button></div>
+</div></div>
+<div class="gate" id="gate"><div class="gbox">
+  <div class="logo">PVR</div>
+  <h2 id="gTitle">Sign in</h2><p class="note" id="gSub">Production Value Report</p>
+  <div id="gLoading" class="note" style="margin-top:14px">Connecting…</div>
+  <form id="loginForm" hidden autocomplete="on">
+    <div><label>Employee code or email</label><input id="lgId" autocapitalize="off" autocomplete="username" required></div>
+    <div><label>Password</label><input id="lgPw" type="password" autocomplete="current-password" required></div>
+    <button class="btn" type="submit" id="lgBtn">Sign in</button>
+    <div class="err" id="lgErr"></div>
+    <p class="note" style="margin-top:6px">Forgot your password? Ask your admin.</p>
+  </form>
+  <form id="setupForm" hidden autocomplete="off">
+    <hr><p class="note" style="margin:10px 0 0"><b>First-time setup.</b> Create the admin account. Only the first person can do this.</p>
+    <div><label>Your name</label><input id="suName" required></div>
+    <div><label>Employee code or email</label><input id="suId" autocapitalize="off" required></div>
+    <div><label>Password (min 6)</label><input id="suPw" type="password" autocomplete="new-password" required minlength="6"></div>
+    <button class="btn" type="submit" id="suBtn">Create admin account</button>
+    <div class="err" id="suErr"></div>
+  </form>
+  <div id="gBlocked" hidden>
+    <p style="margin:14px 0 0">Your account isn't active yet. Ask your admin to give you access.</p>
+    <button class="btn ghost" type="button" id="gOut">Sign out</button>
+  </div>
+  <div id="gCfg" hidden><p class="err">This app isn't connected to Firebase yet. Open <b>firebase-config.js</b> on GitHub and paste your Firebase web app settings.</p></div>
+</div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* Target-vs-Achievement sheet reader: values + cell fill colours (works in browser and node). Needs JSZip. */
+const TVA = (() => {
+  const dec = s => s.replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&quot;/g,'"').replace(/&apos;/g,"'").replace(/&#(\d+);/g,(m,n)=>String.fromCharCode(+n)).replace(/&#x([0-9a-f]+);/gi,(m,n)=>String.fromCharCode(parseInt(n,16))).replace(/&amp;/g,"&");
+  const attr = (tag, name) => { const m = tag.match(new RegExp("\\s"+name+'="([^"]*)"')); return m ? m[1] : null; };
+  const colIdx = ref => { let n=0; for (const ch of ref.replace(/\d+/g,"")) n = n*26 + (ch.charCodeAt(0)-64); return n; };
+  const allT = xml => { let s="", m; const re=/<t(?:\s[^>]*)?>([\s\S]*?)<\/t>|<t\s*\/>/g; while((m=re.exec(xml))) s += m[1]?dec(m[1]):""; return s; };
+
+  function themeColors(xml){
+    if(!xml) return [];
+    const cs = (xml.match(/<a:clrScheme[\s\S]*?<\/a:clrScheme>/)||[""])[0];
+    const get = n => { const m = cs.match(new RegExp("<a:"+n+">([\\s\\S]*?)</a:"+n+">")); if(!m) return "000000"; const v = m[1].match(/(?:srgbClr val|lastClr)="([0-9A-Fa-f]{6})"/); return v?v[1].toUpperCase():"000000"; };
+    return ["lt1","dk1","lt2","dk2","accent1","accent2","accent3","accent4","accent5","accent6"].map(get);
+  }
+  function applyTint(hex, t){
+    if(!t) return hex;
+    let r=parseInt(hex.slice(0,2),16)/255, g=parseInt(hex.slice(2,4),16)/255, b=parseInt(hex.slice(4,6),16)/255;
+    const mx=Math.max(r,g,b), mn=Math.min(r,g,b); let h=0,s=0,l=(mx+mn)/2;
+    if(mx!==mn){ const d=mx-mn; s=l>0.5?d/(2-mx-mn):d/(mx+mn); h = mx===r?((g-b)/d+(g<b?6:0)):mx===g?((b-r)/d+2):((r-g)/d+4); h/=6; }
+    l = t<0 ? l*(1+t) : l*(1-t)+t;
+    const f=(p,q,x)=>{ if(x<0)x+=1; if(x>1)x-=1; if(x<1/6) return p+(q-p)*6*x; if(x<1/2) return q; if(x<2/3) return p+(q-p)*(2/3-x)*6; return p; };
+    if(s===0){ r=g=b=l; } else { const q=l<0.5?l*(1+s):l+s-l*s, p=2*l-q; r=f(p,q,h+1/3); g=f(p,q,h); b=f(p,q,h-1/3); }
+    const h2=v=>Math.round(v*255).toString(16).padStart(2,"0"); return (h2(r)+h2(g)+h2(b)).toUpperCase();
+  }
+  const INDEXED = {8:"000000",9:"FFFFFF",10:"FF0000",11:"00FF00",12:"0000FF",13:"FFFF00",14:"FF00FF",15:"00FFFF",64:null};
+
+  function styleFills(xml, theme){
+    const fills = [];
+    const fsec = (xml.match(/<fills[\s\S]*?<\/fills>/)||[""])[0];
+    (fsec.match(/<fill>[\s\S]*?<\/fill>|<fill\/>/g)||[]).forEach(f => {
+      const pt = (f.match(/patternType="([^"]+)"/)||[])[1];
+      const fg = (f.match(/<fgColor[^>]*\/?>/)||[])[0];
+      if(!pt || pt==="none" || !fg){ fills.push(null); return; }
+      let hex=null; const rgb=attr(fg,"rgb"), th=attr(fg,"theme"), ix=attr(fg,"indexed"), tint=+(attr(fg,"tint")||0);
+      if(rgb) hex = rgb.slice(-6).toUpperCase();
+      else if(th!=null && theme[+th]) hex = applyTint(theme[+th], tint);
+      else if(ix!=null) hex = INDEXED[+ix]||null;
+      fills.push(hex);
+    });
+    const xsec = (xml.match(/<cellXfs[\s\S]*?<\/cellXfs>/)||[""])[0];
+    return (xsec.match(/<xf\b[^>]*>/g)||[]).map(x => fills[+(attr(x,"fillId")||0)] || null);
+  }
+
+  async function read(buf){
+    const zip = await JSZip.loadAsync(buf);
+    const txt = async p => { const f = zip.file(p); return f ? f.async("string") : null; };
+    const wbx = await txt("xl/workbook.xml"), rels = await txt("xl/_rels/workbook.xml.rels");
+    const relMap = {}; (rels.match(/<Relationship\b[^>]*>/g)||[]).forEach(t => relMap[attr(t,"Id")] = attr(t,"Target"));
+    const sheets = (wbx.match(/<sheet\b[^>]*>/g)||[]).map(t => { let p = relMap[attr(t,"r:id")]||""; p = p.startsWith("/") ? p.slice(1) : "xl/"+p.replace(/^\.\//,""); return { name: dec(attr(t,"name")||""), path: p }; });
+    const ssx = await txt("xl/sharedStrings.xml");
+    const ss = ssx ? (ssx.match(/<si>[\s\S]*?<\/si>|<si\/>/g)||[]).map(allT) : [];
+    const theme = themeColors(await txt("xl/theme/theme1.xml"));
+    const xfFill = styleFills((await txt("xl/styles.xml"))||"", theme);
+    return { sheets, async grid(i){
+      const xml = await txt(sheets[i].path); const g = [];
+      const re = /<c\b([^>]*?)(?:\/>|>([\s\S]*?)<\/c>)/g; let m;
+      while((m = re.exec(xml))){
+        const a = m[1], body = m[2]||"", ref = attr(a,"r"); if(!ref) continue;
+        const r = +ref.replace(/[A-Z]+/,""), c = colIdx(ref), t = attr(a,"t"), s = attr(a,"s");
+        let v = null; const vm = body.match(/<v>([\s\S]*?)<\/v>/);
+        if(t==="s") v = vm ? ss[+vm[1]] : null;
+        else if(t==="inlineStr") v = allT(body);
+        else if(t==="str" || t==="e") v = vm ? dec(vm[1]) : null;
+        else if(t==="b") v = vm ? vm[1]==="1" : null;
+        else if(vm){ v = +vm[1]; }
+        (g[r] = g[r] || [])[c] = { v, fill: s!=null ? xfFill[+s] : null };
+      }
+      return g;
+    }};
+  }
+
+  const U = v => String(v==null?"":v).trim().toUpperCase();
+  const toN = v => { if(v==null||v==="") return 0; if(typeof v==="number") return v; const n=parseFloat(String(v).replace(/[,₹\s]/g,"")); return isNaN(n)?0:n; };
+  const dist = (a,b) => { const p=h=>[0,2,4].map(i=>parseInt(h.slice(i,i+2),16)); const x=p(a), y=p(b); return Math.sqrt(x.reduce((s,v,i)=>s+(v-y[i])**2,0)); };
+  const isBlankFill = h => !h || h==="FFFFFF" || dist(h,"FFFFFF")<18;
+  const pad = n => String(n).padStart(2,"0");
+  const titleCase = s => s.toLowerCase().replace(/\b([a-z])/g, c=>c.toUpperCase()).replace(/\b(Jcb|Jd|B\.p|Itl|Tafe|Cnh)\b/gi, w=>w.toUpperCase());
+
+  /* parse one sheet grid into { line, sections, parts:[...], dayCols:[...] } ; returns null if not a TvA sheet */
+  function parse(g, fileName, sheetName){
+    let h = 0;
+    for(let r=1;r<=12 && !h;r++) if((g[r]||[]).some(c=>c && U(c.v)==="INCLUDING OVER BILL")) h=r;
+    if(!h) return null;
+    const cols = {};
+    for(let r=1;r<=h+1;r++) (g[r]||[]).forEach((c,ci)=>{ if(!c) return; const t=U(c.v);
+      if(t==="RATE") cols.rate=ci; else if(t==="TARGET VALUE") cols.tval=ci; else if(t==="MONTH TARGET") cols.tqty=ci; else if(t==="MS NO.") cols.ms=ci; });
+    if(!cols.ms || !cols.rate) return null;
+    const days = [];
+    (g[h]||[]).forEach((c,ci)=>{ if(!c || U(c.v)!=="INCLUDING OVER BILL") return;
+      const lab = String((g[h+1]||[])[ci]?.v ?? "").trim(); const m = lab.match(/(\d{1,2})(?:\s*\/\s*(\d{1,2}))?\s*\.\s*(\d{1,2})\s*\.\s*(\d{4})/);
+      if(!m) return; const d = Math.max(+m[1], m[2]?+m[2]:0);
+      days.push({ col: ci, label: lab, date: `${m[4]}-${pad(m[3])}-${pad(d)}` }); });
+    if(!days.length) return null;
+    // line name
+    let line = (fileName.match(/([A-Za-z]+)[\s_-]+LINE/i)||[])[1];
+    line = line ? titleCase(line)+" Line" : (sheetName||"Line");
+    // legend = filled text cells above header row
+    const legend = [];
+    for(let r=1;r<h;r++) (g[r]||[]).forEach(c=>{ if(c && typeof c.v==="string" && c.v.trim() && c.fill && !isBlankFill(c.fill)) legend.push({ name: titleCase(c.v.trim().replace(/\s+/g," ")), fill: c.fill }); });
+    const sectionOf = fill => {
+      if(legend.length===1) return legend[0].name;
+      if(isBlankFill(fill) || !legend.length) return "Other";
+      let best=null, bd=1e9; legend.forEach(l=>{ const d=dist(l.fill,fill); if(d<bd){ bd=d; best=l; } });
+      return bd<=130 ? best.name : "Other";
+    };
+    const parts = []; let cust = "";
+    const max = g.length;
+    for(let r=h+2;r<max;r++){
+      const row = g[r]; if(!row) continue;
+      const a = U(row[1]?.v); if(a.startsWith("TOTAL") || a.startsWith("GRAND")) break;
+      if(row[1] && String(row[1].v??"").trim()) cust = String(row[1].v).trim();
+      const msC = row[cols.ms]; const ms = msC ? String(msC.v??"").trim() : "";
+      if(!ms) continue;
+      const cl = v => { const x=String(v ?? "").trim(); return x==="0" ? "" : x; }; const item = cl(row[cols.ms-2]?.v), partNo = cl(row[cols.ms-1]?.v);
+      const rate = toN(row[cols.rate]?.v);
+      const tq = cols.tqty ? toN(row[cols.tqty]?.v) : 0;
+      const tv = cols.tval ? toN(row[cols.tval]?.v) : tq*rate;
+      const qty = days.map(d => toN(row[d.col]?.v));
+      parts.push({ row:r, customer: cust, item: item.replace(/\s+/g," "), partNo, ms, rate, targetQty: tq, targetValue: tv || tq*rate, section: sectionOf(msC.fill), fill: msC.fill, qty });
+    }
+    // month from day dates
+    const month = days[0].date.slice(0,7);
+    return { line, legend, month, days, parts };
+  }
+  return { read, parse };
+})();
+
+
+</script>
+<script type="module">
+import { initializeApp, deleteApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, doc, getDoc, setDoc, updateDoc, deleteDoc, onSnapshot, query, where, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+(() => {
+const $ = id => document.getElementById(id);
+const SAVE_IC = '<svg class="i" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>';
+const DEFAULT_SECTIONS = [];
+const S = { entries: [], targets: [], cfg: { name:"", unit:"", sections: [], sectionLine:{}, rates:{} }, editId:null, db:null, mode:"loading" };
+
+const inr = n => "₹" + Math.round(n||0).toLocaleString("en-IN");
+const cr = n => { n=n||0; const a=Math.abs(n); return a>=1e7 ? "₹"+(n/1e7).toFixed(2)+" Cr" : a>=1e5 ? "₹"+(n/1e5).toFixed(2)+" L" : inr(n); };
+const num = n => (Math.round((n||0)*100)/100).toLocaleString("en-IN");
+const pct = (a,b) => b ? (a*100/b).toFixed(1)+"%" : "–";
+const esc = s => String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const today = () => { const d=new Date(); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); return d.toISOString().slice(0,10); };
+const fmtD = iso => iso ? iso.split("-").reverse().join("/") : "";
+const monthName = ym => { const [y,m]=ym.split("-"); return new Date(+y,+m-1,1).toLocaleString("en-IN",{month:"long",year:"numeric"}); };
+let tT; const toast = m => { const t=$("toast"); t.textContent=m; t.classList.add("on"); clearTimeout(tT); tT=setTimeout(()=>t.classList.remove("on"),2600); };
+const hash = s => { let h1=0x811c9dc5, h2=0x9747b28c; for(let i=0;i<s.length;i++){ const c=s.charCodeAt(i); h1=Math.imul(h1^c,16777619); h2=Math.imul(h2^c,2246822519); } return (h1>>>0).toString(36)+(h2>>>0).toString(36); };
+const lineOf = sec => (S.cfg.sectionLine||{})[sec] || "General";
+const eLine = e => e.line || lineOf(e.section);
+function linesOrdered(extra){
+  const L=[]; S.cfg.sections.forEach(s=>{ const l=lineOf(s); if(!L.includes(l)) L.push(l); });
+  (extra||[]).forEach(l=>{ if(!L.includes(l)) L.push(l); }); return L;
+}
+
+/* ---------- clock ---------- */
+const tick = () => { const d=new Date(); $("clock").textContent = d.toLocaleDateString("en-IN",{weekday:"short",day:"2-digit",month:"short",year:"numeric"})+" · "+d.toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit"}); };
+tick(); setInterval(tick, 20000);
+
+/* ---------- Firebase layer ---------- */
+const EMAIL_DOMAIN = "pvr.example.com";            // employee codes become <code>@pvr.example.com
+const toEmail = id => { id=String(id||"").trim(); return id.includes("@") ? id.toLowerCase() : id.toLowerCase().replace(/\s+/g,"")+"@"+EMAIL_DOMAIN; };
+const loginLabel = email => String(email||"").endsWith("@"+EMAIL_DOMAIN) ? email.slice(0,-(EMAIL_DOMAIN.length+1)) : email;
+const authMsg = e => { const c=(e&&e.code)||""; return ({ "auth/invalid-credential":"Wrong employee code or password.", "auth/wrong-password":"Wrong employee code or password.", "auth/user-not-found":"Wrong employee code or password.", "auth/invalid-email":"That employee code or email isn't valid.", "auth/email-already-in-use":"That employee code or email already has an account.", "auth/weak-password":"Password must be at least 6 characters.", "auth/too-many-requests":"Too many tries. Wait a few minutes and try again.", "auth/network-request-failed":"No internet connection.", "auth/requires-recent-login":"Sign out and sign in again, then retry.", "permission-denied":"You don't have permission to do that." })[c] || (e&&e.message) || String(e); };
+let fbApp=null, auth=null, db=null, CFG=null;
+let unsubs=[];
+const pad2 = n => String(n).padStart(2,"0");
+function setConn(txt, ok){ $("conn").textContent = txt; $("conn").style.color = ok ? "#86efac" : "#fdba74"; }
+function normCfg(d){ const c=Object.assign({ name:"",unit:"",sections:[],sectionLine:{},rates:{} }, d||{}); if(!Array.isArray(c.sections)) c.sections=[]; c.sectionLine=c.sectionLine||{}; c.rates=c.rates||{}; return c; }
+S.months={}; S.tmonths={}; S.subs={}; S.users=[]; S.profile=null;
+function rebuild(){ S.entries=[].concat(...Object.values(S.months)); S.targets=[].concat(...Object.values(S.tmonths)); }
+let rT=null; const rerender = () => { clearTimeout(rT); rT=setTimeout(renderAll,120); };
+const monthOf = d => String(d||"").slice(0,7);
+function monthsBetween(from,to){ const out=[]; let [y,m]=monthOf(from).split("-").map(Number); const [ty,tm]=monthOf(to).split("-").map(Number); if(!y||!ty) return out; while((y<ty||(y===ty&&m<=tm)) && out.length<36){ out.push(y+"-"+pad2(m)); m++; if(m>12){m=1;y++;} } return out; }
+function ensureMonth(ym){
+  if(!ym || !db) return Promise.resolve();
+  if(S.subs[ym]) return S.subs[ym];
+  S.subs[ym] = new Promise(res => {
+    let a=false, b=false; const done=()=>{ if(a&&b) res(); };
+    unsubs.push(onSnapshot(query(collection(db,"entries"), where("date",">=",ym+"-01"), where("date","<=",ym+"-31")),
+      snap => { S.months[ym]=snap.docs.map(d=>Object.assign({},d.data(),{id:d.id})); rebuild(); a=true; done(); rerender(); },
+      err => { a=true; done(); toast("Couldn't load "+ym+": "+authMsg(err)); }));
+    unsubs.push(onSnapshot(query(collection(db,"targets"), where("month","==",ym)),
+      snap => { S.tmonths[ym]=snap.docs.map(d=>Object.assign({},d.data(),{id:d.id})); rebuild(); b=true; done(); rerender(); },
+      err => { b=true; done(); }));
+  });
+  return S.subs[ym];
+}
+const ensureRange = (from,to) => Promise.all(monthsBetween(from,to).map(ensureMonth));
+function stopAll(){ unsubs.forEach(f=>{ try{f();}catch(e){} }); unsubs=[]; S.months={}; S.tmonths={}; S.subs={}; S.users=[]; rebuild(); }
+
+async function saveEntry(e){ await setDoc(doc(db,"entries",e.id), e); }
+async function deleteEntry(id){ await deleteDoc(doc(db,"entries",id)); }
+async function bulk(ops, onProg){
+  let done=0, failed=0; const CH=400;
+  for(let i=0;i<ops.length;i+=CH){
+    const part=ops.slice(i,i+CH); const b=writeBatch(db);
+    part.forEach(o=>{ const ref=doc(db,o.col,o.id); if(o.del) b.delete(ref); else b.set(ref,o.data); });
+    try{ await b.commit(); done+=part.length; }catch(err){ failed+=part.length; toast("Save failed: "+authMsg(err)); }
+    onProg && onProg(done+failed, ops.length);
+  }
+  return {done, failed};
+}
+let cfgBusy = Promise.resolve();
+function saveCfg(){ const snap = JSON.parse(JSON.stringify(S.cfg)); cfgBusy = cfgBusy.then(()=>setDoc(doc(db,"config","main"), snap)).catch(err=>toast("Couldn't save settings: "+authMsg(err))); renderAll(); return cfgBusy; }
+
+/* ---------- sign-in gate ---------- */
+function gate(mode){
+  $("gate").hidden = mode==="none";
+  $("gLoading").hidden = mode!=="loading";
+  $("loginForm").hidden = !(mode==="login"||mode==="setup");
+  $("setupForm").hidden = mode!=="setup";
+  $("gBlocked").hidden = mode!=="blocked";
+  $("gCfg").hidden = mode!=="config";
+  $("gTitle").textContent = mode==="blocked" ? "Access pending" : "Sign in";
+}
+async function loadConfig(){
+  try{ const r=await fetch("/__/firebase/init.json",{cache:"no-store"}); if(r.ok){ const j=await r.json(); if(j && j.apiKey) return j; } }catch(e){}
+  const c=window.FIREBASE_CONFIG; if(c && c.apiKey && !/PASTE/i.test(c.apiKey)) return c;
+  return null;
+}
+let profUnsub=null;
+function applyRole(){
+  const r=(S.profile&&S.profile.role)||"viewer"; document.body.dataset.role=r;
+  $("whoName").innerHTML = S.profile ? `${esc(S.profile.name||loginLabel(auth.currentUser&&auth.currentUser.email))}<small>${esc(r)}</small>` : "";
+  route();
+}
+function startData(){
+  unsubs.push(onSnapshot(doc(db,"config","main"), snap => { if(snap.exists()) S.cfg=normCfg(snap.data()); rerender(); }, err=>toast("Couldn't load settings: "+authMsg(err))));
+  if(S.profile.role==="admin") unsubs.push(onSnapshot(collection(db,"users"), snap => { S.users=snap.docs.map(d=>Object.assign({},d.data(),{uid:d.id})); renderUsers(); }, ()=>{}));
+  ensureMonth(today().slice(0,7)).then(()=>{ setConn(navigator.onLine?"Live · synced":"Offline", navigator.onLine); });
+  const lm=monthOf($("listDate").value); if(lm) ensureMonth(lm);
+}
+async function start(){
+  gate("loading");
+  CFG = await loadConfig();
+  if(!CFG){ gate("config"); setConn("Not connected", false); return; }
+  fbApp = initializeApp(CFG); auth = getAuth(fbApp);
+  try{ db = initializeFirestore(fbApp,{ localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }) }); }catch(e){ db = getFirestore(fbApp); }
+  onAuthStateChanged(auth, async u => {
+    if(profUnsub){ profUnsub(); profUnsub=null; }
+    stopAll(); S.profile=null;
+    if(!u){
+      document.body.dataset.role="viewer"; gate("login"); setConn("Signed out", false);
+      try{ const o=await getDoc(doc(db,"meta","owner")); if(!o.exists()) gate("setup"); }catch(e){}
+      return;
+    }
+    gate("loading");
+    profUnsub = onSnapshot(doc(db,"users",u.uid), snap => {
+      const p = snap.exists() ? snap.data() : null;
+      const was = S.profile && S.profile.role;
+      if(!p || !["admin","editor","viewer"].includes(p.role)){ S.profile=null; stopAll(); gate("blocked"); return; }
+      S.profile = p;
+      if(was!==p.role){ stopAll(); applyRole(); startData(); }
+      gate("none"); renderAll();
+    }, err => { gate("blocked"); });
+  });
+}
+$("loginForm").addEventListener("submit", async ev => { ev.preventDefault(); $("lgErr").textContent=""; $("lgBtn").disabled=true;
+  try{ await signInWithEmailAndPassword(auth, toEmail($("lgId").value), $("lgPw").value); $("lgPw").value=""; }catch(e){ $("lgErr").textContent=authMsg(e); }
+  $("lgBtn").disabled=false; });
+$("setupForm").addEventListener("submit", async ev => { ev.preventDefault(); $("suErr").textContent=""; $("suBtn").disabled=true;
+  const id=$("suId").value.trim();
+  try{
+    const cred = await createUserWithEmailAndPassword(auth, toEmail(id), $("suPw").value);
+    const b=writeBatch(db);
+    b.set(doc(db,"meta","owner"),{ uid:cred.user.uid, createdAt:Date.now() });
+    b.set(doc(db,"users",cred.user.uid),{ name:$("suName").value.trim(), login:id, email:toEmail(id), role:"admin", createdAt:Date.now() });
+    await b.commit();
+  }catch(e){ $("suErr").textContent = e.code==="permission-denied" ? "An admin already exists. Sign in instead, or ask the admin for an account." : authMsg(e); if(auth.currentUser && e.code==="permission-denied") await signOut(auth); }
+  $("suBtn").disabled=false; });
+$("gOut").onclick = () => signOut(auth);
+$("logoutBtn").onclick = () => signOut(auth);
+window.addEventListener("online", ()=>{ $("localBanner").style.display="none"; setConn("Live · synced", true); });
+window.addEventListener("offline", ()=>{ $("localBanner").style.display="block"; setConn("Offline", false); });
+
+/* ---------- users (admin) ---------- */
+function renderUsers(){
+  const me = auth && auth.currentUser && auth.currentUser.uid;
+  const rows = S.users.slice().sort((a,b)=>String(a.name).localeCompare(String(b.name)));
+  $("userRows").innerHTML = rows.map(u=>`<tr><td><b>${esc(u.name||"")}</b>${u.uid===me?' <span class="pill">you</span>':""}</td><td>${esc(u.login||loginLabel(u.email))}</td><td><select data-uid="${esc(u.uid)}" style="width:150px;height:32px;padding:4px 8px" ${u.uid===me?"disabled":""}>${["admin","editor","viewer","disabled"].map(r=>`<option value="${r}" ${u.role===r?"selected":""}>${r[0].toUpperCase()+r.slice(1)}</option>`).join("")}</select></td></tr>`).join("") || `<tr><td colspan="3" class="empty">No users yet.</td></tr>`;
+}
+$("userRows").addEventListener("change", async ev => { const uid=ev.target.dataset.uid; if(!uid) return;
+  try{ await updateDoc(doc(db,"users",uid),{ role: ev.target.value }); toast("Role updated"); }catch(e){ toast(authMsg(e)); } });
+$("nuAdd").onclick = async () => {
+  const name=$("nuName").value.trim(), login=$("nuLogin").value.trim(), pw=$("nuPass").value, role=$("nuRole").value;
+  if(!name||!login){ $("nuMsg").textContent="Enter a name and employee code."; return; }
+  if(pw.length<6){ $("nuMsg").textContent="Password must be at least 6 characters."; return; }
+  $("nuAdd").disabled=true; $("nuMsg").textContent="Creating…";
+  let sec=null;
+  try{
+    sec = initializeApp(CFG, "add-"+Date.now()); const sa=getAuth(sec);
+    const cred = await createUserWithEmailAndPassword(sa, toEmail(login), pw);
+    await signOut(sa);
+    await setDoc(doc(db,"users",cred.user.uid),{ name, login, email:toEmail(login), role, createdAt:Date.now() });
+    $("nuMsg").textContent=`Added ${name}. They sign in with “${login}” and the password you set.`; $("nuName").value=$("nuLogin").value=$("nuPass").value="";
+  }catch(e){ $("nuMsg").textContent=authMsg(e); }
+  if(sec) try{ await deleteApp(sec); }catch(e){}
+  $("nuAdd").disabled=false;
+};
+$("pwBtn").onclick = async () => {
+  const o=$("pwOld").value, n=$("pwNew").value; if(n.length<6){ $("pwMsg").textContent="New password must be at least 6 characters."; return; }
+  try{ const u=auth.currentUser; await reauthenticateWithCredential(u, EmailAuthProvider.credential(u.email,o)); await updatePassword(u,n); $("pwMsg").textContent="Password changed."; $("pwOld").value=$("pwNew").value=""; }
+  catch(e){ $("pwMsg").textContent=authMsg(e); }
+};
+
+/* ---------- routing ---------- */
+const VIEWS=["report","upload","entry","setup"];
+function route(){ const h=(location.hash||"").slice(1); let v=VIEWS.includes(h)?h:"report"; if(document.body.dataset.role==="viewer" && (v==="upload"||v==="entry")) v="report";
+  VIEWS.forEach(x=>{ $("v-"+x).classList.toggle("on",x===v); });
+  document.querySelectorAll("nav.tabs a").forEach(a=>a.classList.toggle("on",a.dataset.v===v));
+  if (v==="report") renderReport(); }
+window.addEventListener("hashchange", route);
+
+/* ---------- entry ---------- */
+function sectionOptions(){
+  return linesOrdered().map(l=>`<optgroup label="${esc(l)}">${S.cfg.sections.filter(s=>lineOf(s)===l).map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join("")}</optgroup>`).join("");
+}
+function fillSectionSelect(){
+  const cur=$("fSection").value;
+  $("fSection").innerHTML = S.cfg.sections.length ? sectionOptions() : `<option value="">Add sections in Setup or upload a line sheet</option>`;
+  if (cur && S.cfg.sections.includes(cur)) $("fSection").value=cur;
+  $("partList").innerHTML = Object.keys(S.cfg.rates||{}).sort().map(p=>`<option value="${esc(p)}">`).join("");
+}
+const calcVal = () => { $("fVal").value = inr((+$("fOk").value||0)*(+$("fRate").value||0)); };
+["fOk","fRate"].forEach(id=>$(id).addEventListener("input",calcVal));
+$("fPart").addEventListener("input",()=>{ const r=(S.cfg.rates||{})[$("fPart").value.trim()]; if(r!=null){ $("fRate").value=r; calcVal(); } });
+
+function resetForm(keep){
+  const d=$("fDate").value, sh=$("fShift").value, sec=$("fSection").value;
+  $("entryForm").reset(); $("fRej").value=0; $("fVal").value=inr(0);
+  if (keep){ $("fDate").value=d; $("fShift").value=sh; $("fSection").value=sec; } else $("fDate").value=today();
+  S.editId=null; $("editTag").style.display="none"; $("cancelEdit").style.display="none"; $("saveBtn").innerHTML=SAVE_IC+"Save Entry";
+}
+$("cancelEdit").onclick=()=>resetForm(true);
+$("entryForm").addEventListener("submit", async ev => {
+  ev.preventDefault();
+  const part=$("fPart").value.trim(); const ok=Math.max(0,+$("fOk").value||0), rej=Math.max(0,+$("fRej").value||0), rate=Math.max(0,+$("fRate").value||0);
+  if(!part){ toast("Enter a part"); return; } if(!$("fSection").value){ toast("Add a section first (Setup tab)"); return; }
+  const prev = S.editId ? S.entries.find(x=>x.id===S.editId) : null;
+  const e = Object.assign({}, prev||{}, { id: S.editId || ("e"+Date.now().toString(36)+Math.random().toString(36).slice(2,6)),
+    date:$("fDate").value, shift:$("fShift").value, section:$("fSection").value, line: lineOf($("fSection").value), part, okQty:ok, rejQty:rej, rate,
+    value: ok*rate, rejValue: rej*rate, remarks:$("fRem").value.trim(), source: prev?(prev.source||"manual"):"manual", createdAt: prev?prev.createdAt:Date.now(), updatedAt: Date.now() });
+  $("saveBtn").disabled=true;
+  try{
+    await saveEntry(e);
+    if (e.source==="manual" && (S.cfg.rates||{})[part]!==rate){ S.cfg.rates=Object.assign({},S.cfg.rates,{[part]:rate}); await saveCfg(); }
+    toast(S.editId?"Entry updated":"Entry saved · "+inr(e.value));
+    $("listDate").value=e.date; resetForm(true); renderDay();
+  }catch(err){ toast("Couldn't save: "+(err.message||err)); }
+  $("saveBtn").disabled=false;
+});
+function renderDay(){
+  const d=$("listDate").value||today();
+  const rows=S.entries.filter(x=>x.date===d).sort((a,b)=>(eLine(a)+a.section+a.part).localeCompare(eLine(b)+b.section+b.part));
+  $("dayTotal").textContent=`${rows.length} entries · ${inr(rows.reduce((s,x)=>s+(+x.value||0),0))}`;
+  $("dayRows").innerHTML = rows.length ? rows.map(x=>`<tr><td><div class="note">${esc(eLine(x))}</div>${esc(x.section)}</td><td>${esc(x.part)}${x.ms?`<div class="note">MS ${esc(x.ms)}${x.partNo?" · "+esc(x.partNo):""}</div>`:""}${x.remarks&&x.source!=="sheet"?`<div class="note">${esc(x.remarks)}</div>`:""}</td><td class="n">${num(x.okQty)}</td><td class="n">${x.rejQty?`<span class="pill r">${num(x.rejQty)}</span>`:"0"}</td><td class="n">${num(x.rate)}</td><td class="n"><b>${inr(x.value)}</b></td><td><div class="row w-only" style="gap:4px;flex-wrap:nowrap"><button class="btn ghost icon" title="Edit" data-ed="${esc(x.id)}"><svg class="i" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button><button class="btn del icon" title="Delete" data-dl="${esc(x.id)}"><svg class="i" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button></div></td></tr>`).join("")
+    : `<tr><td colspan="7" class="empty">No entries for ${fmtD(d)} yet.</td></tr>`;
+}
+$("listDate").addEventListener("change",()=>{ ensureMonth(monthOf($("listDate").value)); renderDay(); });
+$("dayRows").addEventListener("click", ev => {
+  const ed=ev.target.closest("[data-ed]"), dl=ev.target.closest("[data-dl]");
+  if (ed){ const x=S.entries.find(e=>e.id===ed.dataset.ed); if(!x) return;
+    S.editId=x.id; $("fDate").value=x.date; $("fShift").value=x.shift||"General";
+    if(!S.cfg.sections.includes(x.section)) $("fSection").insertAdjacentHTML("beforeend",`<option>${esc(x.section)}</option>`);
+    $("fSection").value=x.section; $("fPart").value=x.part; $("fOk").value=x.okQty; $("fRej").value=x.rejQty||0; $("fRate").value=x.rate; $("fRem").value=x.remarks||""; calcVal();
+    $("editTag").style.display=""; $("cancelEdit").style.display=""; $("saveBtn").innerHTML=SAVE_IC+"Update Entry"; window.scrollTo({top:0,behavior:"smooth"}); }
+  if (dl){ const x=S.entries.find(e=>e.id===dl.dataset.dl); if(!x) return;
+    ask("Delete entry?", `${x.section} · ${x.part} · ${inr(x.value)} on ${fmtD(x.date)}`, async()=>{ try{ await deleteEntry(x.id); toast("Deleted"); renderDay(); }catch(err){ toast("Couldn't delete: "+(err.message||err)); } }); }
+});
+let cbYes=null;
+function ask(t,m,fn,yes){ $("cTitle").textContent=t; $("cMsg").textContent=m; $("cYes").textContent=yes||"Delete"; cbYes=fn; $("confirmM").classList.add("on"); }
+$("cNo").onclick=()=>$("confirmM").classList.remove("on");
+$("cYes").onclick=()=>{ $("confirmM").classList.remove("on"); if(cbYes) cbYes(); };
+
+/* ---------- report ---------- */
+function periodFilter(){
+  const p=$("rPeriod").value; let from,to,label,month=null;
+  if(p==="day"){ from=to=$("rDay").value||today(); label=fmtD(from); }
+  else if(p==="month"){ const ym=$("rMonth").value||today().slice(0,7); from=ym+"-01"; to=ym+"-31"; label=monthName(ym); month=ym; }
+  else { from=$("rFrom").value||today(); to=$("rTo").value||today(); if(from>to){ const t=from; from=to; to=t; } label=fmtD(from)+" – "+fmtD(to); if(from.slice(0,7)===to.slice(0,7) && from.endsWith("-01") && +to.slice(8)>=28) month=from.slice(0,7); }
+  const sh=$("rShift").value, ln=$("rLine").value; if(ln) label+=" · "+ln; if(sh) label+=" · Shift "+sh;
+  return { from,to,sh,ln,label,month };
+}
+function computeReport(){
+  const f=periodFilter();
+  const rows=S.entries.filter(x=>x.date>=f.from && x.date<=f.to && (!f.sh||x.shift===f.sh) && (!f.ln||eLine(x)===f.ln));
+  const tg = f.month && !f.sh ? S.targets.filter(t=>t.month===f.month && (!f.ln||t.line===f.ln)) : [];
+  const key=(l,s)=>l+"\u0001"+s, M=new Map();
+  const get=(l,s)=>{ const k=key(l,s); if(!M.has(k)) M.set(k,{line:l,name:s,n:0,ok:0,rej:0,val:0,rv:0,tq:0,tv:0,parts:new Map()}); return M.get(k); };
+  const pget=(sec,e)=>{ const k=e.ms?("ms:"+e.ms+"|"+(e.partNo||"")):("p:"+e.part); if(!sec.parts.has(k)) sec.parts.set(k,{part:e.part||e.item,ms:e.ms||"",partNo:e.partNo||"",customer:e.customer||"",ok:0,rej:0,val:0,rv:0,tq:0,tv:0,rate:e.rate}); return sec.parts.get(k); };
+  // seed order from config
+  S.cfg.sections.forEach(s=>{ const l=lineOf(s); if(!f.ln||l===f.ln) get(l,s); });
+  rows.forEach(x=>{ const s=get(eLine(x),x.section); s.n++; s.ok+=+x.okQty||0; s.rej+=+x.rejQty||0; s.val+=+x.value||0; s.rv+=+x.rejValue||0;
+    const p=pget(s,x); p.ok+=+x.okQty||0; p.rej+=+x.rejQty||0; p.val+=+x.value||0; p.rv+=+x.rejValue||0; });
+  tg.forEach(t=>{ const s=get(t.line,t.section); s.tq+=+t.targetQty||0; s.tv+=+t.targetValue||0; const p=pget(s,{part:t.part,ms:t.ms,partNo:t.partNo,customer:t.customer,rate:t.rate}); p.tq+=+t.targetQty||0; p.tv+=+t.targetValue||0; });
+  const secs=[...M.values()].filter(s=>s.n||s.tv||S.cfg.sections.includes(s.name));
+  secs.forEach(s=>{ s.partList=[...s.parts.values()].filter(p=>p.val||p.tv||p.ok).sort((a,b)=>b.val-a.val||b.tv-a.tv); s.nparts=s.partList.filter(p=>p.ok).length; });
+  const lines=linesOrdered(secs.map(s=>s.line)).filter(l=>secs.some(s=>s.line===l));
+  const T={ n:0, ok:0, rej:0, val:0, rv:0, tq:0, tv:0, nparts:0 }; secs.forEach(s=>{ ["n","ok","rej","val","rv","tq","tv","nparts"].forEach(k=>T[k]+=s[k]); });
+  return { f, secs, lines, T, hasTarget: tg.length>0 };
+}
+function renderReport(){
+  const p=$("rPeriod").value;
+  { const pf=periodFilter(); ensureRange(pf.from,pf.to); }
+  $("rDayW").style.display=p==="day"?"":"none"; $("rMonW").style.display=p==="month"?"":"none";
+  $("rFromW").style.display=$("rToW").style.display=p==="range"?"":"none";
+  const { f, secs, lines, T, hasTarget } = computeReport();
+  $("rLabel").textContent=f.label; $("rLabelHead").textContent=f.label+" · Including over bill · value = quantity × rate";
+  $("tgtNote").textContent = hasTarget ? "Target = month target value from the uploaded line sheets." : (f.month ? "No targets for this month yet. Upload the line sheets to add them." : "Targets are monthly, so they show when Period is set to Month.");
+  const best = secs.filter(s=>s.val>0).sort((a,b)=>b.val-a.val)[0];
+  $("kpis").innerHTML = `<div class="kpi accent"><div class="k">Production Value</div><div class="v">${cr(T.val)}</div><div class="s">${inr(T.val)}</div></div>
+    <div class="kpi"><div class="k">Target Value</div><div class="v">${hasTarget?cr(T.tv):"–"}</div><div class="s">${hasTarget?inr(T.tv):"Shown in monthly view"}</div></div>
+    <div class="kpi ${hasTarget&&T.val>=T.tv?"good":""}"><div class="k">Achievement</div><div class="v">${hasTarget?pct(T.val,T.tv):"–"}</div>${hasTarget?`<div class="meter"><div style="width:${Math.min(100,T.tv?T.val*100/T.tv:0).toFixed(1)}%"></div></div><div class="s">Balance ${cr(Math.max(0,T.tv-T.val))}</div>`:`<div class="s">&nbsp;</div>`}</div>
+    <div class="kpi"><div class="k">Quantity (incl. OB)</div><div class="v">${num(T.ok)}</div><div class="s">${T.nparts} parts · ${T.n} entries</div></div>
+    <div class="kpi"><div class="k">Top Section</div><div class="v" style="font-size:15px;line-height:1.3">${best?esc(best.name):"–"}</div><div class="s">${best?esc(best.line)+" · "+cr(best.val):""}</div></div>`;
+  const tv = v => hasTarget ? inr(v) : "–";
+  let html="";
+  lines.forEach(l=>{
+    const ss=secs.filter(s=>s.line===l); const L={ok:0,val:0,tv:0,rej:0,rv:0,np:0}; ss.forEach(s=>{L.ok+=s.ok;L.val+=s.val;L.tv+=s.tv;L.rej+=s.rej;L.rv+=s.rv;L.np+=s.nparts;});
+    html+=`<tr class="lineh"><td colspan="9">${esc(l.toUpperCase())}</td></tr>`;
+    html+=ss.map(s=>`<tr><td><b>${esc(s.name)}</b></td><td class="n">${s.nparts}</td><td class="n">${num(s.ok)}</td><td class="n"><b>${inr(s.val)}</b></td><td class="n">${tv(s.tv)}</td><td class="n">${hasTarget&&s.tv?`<span class="pill ${s.val>=s.tv?"g":s.val/s.tv<0.4?"r":"w"}">${pct(s.val,s.tv)}</span>`:"–"}</td><td class="n">${num(s.rej)}</td><td class="n">${inr(s.rv)}</td><td class="n">${pct(s.val,T.val)}</td></tr>`).join("");
+    if(ss.length>1) html+=`<tr class="sub"><td>${esc(l)} total</td><td class="n">${L.np}</td><td class="n">${num(L.ok)}</td><td class="n">${inr(L.val)}</td><td class="n">${tv(L.tv)}</td><td class="n">${hasTarget?pct(L.val,L.tv):"–"}</td><td class="n">${num(L.rej)}</td><td class="n">${inr(L.rv)}</td><td class="n">${pct(L.val,T.val)}</td></tr>`;
+  });
+  html+=`<tr class="tot"><td>GRAND TOTAL</td><td class="n">${T.nparts}</td><td class="n">${num(T.ok)}</td><td class="n">${inr(T.val)}</td><td class="n">${tv(T.tv)}</td><td class="n">${hasTarget?pct(T.val,T.tv):"–"}</td><td class="n">${num(T.rej)}</td><td class="n">${inr(T.rv)}</td><td class="n">${T.val?"100%":"–"}</td></tr>`;
+  $("secRows").innerHTML = secs.length ? html : `<tr><td colspan="9" class="empty">No sections yet. Upload your line sheets or add sections in Setup.</td></tr>`;
+  const mx=Math.max(1,...secs.map(s=>Math.max(s.val,hasTarget?s.tv:0)));
+  $("bars").innerHTML = (T.val||T.tv) ? lines.map(l=>`<div class="lh">${esc(l)}</div>`+secs.filter(s=>s.line===l && (s.val||s.tv)).map(s=>`<div class="b"><div class="nm" title="${esc(s.name)}">${esc(s.name)}</div><div class="t">${hasTarget?`<div class="tg" style="width:${(s.tv*100/mx).toFixed(1)}%"></div>`:""}<div class="f" style="width:${(s.val*100/mx).toFixed(1)}%"></div></div><div class="vl">${cr(s.val)}${hasTarget?` <small>/ ${cr(s.tv)} · ${pct(s.val,s.tv)}</small>`:""}</div></div>`).join("")).join("") : `<div class="empty">No production for ${esc(f.label)}.</div>`;
+  const withData=secs.filter(s=>s.partList.length);
+  $("detail").innerHTML = withData.length ? withData.map(s=>`<details><summary><span>${esc(s.line)} · ${esc(s.name)}</span><span>${inr(s.val)}${hasTarget?` / ${inr(s.tv)}`:""}</span></summary><div class="tw"><table><thead><tr><th>Part</th><th>MS No</th><th>Customer</th><th class="n">Rate</th><th class="n">${hasTarget?"Target Qty":""}</th><th class="n">OK Qty</th><th class="n">${hasTarget?"Achv %":""}</th><th class="n">Value ₹</th></tr></thead><tbody>${s.partList.map(p=>`<tr><td>${esc(p.part)}${p.partNo?`<div class="note">${esc(p.partNo)}</div>`:""}</td><td>${esc(p.ms)}</td><td>${esc(p.customer)}</td><td class="n">${num(p.rate)}</td><td class="n">${hasTarget?num(p.tq):""}</td><td class="n">${num(p.ok)}</td><td class="n">${hasTarget&&p.tq?pct(p.ok,p.tq):""}</td><td class="n"><b>${inr(p.val)}</b></td></tr>`).join("")}</tbody></table></div></details>`).join("") : `<div class="empty">Nothing to show for this period.</div>`;
+}
+["rPeriod","rDay","rMonth","rFrom","rTo","rShift","rLine"].forEach(id=>$(id).addEventListener("change",renderReport));
+
+function reportRows(){
+  const { f, secs, lines, T, hasTarget } = computeReport();
+  const L=[["Section-wise Production Value Report (Including Over Bill)"],[plantName()],["Period",f.label],[],["Line","Section","Parts","OK Qty","Production Value (Rs)","Target Value (Rs)","Achievement %","Rej Qty","Rejection Value (Rs)"]];
+  lines.forEach(l=>secs.filter(s=>s.line===l).forEach(s=>L.push([l,s.name,s.nparts,s.ok,Math.round(s.val),hasTarget?Math.round(s.tv):"",hasTarget?pct(s.val,s.tv):"",s.rej,Math.round(s.rv)])));
+  L.push(["","GRAND TOTAL",T.nparts,T.ok,Math.round(T.val),hasTarget?Math.round(T.tv):"",hasTarget?pct(T.val,T.tv):"",T.rej,Math.round(T.rv)]);
+  L.push([]); L.push(["Detail"]); L.push(["Line","Section","Part","Part No","MS No","Customer","Rate","Target Qty","OK Qty","Value (Rs)","Target Value (Rs)"]);
+  secs.forEach(s=>s.partList.forEach(p=>L.push([s.line,s.name,p.part,p.partNo,p.ms,p.customer,p.rate,p.tq,p.ok,Math.round(p.val),Math.round(p.tv)])));
+  return L;
+}
+const toDelim = (L,sep) => L.map(r=>r.map(v=>sep===","?`"${String(v??"").replace(/"/g,'""')}"`:String(v??"").replace(/[\t\n]/g," ")).join(sep)).join("\n");
+$("copyRep").onclick = async () => { try{ await navigator.clipboard.writeText(toDelim(reportRows(),"\t")); toast("Copied. Paste into Excel."); }catch(e){ toast("Copy blocked by the browser"); } };
+
+/* ---------- downloads ---------- */
+async function save(filename, data){
+  try{ const blob=new Blob([data],{type: filename.endsWith(".csv")?"text/csv;charset=utf-8":"text/html;charset=utf-8"}); const url=URL.createObjectURL(blob);
+    const a=document.createElement("a"); a.href=url; a.download=filename; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),4000); }
+  catch(e){ toast("Download failed"); }
+}
+$("dlCsv").onclick = () => { const f=periodFilter(); save(`production-value-${f.month||(f.from+"_"+f.to)}.csv`, "\ufeff"+toDelim(reportRows(),",")); };
+const PRINT_CSS = `body{font-family:Arial,sans-serif;font-size:12px;color:#000;margin:18px}h2{text-align:center;margin:0}p.c{text-align:center;margin:2px 0 10px}table{width:100%;border-collapse:collapse;margin-bottom:12px}th,td{border:1px solid #444;padding:5px 6px;font-size:11.5px}th{background:#f3f3f3}td.n{text-align:right}.sh td{background:#ffe8d4;font-weight:bold}.lh td{background:#333;color:#fff;font-weight:bold}.t td{font-weight:bold;background:#fff4ea}.blank{height:22px}.meta{display:flex;justify-content:space-between;margin-bottom:8px}.sig{display:flex;justify-content:space-between;margin-top:40px}.sig div{border-top:1px solid #000;padding-top:4px;min-width:150px;text-align:center}@media print{@page{size:A4;margin:12mm}body{margin:0}}`;
+const wrapDoc=(title,body)=>`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${esc(title)}</title><style>${PRINT_CSS}</style></head><body>${body}<script>setTimeout(function(){try{window.print()}catch(e){}},400)<\/script></body></html>`;
+$("dlRep").onclick = () => {
+  const { f, secs, lines, T, hasTarget } = computeReport();
+  const tv=v=>hasTarget?inr(v):"–";
+  let b=`<h2>Section-wise Production Value Report</h2><p class="c">${esc(plantName())} · Including Over Bill</p><div class="meta"><span><b>Period:</b> ${esc(f.label)}</span><span><b>Printed:</b> ${fmtD(today())}</span></div>
+  <table><tr><th>Section</th><th>Parts</th><th>OK Qty</th><th>Production Value (₹)</th><th>Target Value (₹)</th><th>Achv %</th><th>Rej Qty</th><th>Rejection Value (₹)</th></tr>`;
+  lines.forEach(l=>{ b+=`<tr class="lh"><td colspan="8">${esc(l)}</td></tr>`; secs.filter(s=>s.line===l).forEach(s=>{ b+=`<tr><td>${esc(s.name)}</td><td class="n">${s.nparts}</td><td class="n">${num(s.ok)}</td><td class="n">${inr(s.val)}</td><td class="n">${tv(s.tv)}</td><td class="n">${hasTarget?pct(s.val,s.tv):"–"}</td><td class="n">${num(s.rej)}</td><td class="n">${inr(s.rv)}</td></tr>`; }); });
+  b+=`<tr class="t"><td>GRAND TOTAL</td><td class="n">${T.nparts}</td><td class="n">${num(T.ok)}</td><td class="n">${inr(T.val)}</td><td class="n">${tv(T.tv)}</td><td class="n">${hasTarget?pct(T.val,T.tv):"–"}</td><td class="n">${num(T.rej)}</td><td class="n">${inr(T.rv)}</td></tr></table>`;
+  secs.filter(s=>s.partList.some(p=>p.ok)).forEach(s=>{ b+=`<table><tr class="sh"><td colspan="6">${esc(s.line)} · ${esc(s.name)}</td></tr><tr><th>Part</th><th>MS No</th><th>Rate</th><th>OK Qty</th><th>Value (₹)</th><th>Target Value (₹)</th></tr>${s.partList.filter(p=>p.ok).map(p=>`<tr><td>${esc(p.part)}</td><td>${esc(p.ms)}</td><td class="n">${num(p.rate)}</td><td class="n">${num(p.ok)}</td><td class="n">${inr(p.val)}</td><td class="n">${tv(p.tv)}</td></tr>`).join("")}<tr class="t"><td colspan="3">Section total</td><td class="n">${num(s.ok)}</td><td class="n">${inr(s.val)}</td><td class="n">${tv(s.tv)}</td></tr></table>`; });
+  b+=`<div class="sig"><div>Prepared by</div><div>Checked by</div><div>Approved by</div></div>`;
+  save(`production-value-report-${f.month||(f.from+"_"+f.to)}.html`, wrapDoc("Production Value Report", b));
+};
+
+const plantName = () => [S.cfg.name, S.cfg.unit].filter(Boolean).join(" · ") || "Production Value Report";
+
+/* ---------- upload: line Target-vs-Achievement sheets ---------- */
+const T2 = { items: [] }; // {file, p}
+function renderTva(){
+  if(!T2.items.length){ $("tvaBox").style.display="none"; return; }
+  $("tvaBox").style.display="";
+  let entries=0, val=0, tv=0;
+  $("tvaList").innerHTML = T2.items.map(({file,p},ix)=>{
+    const sec={}; p.parts.forEach(x=>{ const s=sec[x.section]||(sec[x.section]={parts:0,act:0,qty:0,val:0,tv:0,fill:x.fill}); s.parts++; s.tv+=x.targetValue; let a=0; x.qty.forEach(q=>{ if(q){ entries++; s.qty+=q; s.val+=q*x.rate; a=1; } }); s.act+=a; });
+    const lf=Object.fromEntries(p.legend.map(l=>[l.name,l.fill]));
+    const tot=Object.values(sec).reduce((a,s)=>({val:a.val+s.val,tv:a.tv+s.tv,qty:a.qty+s.qty}),{val:0,tv:0,qty:0}); val+=tot.val; tv+=tot.tv;
+    const unused=p.legend.filter(l=>!sec[l.name]).map(l=>l.name);
+    return `<div style="margin-bottom:14px"><div class="row" style="justify-content:space-between"><b>${esc(p.line)} · ${monthName(p.month)}</b><span class="note">${esc(file)} · ${p.days.length} day columns · ${p.parts.length} parts</span></div>
+    <div class="tw"><table><thead><tr><th>Section (colour)</th><th class="n">Parts</th><th class="n">Parts produced</th><th class="n">Qty incl. OB</th><th class="n">Value ₹</th><th class="n">Target ₹</th><th class="n">Achv %</th></tr></thead><tbody>
+    ${Object.entries(sec).sort((a,b)=>b[1].val-a[1].val).map(([n,s])=>`<tr><td><span class="sw" style="background:#${esc(lf[n]||s.fill||"FFFFFF")}"></span>${esc(n)}${n==="Other"?` <span class="note">(no colour)</span>`:""}</td><td class="n">${s.parts}</td><td class="n">${s.act}</td><td class="n">${num(s.qty)}</td><td class="n"><b>${inr(s.val)}</b></td><td class="n">${inr(s.tv)}</td><td class="n">${pct(s.val,s.tv)}</td></tr>`).join("")}
+    <tr class="tot"><td>${esc(p.line)} total</td><td class="n">${p.parts.length}</td><td></td><td class="n">${num(tot.qty)}</td><td class="n">${inr(tot.val)}</td><td class="n">${inr(tot.tv)}</td><td class="n">${pct(tot.val,tot.tv)}</td></tr></tbody></table></div>
+    ${unused.length?`<div class="note" style="color:var(--warn)">No parts are coloured for: ${unused.map(esc).join(", ")}</div>`:""}</div>`;
+  }).join("");
+  $("tvaSum").textContent=`${T2.items.length} line${T2.items.length>1?"s":""} · ${cr(val)}`;
+  $("tvaImport").textContent=`Import ${entries} entries · ${cr(val)}`;
+  $("tvaImport").disabled=!entries && !tv;
+}
+$("tvaCancel").onclick=()=>{ T2.items=[]; renderTva(); $("upName").textContent=""; };
+$("tvaImport").onclick=async()=>{
+  $("tvaMsg").textContent="Preparing…"; await Promise.all(T2.items.map(it=>ensureMonth(it.p.month)));
+  const now=Date.now(); const ops=[]; const keepE=new Set(), keepT=new Set();
+  const secs=S.cfg.sections.slice(), sl=Object.assign({},S.cfg.sectionLine);
+  const scopes=[];
+  T2.items.forEach(({file,p})=>{
+    scopes.push({line:p.line, month:p.month});
+    const used=new Set();
+    p.parts.forEach(x=>{
+      const hasData = x.qty.some(q=>q) || x.targetValue;
+      if(!hasData) return;
+      if(!secs.includes(x.section)){ secs.push(x.section); } if(!sl[x.section]) sl[x.section]=p.line;
+      const name = x.item || x.partNo || ("MS "+x.ms);
+      let base = [p.line,x.ms,x.partNo,x.item].join("|"); let k=base, c=1; while(used.has(k)) k=base+"#"+(++c); used.add(k);
+      p.days.forEach((d,di)=>{ const q=x.qty[di]; if(!q) return;
+        const id="s"+hash(k+"|"+d.date+"|"+d.label); keepE.add(id);
+        ops.push({col:"entries",id,data:{ id, date:d.date, shift:"General", line:p.line, section:x.section, part:name, item:x.item, partNo:x.partNo, ms:x.ms, customer:x.customer,
+          okQty:q, rejQty:0, rate:x.rate, value:q*x.rate, rejValue:0, remarks:"Sheet day "+d.label, source:"sheet", file, createdAt:now, updatedAt:now }}); });
+      if(x.targetValue||x.targetQty){ const id="t"+hash(k+"|"+p.month); keepT.add(id);
+        ops.push({col:"targets",id,data:{ id, month:p.month, line:p.line, section:x.section, part:name, partNo:x.partNo, ms:x.ms, customer:x.customer, rate:x.rate, targetQty:x.targetQty, targetValue:x.targetValue, updatedAt:now }}); }
+    });
+  });
+  // remove old sheet rows for the same line+month that are not in the new upload
+  const inScope=(line,date)=>scopes.some(s=>s.line===line && date.startsWith(s.month));
+  S.entries.filter(e=>e.source==="sheet" && inScope(e.line,e.date||"") && !keepE.has(e.id)).forEach(e=>ops.push({col:"entries",id:e.id,del:true}));
+  S.targets.filter(t=>scopes.some(s=>s.line===t.line&&s.month===t.month) && !keepT.has(t.id)).forEach(t=>ops.push({col:"targets",id:t.id,del:true}));
+  $("tvaImport").disabled=true; $("tvaCancel").disabled=true; const pg=$("tvaProg"); pg.style.display="block";
+  try{
+    const r=await bulk(ops,(d,n)=>{ pg.firstElementChild.style.width=(d*100/n)+"%"; $("tvaMsg").textContent=`Saving ${d} / ${n}…`; });
+    S.cfg.sections=secs; S.cfg.sectionLine=sl; await saveCfg();
+    $("tvaMsg").textContent = r.failed ? `Saved ${r.done}, ${r.failed} failed. Upload again to finish.` : `Done. ${r.done} records saved.`;
+    toast(r.failed?`${r.failed} records failed. Try again.`:"Line sheets imported");
+    if(!r.failed){ const m=scopes[0]&&scopes[0].month; T2.items=[]; renderTva(); if(m){ $("rPeriod").value="month"; $("rMonth").value=m; } location.hash="report"; }
+    renderAll();
+  }catch(err){ toast("Import stopped: "+(err.message||err)); }
+  $("tvaImport").disabled=false; $("tvaCancel").disabled=false; setTimeout(()=>{ pg.style.display="none"; pg.firstElementChild.style.width="0"; },1500);
+};
+
+/* ---------- upload: generic sheets ---------- */
+const FIELDS=[
+  {k:"date",l:"Date",req:1,al:["date","dt","prod date","production date","entry date"]},
+  {k:"shift",l:"Shift",al:["shift"]},
+  {k:"section",l:"Section",req:1,al:["section","department","dept","area","shop","line"]},
+  {k:"part",l:"Part No / Description",req:1,al:["part","part no","part number","part name","description","item","item name","component","ms no","drawing no"]},
+  {k:"okQty",l:"OK Qty",req:1,al:["ok qty","ok","ok quantity","good qty","production qty","prod qty","qty","quantity","output","nos"]},
+  {k:"rejQty",l:"Rej Qty",al:["rej qty","rej","rejection","rejection qty","reject","rejected","scrap"]},
+  {k:"rate",l:"Rate ₹/pc",al:["rate","rate/pc","rate per pc","price","unit price","rate per piece"]},
+  {k:"value",l:"Value ₹",al:["value","amount","production value","prod value","total value","total amount"]},
+  {k:"remarks",l:"Remarks",al:["remarks","remark","comment","comments","notes"]}
+];
+const nrm = s => String(s??"").toLowerCase().replace(/[^a-z0-9]/g,"");
+const U = { wb:null, rows:[], hdr:[], map:{}, parsed:[] };
+const MON={jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12};
+const pad=n=>String(n).padStart(2,"0");
+function toISO(v){
+  if(v==null||v==="") return "";
+  if(v instanceof Date && !isNaN(v)) return v.getFullYear()+"-"+pad(v.getMonth()+1)+"-"+pad(v.getDate());
+  if(typeof v==="number"){ if(v<20000||v>80000) return ""; const d=new Date(Math.round((v-25569)*86400000)); return d.getUTCFullYear()+"-"+pad(d.getUTCMonth()+1)+"-"+pad(d.getUTCDate()); }
+  const s=String(v).trim(); let m;
+  if((m=s.match(/^(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})/))) return m[1]+"-"+pad(m[2])+"-"+pad(m[3]);
+  if((m=s.match(/^(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{2,4})/))){ let y=+m[3]; if(y<100) y+=2000; return y+"-"+pad(m[2])+"-"+pad(m[1]); }
+  if((m=s.match(/^(\d{1,2})[-\s\/.]?([a-z]{3})[a-z]*[-\s\/.,]*(\d{2,4})/i)) && MON[m[2].toLowerCase()]){ let y=+m[3]; if(y<100) y+=2000; return y+"-"+pad(MON[m[2].toLowerCase()])+"-"+pad(m[1]); }
+  if(/^\d+(\.\d+)?$/.test(s)) return toISO(+s);
+  return "";
+}
+const toNum = v => { if(v==null||v==="") return null; if(typeof v==="number") return v; const n=parseFloat(String(v).replace(/[₹,\s]/g,"").replace(/rs\.?/i,"")); return isNaN(n)?null:n; };
+function findHeaderRow(rows){
+  const all=new Set(FIELDS.flatMap(f=>f.al.map(nrm))); let best=0,bi=0;
+  for(let i=0;i<Math.min(15,rows.length);i++){ const sc=(rows[i]||[]).filter(c=>all.has(nrm(c))).length; if(sc>best){best=sc;bi=i;} }
+  return bi;
+}
+function autoMap(hdr){
+  const map={}, used=new Set(), H=hdr.map(nrm);
+  FIELDS.forEach(f=>{ const i=H.findIndex((h,ix)=>!used.has(ix)&&h&&f.al.some(a=>nrm(a)===h)); if(i>=0){ map[f.k]=i; used.add(i);} });
+  ["rejQty","value","rate","date","shift","section","part","remarks","okQty"].forEach(k=>{ if(map[k]!=null) return; const f=FIELDS.find(x=>x.k===k);
+    const i=H.findIndex((h,ix)=>!used.has(ix)&&h&&f.al.some(a=>nrm(a).length>2&&h.includes(nrm(a)))); if(i>=0){ map[k]=i; used.add(i);} });
+  return map;
+}
+function loadSheet(name){
+  const ws=U.wb.Sheets[name]; const rows=XLSX.utils.sheet_to_json(ws,{header:1,raw:true,defval:""});
+  const hi=findHeaderRow(rows); U.hdr=(rows[hi]||[]).map(h=>String(h).trim()); U.rows=rows.slice(hi+1);
+  U.map=autoMap(U.hdr);
+  $("upSheetInfo").textContent=`${U.rows.length} rows · headings on row ${hi+1}`;
+  $("upMap").innerHTML=FIELDS.map(f=>`<div><label>${f.l}${f.req?" *":""}</label><select data-f="${f.k}"><option value="">— not in sheet —</option>${U.hdr.map((h,i)=>`<option value="${i}" ${U.map[f.k]===i?"selected":""}>${esc(h||("Column "+(i+1)))}</option>`).join("")}</select></div>`).join("");
+  buildPreview();
+}
+function buildPreview(){
+  const M=U.map, get=(r,k)=>M[k]!=null?r[M[k]]:"";
+  const defD=$("upDefDate").value, defS=$("upDefSec").value, defSh=$("upDefShift").value, skip=$("upSkipDup").checked;
+  const key=e=>[e.date,e.shift,String(e.section).toLowerCase(),String(e.part).toLowerCase(),e.okQty].join("|");
+  const have=new Set(S.entries.map(key)); const seen=new Set(); U.parsed=[];
+  U.rows.forEach((r,ix)=>{
+    if(!r.some(c=>String(c).trim()!=="")) return;
+    const part=String(get(r,"part")??"").trim(); const sec=String(get(r,"section")??"").trim();
+    if(/total/i.test(part)||/total/i.test(sec)||(!part && toNum(get(r,"okQty"))==null)) return;
+    const ok=Math.max(0,toNum(get(r,"okQty"))||0), rej=Math.max(0,toNum(get(r,"rejQty"))||0), val=toNum(get(r,"value"));
+    let rate=toNum(get(r,"rate")); if(rate==null) rate = (val!=null&&ok) ? val/ok : ((S.cfg.rates||{})[part] ?? null);
+    let sh=String(get(r,"shift")??"").trim().toUpperCase(); if(sh.startsWith("GEN")) sh="General"; if(!sh) sh=defSh;
+    const e={ row:ix+1, date:toISO(get(r,"date"))||defD, shift:sh, section:sec||defS, part, okQty:ok, rejQty:rej, rate:rate==null?null:Math.round(rate*100)/100, remarks:String(get(r,"remarks")??"").trim() };
+    const errs=[]; if(!e.date) errs.push("no date"); if(!e.section) errs.push("no section"); if(!e.part) errs.push("no part"); if(e.rate==null) errs.push("no rate");
+    e.err=errs.join(", ");
+    if(!e.err){ const k=key(e); e.dup = skip && (have.has(k)||seen.has(k)); seen.add(k); }
+    U.parsed.push(e);
+  });
+  const good=U.parsed.filter(e=>!e.err&&!e.dup), bad=U.parsed.filter(e=>e.err), dup=U.parsed.filter(e=>e.dup);
+  $("upOkCount").textContent=`${good.length} ready`;
+  $("upBadCount").textContent= `${bad.length} with problems${dup.length?` · ${dup.length} already in app`:""}`;
+  $("upBadCount").style.display= bad.length||dup.length ? "" : "none";
+  $("upImport").textContent=`Import ${good.length} rows · ${inr(good.reduce((s,e)=>s+e.okQty*e.rate,0))}`;
+  $("upImport").disabled=!good.length;
+  const miss=FIELDS.filter(f=>f.req&&M[f.k]==null&&!(f.k==="date"&&defD)&&!(f.k==="section"&&defS)).map(f=>f.l);
+  $("upMsg").textContent = miss.length ? "Match these columns: "+miss.join(", ") : "";
+  const show=U.parsed.slice(0,300);
+  $("upRows").innerHTML = show.map(e=>`<tr class="${e.err?"bad":e.dup?"dup":""}"><td>${e.row}</td><td>${fmtD(e.date)}</td><td>${esc(e.shift)}</td><td>${esc(e.section)}</td><td>${esc(e.part)}</td><td class="n">${num(e.okQty)}</td><td class="n">${num(e.rejQty)}</td><td class="n">${e.rate==null?"–":num(e.rate)}</td><td class="n">${e.rate==null?"–":inr(e.okQty*e.rate)}</td><td>${e.err?`<span class="err">${esc(e.err)}</span>`:e.dup?"Already in app":`<span class="ok">Ready</span>`}</td></tr>`).join("")
+    + (U.parsed.length>300?`<tr><td colspan="10" class="note">…and ${U.parsed.length-300} more rows</td></tr>`:"")
+    + (U.parsed.length?"":`<tr><td colspan="10" class="empty">No data rows found. Check the column matching above.</td></tr>`);
+}
+function fillUpSelects(){
+  const cur=$("upDefSec").value;
+  $("upDefSec").innerHTML=`<option value="">— none —</option>`+sectionOptions();
+  if(cur) $("upDefSec").value=cur;
+}
+async function readFiles(files){
+  files=[...(files||[])]; if(!files.length) return;
+  const names=[]; let generic=null; const found=[];
+  $("upName").textContent="Reading "+files.length+" file(s)…";
+  for(const file of files){
+    try{
+      const buf=await file.arrayBuffer(); let got=false;
+      if(/\.xls[xm]$/i.test(file.name) && typeof TVA!=="undefined" && typeof JSZip!=="undefined"){
+        const wb=await TVA.read(buf);
+        for(let i=0;i<wb.sheets.length && !got;i++){ const p=TVA.parse(await wb.grid(i), file.name, wb.sheets[i].name); if(p && p.parts.length){ found.push({file:file.name,p}); got=true; } }
+      }
+      if(!got && !generic) generic={file,buf};
+      names.push(file.name);
+    }catch(err){ toast("Couldn't read "+file.name+": "+(err.message||err)); }
+  }
+  if(found.length){ found.forEach(it=>{ T2.items=T2.items.filter(x=>!(x.p.line===it.p.line&&x.p.month===it.p.month)); T2.items.push(it); }); renderTva(); }
+  if(generic){
+    if(typeof XLSX==="undefined"){ toast("Excel reader didn't load. Check your internet and reload."); }
+    else {
+      const {file,buf}=generic;
+      U.wb = /\.csv$/i.test(file.name) ? XLSX.read(new TextDecoder().decode(buf),{type:"string",raw:true}) : XLSX.read(buf,{type:"array"});
+      $("upSheet").innerHTML=U.wb.SheetNames.map(n=>`<option>${esc(n)}</option>`).join("");
+      $("sheetW").style.display=U.wb.SheetNames.length>1?"":"none";
+      fillUpSelects(); $("upStep2").style.display=""; loadSheet(U.wb.SheetNames[0]);
+    }
+  }
+  $("upName").textContent = names.length ? names.join(", ") : "";
+}
+$("upFile").addEventListener("change",e=>{ readFiles(e.target.files); e.target.value=""; });
+const drop=$("drop");
+["dragover","dragenter"].forEach(t=>drop.addEventListener(t,e=>{ e.preventDefault(); drop.classList.add("hov"); }));
+["dragleave","drop"].forEach(t=>drop.addEventListener(t,e=>{ e.preventDefault(); drop.classList.remove("hov"); }));
+drop.addEventListener("drop",e=>readFiles(e.dataTransfer.files));
+$("upSheet").addEventListener("change",()=>loadSheet($("upSheet").value));
+$("upMap").addEventListener("change",e=>{ const f=e.target.dataset.f; if(!f) return; if(e.target.value==="") delete U.map[f]; else U.map[f]=+e.target.value; buildPreview(); });
+["upDefDate","upDefSec","upDefShift","upSkipDup"].forEach(id=>$(id).addEventListener("change",buildPreview));
+$("upCancel").onclick=()=>{ U.wb=null; U.parsed=[]; $("upStep2").style.display="none"; };
+$("upImport").onclick=async()=>{
+  const good=U.parsed.filter(e=>!e.err&&!e.dup); if(!good.length) return;
+  const now=Date.now();
+  const list=good.map((e,i)=>({ id:"u"+now.toString(36)+i.toString(36)+Math.random().toString(36).slice(2,5), date:e.date, shift:e.shift, section:e.section, line:lineOf(e.section), part:e.part, okQty:e.okQty, rejQty:e.rejQty, rate:e.rate, value:e.okQty*e.rate, rejValue:e.rejQty*e.rate, remarks:e.remarks, source:"upload", createdAt:now+i, updatedAt:now }));
+  $("upImport").disabled=true; $("upCancel").disabled=true; const pg=$("upProg"); pg.style.display="block";
+  try{
+    const r=await bulk(list.map(e=>({col:"entries",id:e.id,data:e})),(d,n)=>{ pg.firstElementChild.style.width=(d*100/n)+"%"; $("upMsg").textContent=`Saving ${d} / ${n}…`; });
+    const secs=S.cfg.sections.slice(); list.forEach(e=>{ if(!secs.some(s=>s.toLowerCase()===e.section.toLowerCase())) secs.push(e.section); });
+    const rates=Object.assign({},S.cfg.rates); list.forEach(e=>{ rates[e.part]=e.rate; });
+    S.cfg.sections=secs; S.cfg.rates=rates; await saveCfg();
+    toast(`Imported ${r.done} rows${r.failed?` · ${r.failed} failed`:""}`);
+    $("upMsg").textContent=`Imported ${r.done} rows${r.failed?`, ${r.failed} failed (upload again; done rows will be skipped)`:""}.`;
+    renderAll(); buildPreview();
+  }catch(err){ toast("Import stopped: "+(err.message||err)); }
+  $("upCancel").disabled=false; setTimeout(()=>{ pg.style.display="none"; pg.firstElementChild.style.width="0"; },1500);
+};
+$("dlTpl").onclick=()=>{
+  const d=today(), s0=S.cfg.sections[0]||"Section 1", s1=S.cfg.sections[1]||s0;
+  const L=[["Date","Shift","Section","Part No / Description","OK Qty","Rej Qty","Rate","Remarks"],[fmtD(d),"A",s0,"Bull Gear 4521",120,2,450,""],[fmtD(d),"A",s1,"Pinion Shaft 3310",80,0,620,""]];
+  save("production-upload-sample.csv", toDelim(L,","));
+};
+
+/* ---------- setup ---------- */
+function fillLineSelects(){
+  const L=linesOrdered([...new Set(S.entries.map(eLine)), ...new Set(S.targets.map(t=>t.line))]);
+  const opt=(id,all)=>{ const cur=$(id).value; $(id).innerHTML=(all?`<option value="">${all}</option>`:"")+L.map(l=>`<option>${esc(l)}</option>`).join(""); if(L.includes(cur)||(cur===""&&all)) $(id).value=cur; else if(!all&&L.length) $(id).value=L[0]; };
+  opt("rLine","All lines"); opt("clrLine",null);
+  $("lineList").innerHTML=L.map(l=>`<option value="${esc(l)}">`).join("");
+}
+function renderSetup(){
+  if (document.activeElement!==$("sName")) $("sName").value=S.cfg.name||"";
+  if (document.activeElement!==$("sUnit")) $("sUnit").value=S.cfg.unit||"";
+  const L=S.cfg.sections;
+  $("secList").innerHTML = L.map((s,i)=>`<div class="it"><span>${esc(s)} <em>· ${esc(lineOf(s))}</em></span><button class="btn ghost icon" data-up="${i}" ${i?"":"disabled"}><svg class="i" viewBox="0 0 24 24"><path d="m18 15-6-6-6 6"/></svg></button><button class="btn ghost icon" data-dn="${i}" ${i<L.length-1?"":"disabled"}><svg class="i" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button><button class="btn del icon" title="Remove" data-rm="${i}"><svg class="i" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>`).join("") || `<div class="empty">No sections yet. Upload a line sheet or add one above.</div>`;
+  const R=S.cfg.rates||{};
+  $("rateRows").innerHTML = Object.keys(R).sort().map(p=>`<tr><td>${esc(p)}</td><td class="n"><input type="number" step="0.01" min="0" value="${R[p]}" data-rate="${esc(p)}" style="width:110px;text-align:right;padding:6px"></td><td><button class="btn del icon" title="Remove" data-rr="${esc(p)}"><svg class="i" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button></td></tr>`).join("") || `<tr><td colspan="3" class="empty">Rates appear here after manual entries.</td></tr>`;
+}
+$("saveName").onclick=async()=>{ S.cfg.name=$("sName").value.trim(); S.cfg.unit=$("sUnit").value.trim(); await saveCfg(); renderHeader(); toast("Saved"); };
+$("addSec").onclick=async()=>{ const v=$("newSec").value.trim(), l=$("newSecLine").value.trim()||"General"; if(!v) return; if(S.cfg.sections.includes(v)){ toast("Already there"); return; }
+  S.cfg.sections=[...S.cfg.sections,v]; S.cfg.sectionLine=Object.assign({},S.cfg.sectionLine,{[v]:l}); $("newSec").value=""; await saveCfg(); renderAll(); toast("Section added"); };
+$("newSec").addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); $("addSec").click(); } });
+$("secList").addEventListener("click",async ev=>{
+  const b=ev.target.closest("button"); if(!b) return; const L=S.cfg.sections.slice();
+  if(b.dataset.rm!=null){ const i=+b.dataset.rm; ask("Remove section?", `"${L[i]}" will be removed from the entry form and blank report. Old entries stay.`, async()=>{ L.splice(i,1); S.cfg.sections=L; await saveCfg(); renderAll(); },"Remove"); return; }
+  if(b.dataset.up!=null){ const i=+b.dataset.up; [L[i-1],L[i]]=[L[i],L[i-1]]; }
+  if(b.dataset.dn!=null){ const i=+b.dataset.dn; [L[i+1],L[i]]=[L[i],L[i+1]]; }
+  S.cfg.sections=L; await saveCfg(); renderAll();
+});
+$("rateRows").addEventListener("change",async ev=>{ const p=ev.target.dataset.rate; if(p==null) return; S.cfg.rates=Object.assign({},S.cfg.rates,{[p]:Math.max(0,+ev.target.value||0)}); await saveCfg(); toast("Rate updated"); });
+$("rateRows").addEventListener("click",async ev=>{ const b=ev.target.closest("[data-rr]"); if(!b) return; const R=Object.assign({},S.cfg.rates); delete R[b.dataset.rr]; S.cfg.rates=R; await saveCfg(); renderAll(); });
+$("clrBtn").onclick=async()=>{
+  const l=$("clrLine").value, m=$("clrMonth").value; if(!l||!m){ toast("Pick a line and month"); return; }
+  await ensureMonth(m);
+  const es=S.entries.filter(e=>eLine(e)===l && (e.date||"").startsWith(m)), ts=S.targets.filter(t=>t.line===l&&t.month===m);
+  if(!es.length&&!ts.length){ toast("Nothing to delete"); return; }
+  ask("Delete data?", `${es.length} entries and ${ts.length} targets for ${l}, ${monthName(m)}. This can't be undone.`, async()=>{
+    const r=await bulk([...es.map(e=>({col:"entries",id:e.id,del:true})),...ts.map(t=>({col:"targets",id:t.id,del:true}))]); toast(`Deleted ${r.done}`); renderAll(); });
+};
+
+function renderHeader(){
+  $("plantTitle").textContent = S.cfg.name ? S.cfg.name : "Production Value Report";
+  $("plantSub").textContent = (S.cfg.unit?S.cfg.unit+" · ":"")+"Section-wise production value · target vs achievement";
+}
+function renderAll(){ renderHeader(); fillSectionSelect(); fillUpSelects(); fillLineSelects(); renderDay(); renderSetup(); const v=(location.hash||"").slice(1); if(v==="report") renderReport(); }
+
+/* ---------- init ---------- */
+$("fDate").value=today(); $("listDate").value=today(); $("rDay").value=today(); $("rMonth").value=today().slice(0,7); $("rFrom").value=today().slice(0,8)+"01"; $("rTo").value=today(); $("clrMonth").value=today().slice(0,7);
+$("fVal").value=inr(0);
+document.body.dataset.role="viewer";
+renderAll(); route();
+setConn("Connecting…", false);
+if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(()=>{});
+start();
+})();
+</script>
+</body>
+</html>

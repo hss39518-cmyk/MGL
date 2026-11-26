@@ -1,0 +1,36 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function profile() { return get(/databases/$(database)/documents/users/$(request.auth.uid)).data; }
+    function role() {
+      return signedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid)) ? profile().role : 'none';
+    }
+    function canRead()  { return role() in ['admin', 'editor', 'viewer']; }
+    function canWrite() { return role() in ['admin', 'editor']; }
+    function isAdmin()  { return role() == 'admin'; }
+
+    // Production data
+    match /entries/{id} { allow read: if canRead(); allow write: if canWrite(); }
+    match /targets/{id} { allow read: if canRead(); allow write: if canWrite(); }
+    match /config/{id}  { allow read: if canRead(); allow write: if canWrite(); }
+
+    // Who set the app up (first admin). Can be created once, never changed.
+    match /meta/owner {
+      allow read: if true;
+      allow create: if signedIn() && request.resource.data.uid == request.auth.uid;
+    }
+
+    // User profiles and roles
+    match /users/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
+      allow create: if isAdmin() || (
+        request.auth.uid == uid
+        && request.resource.data.role == 'admin'
+        && !exists(/databases/$(database)/documents/meta/owner)
+        && getAfter(/databases/$(database)/documents/meta/owner).data.uid == uid
+      );
+      allow update, delete: if isAdmin();
+    }
+  }
+}
