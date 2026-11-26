@@ -138,6 +138,22 @@ tr.dup td{color:var(--mut)}
 .userchip button:hover{background:#1e293b}
 body[data-role="viewer"] .w-only{display:none!important}
 body:not([data-role="admin"]) .a-only{display:none!important}
+.charts2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:900px){.charts2{grid-template-columns:1fr}}
+.chart{position:relative;width:100%}
+.chart svg{display:block;width:100%;overflow:visible}
+.chart .ax{font-size:11px;fill:var(--mut);font-variant-numeric:tabular-nums}
+.chart .lbl{font-size:11.5px;fill:var(--ink2);font-weight:600;font-variant-numeric:tabular-nums}
+.chart .grid{stroke:var(--line);stroke-width:1}
+.chart .base{stroke:#cbd5e1;stroke-width:1}
+.chart .hit{fill:transparent;cursor:crosshair}
+.ctip{position:fixed;z-index:70;pointer-events:none;background:#0f172a;color:#fff;border-radius:8px;padding:8px 10px;font-size:12px;line-height:1.5;box-shadow:0 6px 20px rgba(15,23,42,.25);display:none;white-space:nowrap;font-variant-numeric:tabular-nums}
+.ctip b{font-weight:700}
+.ctip i{display:inline-block;width:10px;height:3px;border-radius:2px;margin-right:6px;vertical-align:3px}
+.clegend{display:flex;gap:16px;font-size:12px;color:var(--ink2);margin:-4px 0 8px;flex-wrap:wrap}
+.clegend span{display:inline-flex;align-items:center;gap:6px}
+.clegend i{display:inline-block;width:14px;height:3px;border-radius:2px}
+.clegend i.dash{background:repeating-linear-gradient(90deg,var(--c) 0 5px,transparent 5px 8px)!important}
 footer{text-align:center;color:var(--mut);font-size:11.5px;padding:8px 0 30px}
 @media (max-width:700px){
   .userchip .nm{display:none}
@@ -215,6 +231,19 @@ footer{text-align:center;color:var(--mut);font-size:11.5px;padding:8px 0 30px}
     <div id="dEmpty" class="card empty" style="display:none">No daily target vs achieved data yet. Upload the <b>Hard Section Production Value</b> workbook on the Upload tab.</div>
     <div id="dBody">
       <div class="kpis" id="dKpis"></div>
+      <div class="charts2">
+        <div class="card"><h3>Cumulative: achieved vs target <span class="pill" id="cCumLabel"></span></h3>
+          <div class="clegend"><span><i style="background:#ea580c"></i>Achieved</span><span><i class="dash" style="--c:#2563eb"></i>Target</span></div>
+          <div class="chart" id="cCum"></div></div>
+        <div class="card"><h3>Day by day <span class="pill" id="cDayLabel"></span></h3>
+          <div class="clegend"><span><i style="background:#ea580c;height:10px;width:10px"></i>Achieved</span><span><i style="background:#2563eb"></i>Target</span></div>
+          <div class="chart" id="cDay"></div></div>
+      </div>
+      <div class="card">
+        <h3>Achd % by section <span class="pill" id="cSecLabel"></span></h3>
+        <div class="chart" id="cSec"></div>
+        <p class="note" style="margin-top:6px">Achieved ÷ target for the days entered so far. The dashed line is 100%. Tap a bar to open that section.</p>
+      </div>
       <div class="card">
         <h3>Section-wise <span class="pill" id="dLabel"></span></h3>
         <div class="tw"><table>
@@ -233,6 +262,8 @@ footer{text-align:center;color:var(--mut);font-size:11.5px;padding:8px 0 30px}
       </div>
       <div class="card">
         <h3>Month comparison <span class="pill" id="dCmpLabel"></span></h3>
+        <div class="clegend"><span><i style="background:#ea580c;height:10px;width:10px"></i>Achieved (full month)</span><span><i style="background:#2563eb"></i>Month target</span></div>
+        <div class="chart" id="cMon" style="margin-bottom:12px"></div>
         <div class="tw"><table>
           <thead><tr><th>Month</th><th class="n">Month Target</th><th class="n">Achieved</th><th class="n">% of month target</th><th class="n" id="dSameHdr">Achd till same day</th><th class="n">Best day</th></tr></thead>
           <tbody id="dCmpRows"></tbody>
@@ -444,6 +475,7 @@ footer{text-align:center;color:var(--mut);font-size:11.5px;padding:8px 0 30px}
   <div id="gCfg" hidden><p class="err">This app isn't connected to Firebase yet. Open <b>firebase-config.js</b> on GitHub and paste your Firebase web app settings.</p></div>
 </div></div>
 <div class="toast" id="toast"></div>
+<div class="ctip" id="ctip"></div>
 
 <script>
 /* Target-vs-Achievement sheet reader: values + cell fill colours (works in browser and node). Needs JSZip. */
@@ -1132,11 +1164,104 @@ function renderDaily(){
     const same=dd.filter(d=>d.a!=null && +d.date.slice(8)<=cutDay).reduce((a,d)=>a+d.a,0); return { m, x, same, has: ss.length>0 }; }).filter(r=>r.has);
   const bestSame=Math.max(...rows.map(r=>r.same)), bestFull=Math.max(...rows.filter(r=>r.x.ask==null).map(r=>r.x.A),0);
   $("dCmpRows").innerHTML = rows.map(r=>`<tr${r.m===D.month?' style="background:var(--brand-l)"':""}><td><b>${monthName(r.m)}</b>${r.x.ask==null&&r.x.A===bestFull&&bestFull>0?' <span class="pill g">Best month</span>':""}</td><td class="n">${fl(r.x.T)}</td><td class="n"><b>${fl(r.x.A)}</b></td><td class="n">${pctPill(r.x.T?r.x.A*100/r.x.T:null)}</td><td class="n">${fl(r.same)}${r.same===bestSame&&rows.length>1?' <span class="pill g">Top</span>':""}</td><td class="n">${r.x.best?fl(r.x.best.a)+` <span class="note">${esc(r.x.best.label)}</span>`:"–"}</td></tr>`).join("");
+  // charts
+  $("cCumLabel").textContent=$("cDayLabel").textContent=selName; $("cSecLabel").textContent=monthName(D.month);
+  chartCumulative($("cCum"), days);
+  chartDaily($("cDay"), days);
+  chartSectionPct($("cSec"), secs.map(s=>{ const x=statsOf(s.days); return { key:s.key, name:s.name, pct:x.pct, a:x.A, tt:x.TT, sel:s.key===D.sec }; }), k=>{ D.sec = D.sec===k ? "" : k; renderDaily(); });
+  chartMonths($("cMon"), rows.slice().reverse().map(r=>({ label: monthName(r.m).replace(/ (\d{4})$/," '$1").replace(/'(\d\d)(\d\d)$/,"'$2"), A:r.x.A, T:r.x.T, sel:r.m===D.month })));
 }
 $("dMonth").addEventListener("change",()=>{ D.month=$("dMonth").value; renderDaily(); });
 $("dSec").addEventListener("change",()=>{ D.sec=$("dSec").value; renderDaily(); });
 $("dSecRows").addEventListener("click",ev=>{ const tr=ev.target.closest("tr[data-k]"); if(!tr) return; D.sec = D.sec===tr.dataset.k ? "" : tr.dataset.k; renderDaily(); });
 
+
+/* ---------- charts (hand-built SVG; orange = achieved, blue = target) ---------- */
+const C_ACH="#ea580c", C_TGT="#2563eb";
+const svgNS="http://www.w3.org/2000/svg";
+function el(tag,attrs,parent){ const e=document.createElementNS(svgNS,tag); for(const k in attrs) e.setAttribute(k,attrs[k]); if(parent) parent.appendChild(e); return e; }
+function niceMax(v){ if(v<=0) return 1; const p=Math.pow(10,Math.floor(Math.log10(v))); const n=v/p; const c=[1,1.2,1.5,2,2.5,3,4,5,6,8,10].find(x=>n<=x); return c*p; }
+const tip=()=>$("ctip");
+function showTip(ev,html){ const t=tip(); t.innerHTML=html; t.style.display="block"; const w=t.offsetWidth,h=t.offsetHeight; let x=ev.clientX+14, y=ev.clientY-h-12; if(x+w>innerWidth-8) x=ev.clientX-w-14; if(y<8) y=ev.clientY+16; t.style.left=x+"px"; t.style.top=y+"px"; }
+function hideTip(){ tip().style.display="none"; }
+const tRow=(c,name,val,dash)=>`<div><i style="background:${dash?`repeating-linear-gradient(90deg,${c} 0 4px,transparent 4px 6px)`:c}"></i>${name}: <b>${val}</b></div>`;
+const fL = n => fl(n)+" L";
+function frame(box,H,padL,padR,padT,padB){ box.innerHTML=""; const W=Math.max(280,box.clientWidth||600); const svg=el("svg",{viewBox:`0 0 ${W} ${H}`,height:H,role:"img"},box); return {svg,W,H,x0:padL,x1:W-padR,y0:padT,y1:H-padB}; }
+function yAxis(g,f,max,ticks,fmt){ for(let i=0;i<=ticks;i++){ const v=max*i/ticks, y=f.y1-(f.y1-f.y0)*i/ticks; el("line",{x1:f.x0,x2:f.x1,y1:y,y2:y,class:i?"grid":"base"},g); const t=el("text",{x:f.x0-6,y:y+3.5,"text-anchor":"end",class:"ax"},g); t.textContent=fmt(v); } }
+const shortL = v => v>=1000 ? (v/1000).toFixed(v>=10000?0:1)+"k" : Math.round(v)+"";
+
+function chartCumulative(box, days){
+  const pts=[]; let ct=0, ca=0; days.forEach(d=>{ ct+=d.t||0; if(d.a!=null){ ca+=d.a; } pts.push({label:d.label, t:ct, a: d.a!=null?ca:null}); });
+  const f=frame(box,250,46,64,12,26), g=f.svg; const max=niceMax(Math.max(ct,ca)*1.05);
+  yAxis(g,f,max,4,shortL);
+  const n=pts.length, X=i=>f.x0+(n<=1?0:(f.x1-f.x0)*i/(n-1)), Y=v=>f.y1-(f.y1-f.y0)*v/max;
+  const step=Math.max(1,Math.ceil(n/7)); pts.forEach((p,i)=>{ if(i%step===0||i===n-1){ const t=el("text",{x:X(i),y:f.y1+16,"text-anchor":"middle",class:"ax"},g); t.textContent=p.label.split(".")[0]; } });
+  const path=(arr,key)=>arr.map((p,i)=>p[key]==null?null:`${X(i)},${Y(p[key])}`).filter(Boolean);
+  el("polyline",{points:path(pts,"t").join(" "),fill:"none",stroke:C_TGT,"stroke-width":2,"stroke-dasharray":"6 4","stroke-linejoin":"round"},g);
+  const ap=path(pts,"a"); if(ap.length) el("polyline",{points:ap.join(" "),fill:"none",stroke:C_ACH,"stroke-width":2.5,"stroke-linejoin":"round","stroke-linecap":"round"},g);
+  // direct labels at the ends
+  const lastA=pts.map((p,i)=>[p,i]).filter(([p])=>p.a!=null).pop();
+  const lt=el("text",{x:X(n-1)+6,y:Y(ct)+4,class:"lbl"},g); lt.textContent="Target"; lt.setAttribute("fill",C_TGT);
+  if(lastA){ const [p,i]=lastA; el("circle",{cx:X(i),cy:Y(p.a),r:4,fill:C_ACH,stroke:"#fff","stroke-width":2},g); const la=el("text",{x:X(i)+8,y:Y(p.a)+4,class:"lbl"},g); la.textContent=shortL(p.a)+" L"; }
+  // crosshair
+  const ch=el("line",{y1:f.y0,y2:f.y1,stroke:"#94a3b8","stroke-width":1,visibility:"hidden"},g);
+  const dt=el("circle",{r:4,fill:C_TGT,stroke:"#fff","stroke-width":2,visibility:"hidden"},g), da=el("circle",{r:5,fill:C_ACH,stroke:"#fff","stroke-width":2,visibility:"hidden"},g);
+  const hit=el("rect",{x:f.x0,y:f.y0,width:f.x1-f.x0,height:f.y1-f.y0,class:"hit"},g);
+  const move=ev=>{ const r=f.svg.getBoundingClientRect(); const sx=(ev.clientX-r.left)*f.W/r.width; const i=Math.max(0,Math.min(n-1,Math.round((sx-f.x0)/((f.x1-f.x0)/Math.max(1,n-1))))); const p=pts[i];
+    ch.setAttribute("x1",X(i)); ch.setAttribute("x2",X(i)); ch.setAttribute("visibility","visible");
+    dt.setAttribute("cx",X(i)); dt.setAttribute("cy",Y(p.t)); dt.setAttribute("visibility","visible");
+    if(p.a!=null){ da.setAttribute("cx",X(i)); da.setAttribute("cy",Y(p.a)); da.setAttribute("visibility","visible"); } else da.setAttribute("visibility","hidden");
+    showTip(ev,`<b>Up to ${esc(p.label)}</b>${tRow(C_ACH,"Achieved",p.a==null?"not yet":fL(p.a))}${tRow(C_TGT,"Target",fL(p.t),true)}${p.a!=null&&p.t?`<div>Achd %: <b>${(p.a*100/p.t).toFixed(1)}%</b></div>`:""}`); };
+  hit.addEventListener("pointermove",move); hit.addEventListener("pointerdown",move);
+  hit.addEventListener("pointerleave",()=>{ ch.setAttribute("visibility","hidden"); dt.setAttribute("visibility","hidden"); da.setAttribute("visibility","hidden"); hideTip(); });
+}
+
+function chartDaily(box, days){
+  const f=frame(box,250,46,10,12,26), g=f.svg; const n=days.length; if(!n){ box.innerHTML='<div class="empty">No days</div>'; return; }
+  const max=niceMax(Math.max(...days.map(d=>Math.max(d.t||0,d.a||0)))*1.08);
+  yAxis(g,f,max,4,shortL);
+  const slot=(f.x1-f.x0)/n, bw=Math.max(4,Math.min(26,slot*0.62)), Y=v=>f.y1-(f.y1-f.y0)*v/max;
+  const step=Math.max(1,Math.ceil(n/8));
+  days.forEach((d,i)=>{ const cx=f.x0+slot*(i+0.5);
+    if(d.a!=null && d.a>0){ const y=Y(d.a), h=f.y1-y, r=Math.min(4,bw/2,h); el("path",{d:`M${cx-bw/2},${f.y1} V${y+r} Q${cx-bw/2},${y} ${cx-bw/2+r},${y} H${cx+bw/2-r} Q${cx+bw/2},${y} ${cx+bw/2},${y+r} V${f.y1} Z`,fill:C_ACH},g); }
+    if(d.t) el("line",{x1:cx-bw/2-3,x2:cx+bw/2+3,y1:Y(d.t),y2:Y(d.t),stroke:C_TGT,"stroke-width":2.5,"stroke-linecap":"round"},g);
+    if(i%step===0||i===n-1){ const t=el("text",{x:cx,y:f.y1+16,"text-anchor":"middle",class:"ax"},g); t.textContent=d.label.split(".")[0]; }
+    const hit=el("rect",{x:f.x0+slot*i,y:f.y0,width:slot,height:f.y1-f.y0,class:"hit"},g);
+    const on=ev=>{ hit.setAttribute("fill","rgba(148,163,184,.12)"); showTip(ev,`<b>${esc(d.label)}</b>${tRow(C_ACH,"Achieved",d.a==null?"not yet":fL(d.a))}${tRow(C_TGT,"Target",fL(d.t))}${d.a!=null?`<div>${d.a>=d.t?"Above":"Short by"}: <b>${fL(Math.abs(d.a-d.t))}</b></div>`:""}`); };
+    hit.addEventListener("pointermove",on); hit.addEventListener("pointerdown",on); hit.addEventListener("pointerleave",()=>{ hit.setAttribute("fill","transparent"); hideTip(); });
+  });
+}
+
+function chartSectionPct(box, rows, onPick){
+  const rh=34, H=rows.length*rh+30; const f=frame(box,H,150,56,6,24), g=f.svg;
+  const max=Math.max(120, Math.ceil(Math.max(...rows.map(r=>r.pct||0))/20)*20), X=v=>f.x0+(f.x1-f.x0)*v/max;
+  for(let v=0; v<=max; v+=20){ el("line",{x1:X(v),x2:X(v),y1:f.y0,y2:f.y1,class:v?"grid":"base"},g); const t=el("text",{x:X(v),y:f.y1+15,"text-anchor":"middle",class:"ax"},g); t.textContent=v+"%"; }
+  el("line",{x1:X(100),x2:X(100),y1:f.y0-2,y2:f.y1,stroke:"#0f172a","stroke-width":1.5,"stroke-dasharray":"4 3"},g);
+  rows.forEach((r,i)=>{ const y=f.y0+i*rh+7, h=rh-14, v=r.pct||0, x2=X(Math.min(v,max)), rr=Math.min(4,h/2,x2-f.x0);
+    const nm=el("text",{x:f.x0-10,y:y+h/2+4,"text-anchor":"end",class:"lbl"},g); nm.textContent=r.name;
+    if(v>0) el("path",{d:`M${f.x0},${y} H${x2-rr} Q${x2},${y} ${x2},${y+rr} V${y+h-rr} Q${x2},${y+h} ${x2-rr},${y+h} H${f.x0} Z`,fill:r.sel?"#c2410c":C_ACH},g);
+    const vt=el("text",{x:x2+6,y:y+h/2+4,class:"lbl"},g); vt.textContent=r.pct==null?"–":r.pct.toFixed(1)+"%";
+    const hit=el("rect",{x:0,y:f.y0+i*rh,width:f.W,height:rh,class:"hit",style:"cursor:pointer"},g);
+    const on=ev=>showTip(ev,`<b>${esc(r.name)}</b><div>Achd %: <b>${r.pct==null?"–":r.pct.toFixed(1)+"%"}</b></div>${tRow(C_ACH,"Achieved",fL(r.a))}${tRow(C_TGT,"Target till date",fL(r.tt))}`);
+    hit.addEventListener("pointermove",on); hit.addEventListener("pointerleave",hideTip); hit.addEventListener("click",()=>{ hideTip(); onPick&&onPick(r.key); });
+  });
+}
+
+function chartMonths(box, rows){
+  const rh=38, H=rows.length*rh+30; const f=frame(box,H,120,70,6,24), g=f.svg;
+  const max=niceMax(Math.max(...rows.map(r=>Math.max(r.A,r.T)))*1.05), X=v=>f.x0+(f.x1-f.x0)*v/max, ticks=4;
+  for(let i=0;i<=ticks;i++){ const v=max*i/ticks; el("line",{x1:X(v),x2:X(v),y1:f.y0,y2:f.y1,class:i?"grid":"base"},g); const t=el("text",{x:X(v),y:f.y1+15,"text-anchor":"middle",class:"ax"},g); t.textContent=shortL(v); }
+  rows.forEach((r,i)=>{ const y=f.y0+i*rh+9, h=rh-18, x2=X(r.A), rr=Math.min(4,h/2,Math.max(0,x2-f.x0));
+    const nm=el("text",{x:f.x0-10,y:y+h/2+4,"text-anchor":"end",class:"lbl"},g); nm.textContent=r.label;
+    if(r.A>0) el("path",{d:`M${f.x0},${y} H${x2-rr} Q${x2},${y} ${x2},${y+rr} V${y+h-rr} Q${x2},${y+h} ${x2-rr},${y+h} H${f.x0} Z`,fill:r.sel?"#c2410c":C_ACH},g);
+    el("line",{x1:X(r.T),x2:X(r.T),y1:y-5,y2:y+h+5,stroke:C_TGT,"stroke-width":2.5,"stroke-linecap":"round"},g);
+    const vt=el("text",{x:Math.max(x2,X(r.T))+8,y:y+h/2+4,class:"lbl"},g); vt.textContent=(r.T?(r.A*100/r.T).toFixed(0)+"%":"–");
+    const hit=el("rect",{x:0,y:f.y0+i*rh,width:f.W,height:rh,class:"hit"},g);
+    const on=ev=>showTip(ev,`<b>${esc(r.label)}</b>${tRow(C_ACH,"Achieved",fL(r.A))}${tRow(C_TGT,"Month target",fL(r.T))}<div>% of month target: <b>${r.T?(r.A*100/r.T).toFixed(1)+"%":"–"}</b></div>`);
+    hit.addEventListener("pointermove",on); hit.addEventListener("pointerdown",on); hit.addEventListener("pointerleave",hideTip);
+  });
+}
+let chResize=null; window.addEventListener("resize",()=>{ clearTimeout(chResize); chResize=setTimeout(()=>{ if((location.hash||"").slice(1)==="daily") renderDaily(); },200); });
 /* ---------- upload: generic sheets ---------- */
 const FIELDS=[
   {k:"date",l:"Date",req:1,al:["date","dt","prod date","production date","entry date"]},
