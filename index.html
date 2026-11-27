@@ -1698,7 +1698,7 @@ function renderDash(){
   $("dbTgtLbl").textContent="Target "+crS(st.T);
   $("dbPlan").textContent=crS(st.TT); $("dbPlanS").textContent=`Short by ${crS(Math.max(0,st.TT-st.A))}`;
   $("dbAsk").textContent=st.ask==null?"Done":crS(st.ask); $("dbAskS").textContent=st.ask==null?"Month complete":`${st.remDays.toFixed(1)} working days left`;
-  $("dbBest").textContent=st.best?crS(st.best.a):"–"; $("dbBestS").textContent=st.best?st.best.label:"";
+  $("dbBest").textContent=st.best?crS(st.best.a):"–"; $("dbBestS").textContent=st.best?yLbl(st.best):"";
   // day strip
   const withA=days.filter(d=>d.a!=null);
   if(!days.some(d=>dKey(d)===DB.day)) DB.day = withA.length ? dKey(withA[withA.length-1]) : (days[0]?dKey(days[0]):"");
@@ -1792,6 +1792,7 @@ $("dtaImport").onclick=async()=>{
 
 const D = { month:"", sec:"" };
 const dKey = (d) => d.date+"|"+d.label;
+const yLbl = d => !d?"":(d.date&&/\.\d{1,2}$/.test(d.label)?d.label+"."+d.date.slice(0,4):d.label);
 function dMonths(){ return [...new Set((S.daily||[]).map(d=>d.month))].sort().reverse(); }
 function dSections(month){ return (S.daily||[]).filter(d=>d.month===month).map(d=>Object.assign({},d,{ name: DTA.NAMES[d.key]||d.name })).sort((a,b)=>(a.order||0)-(b.order||0)); }
 function combineDays(secs){
@@ -1827,16 +1828,16 @@ function renderDaily(){
     <div class="kpi"><div class="k">Till-date Target</div><div class="v">${fl(st.TT)} L</div><div class="s">Month target ${fl(st.T)} L</div></div>
     <div class="kpi ${st.pct!=null&&st.pct>=100?"good":""}"><div class="k">Achd %</div><div class="v">${pctTxt(st.pct)}</div><div class="meter"><div style="width:${Math.min(100,st.pct||0).toFixed(1)}%"></div></div><div class="s">Failure ${fl(st.fail)} L</div></div>
     <div class="kpi"><div class="k">Asking rate / day</div><div class="v">${st.ask==null?"–":fl(st.ask)+" L"}</div><div class="s">${st.ask==null?"Month complete":"Balance "+fl(st.T-st.A)+" L · "+st.remDays.toFixed(1)+" days left"}</div></div>
-    <div class="kpi"><div class="k">Best day</div><div class="v">${st.best?fl(st.best.a)+" L":"–"}</div><div class="s">${st.best?esc(st.best.label):""}</div></div>`;
+    <div class="kpi"><div class="k">Best day</div><div class="v">${st.best?fl(st.best.a)+" L":"–"}</div><div class="s">${st.best?esc(yLbl(st.best)):""}</div></div>`;
   // section table
   const tot=statsOf(combineDays(secs));
-  $("dSecRows").innerHTML = secs.map(s=>{ const x=statsOf(s.days); return `<tr data-k="${esc(s.key)}" style="cursor:pointer${s.key===D.sec?";background:var(--brand-l)":""}"><td><b>${esc(s.name)}</b></td><td class="n">${fl(x.T)}</td><td class="n">${fl(x.TT)}</td><td class="n"><b>${fl(x.A)}</b></td><td class="n" style="color:${x.fail<0?"var(--bad)":"var(--ok)"}">${fl(x.fail)}</td><td class="n">${pctPill(x.pct)}</td><td class="n">${x.ask==null?"–":fl(x.ask)}</td><td class="n">${x.best?fl(x.best.a)+` <span class="note">${esc(x.best.label)}</span>`:"–"}</td></tr>`; }).join("")
+  $("dSecRows").innerHTML = secs.map(s=>{ const x=statsOf(s.days); return `<tr data-k="${esc(s.key)}" style="cursor:pointer${s.key===D.sec?";background:var(--brand-l)":""}"><td><b>${esc(s.name)}</b></td><td class="n">${fl(x.T)}</td><td class="n">${fl(x.TT)}</td><td class="n"><b>${fl(x.A)}</b></td><td class="n" style="color:${x.fail<0?"var(--bad)":"var(--ok)"}">${fl(x.fail)}</td><td class="n">${pctPill(x.pct)}</td><td class="n">${x.ask==null?"–":fl(x.ask)}</td><td class="n">${x.best?fl(x.best.a)+` <span class="note">${esc(yLbl(x.best))}</span>`:"–"}</td></tr>`; }).join("")
     + `<tr class="tot"><td>TOTAL</td><td class="n">${fl(tot.T)}</td><td class="n">${fl(tot.TT)}</td><td class="n">${fl(tot.A)}</td><td class="n">${fl(tot.fail)}</td><td class="n">${pctTxt(tot.pct)}</td><td class="n">${tot.ask==null?"–":fl(tot.ask)}</td><td class="n">${tot.best?fl(tot.best.a):"–"}</td></tr>`;
   // day table
   const mx=Math.max(1,...days.map(d=>Math.max(d.t||0,d.a||0)));
   let cT=0,cA=0;
   $("dDayRows").innerHTML = days.map(d=>{ const has=d.a!=null; if(has){ cT+=d.t; cA+=d.a; }
-    return `<tr${has?"":' style="color:var(--mut)"'}><td><b>${esc(d.label)}</b></td><td><div style="position:relative;height:14px;background:var(--line2);border-radius:3px;overflow:hidden"><div style="position:absolute;inset:0 auto 0 0;width:${(d.t*100/mx).toFixed(1)}%;background:#fed7aa"></div>${has?`<div style="position:absolute;top:3px;bottom:3px;left:0;width:${(d.a*100/mx).toFixed(1)}%;background:${d.a>=d.t?"var(--ok)":"var(--brand)"};border-radius:2px"></div>`:""}</div></td>
+    return `<tr${has?"":' style="color:var(--mut)"'}><td><b>${esc(yLbl(d))}</b></td><td><div style="position:relative;height:14px;background:var(--line2);border-radius:3px;overflow:hidden"><div style="position:absolute;inset:0 auto 0 0;width:${(d.t*100/mx).toFixed(1)}%;background:#fed7aa"></div>${has?`<div style="position:absolute;top:3px;bottom:3px;left:0;width:${(d.a*100/mx).toFixed(1)}%;background:${d.a>=d.t?"var(--ok)":"var(--brand)"};border-radius:2px"></div>`:""}</div></td>
       <td class="n">${fl(d.t)}</td><td class="n">${has?"<b>"+fl(d.a)+"</b>":"–"}</td><td class="n" style="color:${has?(d.a-d.t<0?"var(--bad)":"var(--ok)"):"inherit"}">${has?fl(d.a-d.t):"–"}</td><td class="n">${has?pctPill(d.t?d.a*100/d.t:null):"–"}</td><td class="n">${has?fl(cT):"–"}</td><td class="n">${has?fl(cA):"–"}</td><td class="n">${has?pctTxt(cT?cA*100/cT:null):"–"}</td></tr>`; }).join("")
     + `<tr class="tot"><td>Total</td><td></td><td class="n">${fl(st.T)}</td><td class="n">${fl(st.A)}</td><td class="n">${fl(st.fail)}</td><td class="n">${pctTxt(st.pct)}</td><td></td><td></td><td></td></tr>`;
   // month comparison
@@ -1846,7 +1847,7 @@ function renderDaily(){
   const rows = months.map(m=>{ const ss=dSections(m).filter(s=>!D.sec||s.key===D.sec); const dd=combineDays(ss); const x=statsOf(dd);
     const same=dd.filter(d=>d.a!=null && +d.date.slice(8)<=cutDay).reduce((a,d)=>a+d.a,0); return { m, x, same, has: ss.length>0 }; }).filter(r=>r.has);
   const bestSame=Math.max(...rows.map(r=>r.same)), bestFull=Math.max(...rows.filter(r=>r.x.ask==null).map(r=>r.x.A),0);
-  $("dCmpRows").innerHTML = rows.map(r=>`<tr${r.m===D.month?' style="background:var(--brand-l)"':""}><td><b>${monthName(r.m)}</b>${r.x.ask==null&&r.x.A===bestFull&&bestFull>0?' <span class="pill g">Best month</span>':""}</td><td class="n">${fl(r.x.T)}</td><td class="n"><b>${fl(r.x.A)}</b></td><td class="n">${pctPill(r.x.T?r.x.A*100/r.x.T:null)}</td><td class="n">${fl(r.same)}${r.same===bestSame&&rows.length>1?' <span class="pill g">Top</span>':""}</td><td class="n">${r.x.best?fl(r.x.best.a)+` <span class="note">${esc(r.x.best.label)}</span>`:"–"}</td></tr>`).join("");
+  $("dCmpRows").innerHTML = rows.map(r=>`<tr${r.m===D.month?' style="background:var(--brand-l)"':""}><td><b>${monthName(r.m)}</b>${r.x.ask==null&&r.x.A===bestFull&&bestFull>0?' <span class="pill g">Best month</span>':""}</td><td class="n">${fl(r.x.T)}</td><td class="n"><b>${fl(r.x.A)}</b></td><td class="n">${pctPill(r.x.T?r.x.A*100/r.x.T:null)}</td><td class="n">${fl(r.same)}${r.same===bestSame&&rows.length>1?' <span class="pill g">Top</span>':""}</td><td class="n">${r.x.best?fl(r.x.best.a)+` <span class="note">${esc(yLbl(r.x.best))}</span>`:"–"}</td></tr>`).join("");
   // charts
   $("cCumLabel").textContent=$("cDayLabel").textContent=selName; $("cSecLabel").textContent=monthName(D.month);
   chartCumulative($("cCum"), days);
@@ -1874,7 +1875,7 @@ function yAxis(g,f,max,ticks,fmt){ for(let i=0;i<=ticks;i++){ const v=max*i/tick
 const shortL = v => v>=1000 ? (v/1000).toFixed(v>=10000?0:1)+"k" : Math.round(v)+"";
 
 function chartCumulative(box, days){
-  const pts=[]; let ct=0, ca=0; days.forEach(d=>{ ct+=d.t||0; if(d.a!=null){ ca+=d.a; } pts.push({label:d.label, t:ct, a: d.a!=null?ca:null}); });
+  const pts=[]; let ct=0, ca=0; days.forEach(d=>{ ct+=d.t||0; if(d.a!=null){ ca+=d.a; } pts.push({label:d.label, yl:yLbl(d), t:ct, a: d.a!=null?ca:null}); });
   const f=frame(box,250,46,64,12,26), g=f.svg; const max=niceMax(Math.max(ct,ca)*1.05);
   yAxis(g,f,max,4,shortL);
   const n=pts.length, X=i=>f.x0+(n<=1?0:(f.x1-f.x0)*i/(n-1)), Y=v=>f.y1-(f.y1-f.y0)*v/max;
@@ -1894,7 +1895,7 @@ function chartCumulative(box, days){
     ch.setAttribute("x1",X(i)); ch.setAttribute("x2",X(i)); ch.setAttribute("visibility","visible");
     dt.setAttribute("cx",X(i)); dt.setAttribute("cy",Y(p.t)); dt.setAttribute("visibility","visible");
     if(p.a!=null){ da.setAttribute("cx",X(i)); da.setAttribute("cy",Y(p.a)); da.setAttribute("visibility","visible"); } else da.setAttribute("visibility","hidden");
-    showTip(ev,`<b>Up to ${esc(p.label)}</b>${tRow(C_ACH,"Achieved",p.a==null?"not yet":fL(p.a))}${tRow(C_TGT,"Target",fL(p.t),true)}${p.a!=null&&p.t?`<div>Achd %: <b>${(p.a*100/p.t).toFixed(1)}%</b></div>`:""}`); };
+    showTip(ev,`<b>Up to ${esc(p.yl)}</b>${tRow(C_ACH,"Achieved",p.a==null?"not yet":fL(p.a))}${tRow(C_TGT,"Target",fL(p.t),true)}${p.a!=null&&p.t?`<div>Achd %: <b>${(p.a*100/p.t).toFixed(1)}%</b></div>`:""}`); };
   hit.addEventListener("pointermove",move); hit.addEventListener("pointerdown",move);
   hit.addEventListener("pointerleave",()=>{ ch.setAttribute("visibility","hidden"); dt.setAttribute("visibility","hidden"); da.setAttribute("visibility","hidden"); hideTip(); });
 }
