@@ -1040,15 +1040,16 @@ const XL = (() => {
       return keys[k]=xfs.length-1; }
     const sheets=[];
     function sheet(name){
-      const sh={ name:String(name).replace(/[\\\/\?\*\[\]:]/g," ").slice(0,31), rows:[], merges:[], widths:[], heights:{}, freeze:null, filter:null, landscape:true, paper:9, printTitles:null, r:0 };
+      const sh={ name:String(name).replace(/[\\\/\?\*\[\]:]/g," ").slice(0,31), rows:[], merges:[], widths:[], heights:{}, freeze:null, filter:null, landscape:true, paper:9, printTitles:null, printCols:null, fitW:1, fitH:0, charts:[], r:0 };
       sh.row=(cells,opt)=>{ sh.rows[sh.r]=cells||[]; if(opt&&opt.h) sh.heights[sh.r]=opt.h; return sh.r++; };
       sh.blank=()=>sh.r++;
       sh.merge=(r1,c1,r2,c2)=>sh.merges.push(ref(r1,c1)+":"+ref(r2,c2));
       sh.cols=w=>{ sh.widths=w; };
+      sh.chart=(xml,r1,c1,r2,c2)=>sh.charts.push({xml,r1,c1,r2,c2});
       sheets.push(sh); return sh;
     }
     function sheetXml(sh){
-      const nc=Math.max(1,...sh.rows.map(r=>r?r.length:0), sh.widths.length);
+      const nc=Math.max(1, sh.widths.length, ...Array.from(sh.rows,r=>r?r.length:0));
       let rows="";
       sh.rows.forEach((cells,r)=>{ if(!cells) return; let cx="";
         cells.forEach((c,ci)=>{ if(c==null) return; const o=(typeof c==="object"&&!(c instanceof Date))?c:{v:c}; const s=o.s||0, v=o.v, R=ref(r,ci);
@@ -1060,7 +1061,7 @@ const XL = (() => {
       const fr=sh.freeze; const pane=fr?`<pane${fr.c?` xSplit="${fr.c}"`:""}${fr.r?` ySplit="${fr.r}"`:""} topLeftCell="${ref(fr.r||0,fr.c||0)}" activePane="${fr.r&&fr.c?"bottomRight":fr.r?"bottomLeft":"topRight"}" state="frozen"/>`:"";
       const cols=sh.widths.length?`<cols>${sh.widths.map((w,i)=>`<col min="${i+1}" max="${i+1}" width="${w}" customWidth="1"/>`).join("")}</cols>`:"";
       return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheetPr><pageSetUpPr fitToPage="1"/></sheetPr><dimension ref="A1:${ref(Math.max(0,sh.rows.length-1),nc-1)}"/><sheetViews><sheetView workbookViewId="0" showGridLines="0"${sh===sheets[0]?' tabSelected="1"':""}>${pane}</sheetView></sheetViews><sheetFormatPr defaultRowHeight="15"/>${cols}<sheetData>${rows}</sheetData>${sh.filter?`<autoFilter ref="${sh.filter}"/>`:""}${sh.merges.length?`<mergeCells count="${sh.merges.length}">${sh.merges.map(m=>`<mergeCell ref="${m}"/>`).join("")}</mergeCells>`:""}<printOptions horizontalCentered="1"/><pageMargins left="0.4" right="0.4" top="0.5" bottom="0.5" header="0.3" footer="0.3"/><pageSetup paperSize="${sh.paper||9}" orientation="${sh.landscape?"landscape":"portrait"}" fitToWidth="1" fitToHeight="0"/><headerFooter><oddFooter>&amp;L&amp;8MGL PPC&amp;C&amp;8&amp;A&amp;R&amp;8Page &amp;P of &amp;N</oddFooter></headerFooter></worksheet>`;
+<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheetPr><pageSetUpPr fitToPage="1"/></sheetPr><dimension ref="A1:${ref(Math.max(0,sh.rows.length-1),nc-1)}"/><sheetViews><sheetView workbookViewId="0" showGridLines="0"${sh===sheets[0]?' tabSelected="1"':""}>${pane}</sheetView></sheetViews><sheetFormatPr defaultRowHeight="15"/>${cols}<sheetData>${rows}</sheetData>${sh.filter?`<autoFilter ref="${sh.filter}"/>`:""}${sh.merges.length?`<mergeCells count="${sh.merges.length}">${sh.merges.map(m=>`<mergeCell ref="${m}"/>`).join("")}</mergeCells>`:""}<printOptions horizontalCentered="1"/><pageMargins left="0.4" right="0.4" top="0.5" bottom="0.5" header="0.3" footer="0.3"/><pageSetup paperSize="${sh.paper||9}" orientation="${sh.landscape?"landscape":"portrait"}" fitToWidth="${sh.fitW}" fitToHeight="${sh.fitH}"/><headerFooter><oddFooter>&amp;L&amp;8MGL PPC&amp;C&amp;8&amp;A&amp;R&amp;8Page &amp;P of &amp;N</oddFooter></headerFooter>${sh.charts.length?'<drawing r:id="rId1"/>':""}</worksheet>`;
     }
     async function blob(){
       const z=new JSZip();
@@ -1073,13 +1074,24 @@ const XL = (() => {
 <cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><dc:title>MGL PPC report</dc:title><dc:creator>MGL PPC</dc:creator><dcterms:created xsi:type="dcterms:W3CDTF">${now}</dcterms:created></cp:coreProperties>`);
       z.file("docProps/app.xml",`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties"><Application>MGL PPC</Application></Properties>`);
-      const defs=sheets.map((s,i)=>s.printTitles!=null?`<definedName name="_xlnm.Print_Titles" localSheetId="${i}">'${s.name.replace(/'/g,"''")}'!$${s.printTitles[0]+1}:$${s.printTitles[1]+1}</definedName>`:"").join("")
+      const q=n=>"'"+n.replace(/'/g,"''")+"'"; const defs=sheets.map((s,i)=>(s.printTitles!=null||s.printCols!=null)?`<definedName name="_xlnm.Print_Titles" localSheetId="${i}">${[s.printCols!=null?`${q(s.name)}!$${colName(s.printCols[0])}:$${colName(s.printCols[1])}`:"",s.printTitles!=null?`${q(s.name)}!$${s.printTitles[0]+1}:$${s.printTitles[1]+1}`:""].filter(Boolean).join(",")}</definedName>`:"").join("")+ sheets.map((s,i)=>s.printArea?`<definedName name="_xlnm.Print_Area" localSheetId="${i}">${q(s.name)}!${s.printArea}</definedName>`:"").join("")
         + sheets.map((s,i)=>s.filter?`<definedName name="_xlnm._FilterDatabase" localSheetId="${i}" hidden="1">'${s.name.replace(/'/g,"''")}'!${s.filter.replace(/([A-Z]+)(\d+)/g,"$$$1$$$2")}</definedName>`:"").join("");
       z.file("xl/workbook.xml",`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><bookViews><workbookView activeTab="0"/></bookViews><sheets>${sheets.map((s,i)=>`<sheet name="${esc(s.name)}" sheetId="${i+1}" r:id="rId${i+1}"/>`).join("")}</sheets>${defs?`<definedNames>${defs}</definedNames>`:""}</workbook>`);
       z.file("xl/_rels/workbook.xml.rels",`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${sheets.map((s,i)=>`<Relationship Id="rId${i+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i+1}.xml"/>`).join("")}<Relationship Id="rId${sheets.length+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`);
       sheets.forEach((s,i)=>z.file(`xl/worksheets/sheet${i+1}.xml`,sheetXml(s)));
+      let dn=0, cn=0; const extraCT=[];
+      sheets.forEach((s,i)=>{ if(!s.charts.length) return; dn++;
+        z.file(`xl/worksheets/_rels/sheet${i+1}.xml.rels`,`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/drawing" Target="../drawings/drawing${dn}.xml"/></Relationships>`);
+        let anchors="", rels="";
+        s.charts.forEach((ch,k)=>{ cn++; z.file(`xl/charts/chart${cn}.xml`,ch.xml); extraCT.push(`<Override PartName="/xl/charts/chart${cn}.xml" ContentType="application/vnd.openxmlformats-officedocument.drawingml.chart+xml"/>`);
+          rels+=`<Relationship Id="rId${k+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/chart" Target="../charts/chart${cn}.xml"/>`;
+          anchors+=`<xdr:twoCellAnchor editAs="oneCell"><xdr:from><xdr:col>${ch.c1}</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>${ch.r1}</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:from><xdr:to><xdr:col>${ch.c2}</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>${ch.r2}</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:to><xdr:graphicFrame macro=""><xdr:nvGraphicFramePr><xdr:cNvPr id="${k+2}" name="Chart ${k+1}"/><xdr:cNvGraphicFramePr/></xdr:nvGraphicFramePr><xdr:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/></xdr:xfrm><a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/chart"><c:chart xmlns:c="http://schemas.openxmlformats.org/drawingml/2006/chart" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" r:id="rId${k+1}"/></a:graphicData></a:graphic></xdr:graphicFrame><xdr:clientData/></xdr:twoCellAnchor>`; });
+        z.file(`xl/drawings/drawing${dn}.xml`,`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<xdr:wsDr xmlns:xdr="http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main">${anchors}</xdr:wsDr>`);
+        z.file(`xl/drawings/_rels/drawing${dn}.xml.rels`,`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${rels}</Relationships>`);
+        extraCT.push(`<Override PartName="/xl/drawings/drawing${dn}.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/>`); });
+      if(extraCT.length){ const f=z.file("[Content_Types].xml"); const ct=await f.async("string"); z.file("[Content_Types].xml",ct.replace("</Types>",extraCT.join("")+"</Types>")); }
       z.file("xl/styles.xml",`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">${numFmts.length?`<numFmts count="${numFmts.length}">${numFmts.map(n=>`<numFmt numFmtId="${n.id}" formatCode="${esc(n.code)}"/>`).join("")}</numFmts>`:""}<fonts count="${fonts.length}">${fonts.join("")}</fonts><fills count="${fills.length}">${fills.join("")}</fills><borders count="${borders.length}">${borders.join("")}</borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="${xfs.length}">${xfs.join("")}</cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`);
       return z.generateAsync({type:"blob",mimeType:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",compression:"DEFLATE"});
@@ -1089,12 +1101,13 @@ const XL = (() => {
   /* house styles for MGL PPC reports */
   function kit(B){
     const line=["thin","D9DEE7"], dark=["medium","0F172A"];
-    const cell=(x)=>Object.assign({border:{l:line,r:line,t:line,b:line},align:{v:"center"}},x||{});
+    const cell=(x)=>{ const o=Object.assign({border:{l:line,r:line,t:line,b:line}},x||{}); o.align=Object.assign({v:"center"},(x&&x.align)||{}); return o; };
     const RS='[>=10000000]"₹"##\\,##\\,##\\,##0;[>=100000]"₹"##\\,##\\,##0;"₹"#,##0', INT='[>=10000000]##\\,##\\,##\\,##0;[>=100000]##\\,##\\,##0;#,##0', LK='#,##0.00;[Red]-#,##0.00', PC='0.0%';
     const S={
       title: B.style({font:{b:1,sz:16,color:"0F172A"}}),
       sub:   B.style({font:{sz:10,color:"475569"}}),
       note:  B.style({font:{i:1,sz:9,color:"64748B"}}),
+      noteW: B.style({font:{i:1,sz:9,color:"64748B"},align:{v:"top",wrap:1}}),
       h:     B.style({font:{b:1,sz:10,color:"FFFFFF"},fill:"0F172A",border:{l:["thin","334155"],r:["thin","334155"],t:["thin","334155"],b:["thin","334155"]},align:{h:"center",v:"center",wrap:1}}),
       h2:    B.style({font:{b:1,sz:10,color:"FFFFFF"},fill:"1E3A8A",border:{l:["thin","334155"],r:["thin","334155"],t:["thin","334155"],b:["thin","334155"]},align:{h:"center",v:"center",wrap:1}}),
       lineh: B.style({font:{b:1,sz:10,color:"FFFFFF"},fill:"334155",align:{v:"center",indent:1}}),
@@ -1120,7 +1133,28 @@ const XL = (() => {
     S.pcBand = f => f==null||!isFinite(f) ? S.dash : f>=1 ? S.pcGood : f<0.6 ? S.pcBad : S.pcWarn;
     return S;
   }
-  return { book, kit, colName, ref };
+  /* native Excel charts (DrawingML) */
+  function chart(o){
+    const tx=(sz,col,b)=>`<c:txPr><a:bodyPr/><a:lstStyle/><a:p><a:pPr><a:defRPr sz="${sz}"${b?' b="1"':""}><a:solidFill><a:srgbClr val="${col}"/></a:solidFill><a:latin typeface="Calibri"/></a:defRPr></a:pPr><a:endParaRPr lang="en-US"/></a:p></c:txPr>`;
+    const strC=(f,vals)=>`<c:strRef><c:f>${esc(f)}</c:f><c:strCache><c:ptCount val="${vals.length}"/>${vals.map((v,i)=>`<c:pt idx="${i}"><c:v>${esc(v)}</c:v></c:pt>`).join("")}</c:strCache></c:strRef>`;
+    const numC=(f,vals,fmt)=>`<c:numRef><c:f>${esc(f)}</c:f><c:numCache><c:formatCode>${esc(fmt||"General")}</c:formatCode><c:ptCount val="${vals.length}"/>${vals.map((v,i)=>v==null||!isFinite(v)?"":`<c:pt idx="${i}"><c:v>${v}</c:v></c:pt>`).join("")}</c:numCache></c:numRef>`;
+    let idx=0;
+    const ser=(sr,kind)=>{ const i=idx++;
+      const sp = kind==="bar" ? `<c:spPr><a:solidFill><a:srgbClr val="${sr.color}"/></a:solidFill><a:ln><a:noFill/></a:ln></c:spPr><c:invertIfNegative val="0"/>`
+        : sr.noLine ? `<c:spPr><a:ln w="28575"><a:noFill/></a:ln></c:spPr><c:marker><c:symbol val="dash"/><c:size val="${sr.msize||9}"/><c:spPr><a:solidFill><a:srgbClr val="${sr.color}"/></a:solidFill><a:ln w="9525"><a:solidFill><a:srgbClr val="${sr.color}"/></a:solidFill></a:ln></c:spPr></c:marker>`
+        : `<c:spPr><a:ln w="${sr.w||28575}" cap="rnd"><a:solidFill><a:srgbClr val="${sr.color}"/></a:solidFill>${sr.dash?'<a:prstDash val="dash"/>':""}<a:round/></a:ln></c:spPr><c:marker><c:symbol val="none"/></c:marker>`;
+      const dl = sr.labels ? `<c:dLbls><c:numFmt formatCode="${esc(sr.labelFmt||"General")}" sourceLinked="0"/><c:spPr><a:noFill/><a:ln><a:noFill/></a:ln></c:spPr>${tx(800,"334155",1)}<c:dLblPos val="outEnd"/><c:showLegendKey val="0"/><c:showVal val="1"/><c:showCatName val="0"/><c:showSerName val="0"/><c:showPercent val="0"/><c:showBubbleSize val="0"/></c:dLbls>` : "";
+      return `<c:ser><c:idx val="${i}"/><c:order val="${i}"/><c:tx><c:v>${esc(sr.name)}</c:v></c:tx>${sp}${dl}<c:cat>${strC(o.cats.ref,o.cats.vals)}</c:cat><c:val>${numC(sr.ref,sr.vals,o.fmt)}</c:val>${kind==="line"?'<c:smooth val="0"/>':""}</c:ser>`; };
+    const horiz=o.dir==="bar";
+    const groups=o.groups.map(g=> g.type==="bar"
+      ? `<c:barChart><c:barDir val="${horiz?"bar":"col"}"/><c:grouping val="clustered"/><c:varyColors val="0"/>${g.series.map(sr=>ser(sr,"bar")).join("")}<c:gapWidth val="${g.gap||60}"/><c:axId val="500"/><c:axId val="501"/></c:barChart>`
+      : `<c:lineChart><c:grouping val="standard"/><c:varyColors val="0"/>${g.series.map(sr=>ser(sr,"line")).join("")}<c:marker val="1"/><c:axId val="500"/><c:axId val="501"/></c:lineChart>`).join("");
+    const axLn=`<c:spPr><a:ln w="9525"><a:solidFill><a:srgbClr val="CBD5E1"/></a:solidFill></a:ln></c:spPr>`;
+    const catAx=`<c:catAx><c:axId val="500"/><c:scaling><c:orientation val="${o.reverse?"maxMin":"minMax"}"/></c:scaling><c:delete val="0"/><c:axPos val="${horiz?"l":"b"}"/><c:numFmt formatCode="General" sourceLinked="0"/><c:majorTickMark val="none"/><c:minorTickMark val="none"/><c:tickLblPos val="nextTo"/>${axLn}${tx(800,"475569")}<c:crossAx val="501"/><c:crosses val="autoZero"/><c:auto val="1"/><c:lblAlgn val="ctr"/><c:lblOffset val="100"/>${o.skip?`<c:tickLblSkip val="${o.skip}"/>`:""}<c:noMultiLvlLbl val="0"/></c:catAx>`;
+    const valAx=`<c:valAx><c:axId val="501"/><c:scaling><c:orientation val="minMax"/>${o.max!=null?`<c:max val="${o.max}"/>`:""}<c:min val="0"/></c:scaling><c:delete val="0"/><c:axPos val="${horiz?"b":"l"}"/><c:majorGridlines><c:spPr><a:ln w="6350"><a:solidFill><a:srgbClr val="E2E8F0"/></a:solidFill></a:ln></c:spPr></c:majorGridlines><c:numFmt formatCode="${esc(o.axFmt||"#,##0")}" sourceLinked="0"/><c:majorTickMark val="none"/><c:minorTickMark val="none"/><c:tickLblPos val="nextTo"/><c:spPr><a:ln><a:noFill/></a:ln></c:spPr>${tx(800,"64748B")}<c:crossAx val="500"/><c:crosses val="${o.reverse?"max":"autoZero"}"/><c:crossBetween val="between"/>${o.major?`<c:majorUnit val="${o.major}"/>`:""}</c:valAx>`;
+    return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<c:chartSpace xmlns:c="http://schemas.openxmlformats.org/drawingml/2006/chart" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><c:roundedCorners val="0"/><c:chart><c:title><c:tx><c:rich><a:bodyPr/><a:lstStyle/><a:p><a:pPr><a:defRPr sz="1200" b="1"/></a:pPr><a:r><a:rPr lang="en-US" sz="1200" b="1"><a:solidFill><a:srgbClr val="0F172A"/></a:solidFill><a:latin typeface="Calibri"/></a:rPr><a:t>${esc(o.title)}</a:t></a:r></a:p></c:rich></c:tx><c:overlay val="0"/></c:title><c:autoTitleDeleted val="0"/><c:plotArea><c:layout/>${groups}${catAx}${valAx}<c:spPr><a:noFill/><a:ln><a:noFill/></a:ln></c:spPr></c:plotArea>${o.legend===false?"":`<c:legend><c:legendPos val="t"/><c:overlay val="0"/>${tx(900,"334155")}</c:legend>`}<c:plotVisOnly val="1"/><c:dispBlanksAs val="gap"/></c:chart><c:spPr><a:solidFill><a:srgbClr val="FFFFFF"/></a:solidFill><a:ln w="9525"><a:solidFill><a:srgbClr val="E2E8F0"/></a:solidFill></a:ln></c:spPr><c:txPr><a:bodyPr/><a:lstStyle/><a:p><a:pPr><a:defRPr><a:latin typeface="Calibri"/></a:defRPr></a:pPr><a:endParaRPr lang="en-US"/></a:p></c:txPr></c:chartSpace>`;
+  }
+  return { book, kit, colName, ref, chart };
 })();
 
 </script>
@@ -1915,10 +1949,11 @@ let chResize=null; window.addEventListener("resize",()=>{ clearTimeout(chResize)
 /* ---------- Excel exports (management formatting) ---------- */
 const genStamp = () => new Date().toLocaleString("en-IN",{day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"});
 const fileStamp = () => { const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); };
-function headBlock(sh,S,N,title,sub){
-  sh.row([{v:title,s:S.title}],{h:26}); sh.merge(sh.r-1,0,sh.r-1,N-1);
-  sh.row([{v:sub,s:S.sub}]); sh.merge(sh.r-1,0,sh.r-1,N-1);
-  sh.row([{v:"Generated "+genStamp()+" · "+(plantName()==="Production Value Report"?"MGL PPC":"MGL PPC · "+plantName()),s:S.note}]); sh.merge(sh.r-1,0,sh.r-1,N-1);
+function headBlock(sh,S,N,title,sub,c0){
+  c0=c0||0; const at=(x)=>{ const r=[]; r[c0]=x; return r; };
+  sh.row(at({v:title,s:S.title}),{h:26}); sh.merge(sh.r-1,c0,sh.r-1,c0+N-1);
+  sh.row(at({v:sub,s:S.sub})); sh.merge(sh.r-1,c0,sh.r-1,c0+N-1);
+  sh.row(at({v:"Generated "+genStamp()+" · "+(plantName()==="Production Value Report"?"MGL PPC":"MGL PPC · "+plantName()),s:S.note})); sh.merge(sh.r-1,c0,sh.r-1,c0+N-1);
   sh.blank();
 }
 function kpiBlock(sh,S,items,N){
@@ -1980,20 +2015,27 @@ async function exportDailyXlsx(){
   const m=D.month; const secs=dSections(m); if(!secs.length){ toast("No daily data to export"); return; }
   const B=XL.book(), S=XL.kit(B); const asOf=(secs[0]||{}).asOf||"";
   const all=combineDays(secs), st=statsOf(all);
-  // Summary
-  const sh=B.sheet("Summary"); const N=9; sh.cols([26,15,15,15,15,12,15,13,13]);
-  headBlock(sh,S,N,"MGL PPC – Daily Target vs Achieved",`${monthName(m)} · Hard passing · values in ₹ lakh${asOf?" · as on "+asOf:""}`);
+  const subT=`${monthName(m)} · Hard passing · values in ₹ lakh${asOf?" · as on "+asOf:""}`;
+  const q=n=>"'"+n.replace(/'/g,"''")+"'";
+  const YL=d=>!d?"":(d.date&&/\.\d{1,2}$/.test(d.label)?d.label+"."+d.date.slice(0,4):d.label);
+  // ---- Summary (A4 portrait)
+  const sh=B.sheet("Summary"); const N=9; sh.cols([20,11,11,11,11,9,11,10,17]); sh.landscape=false;
+  headBlock(sh,S,N,"MGL PPC – Daily Target vs Achieved",subT);
   kpiBlock(sh,S,[{label:"ACHIEVED TILL DATE",v:st.A,s:S.kLk},{label:"TILL-DATE TARGET",v:st.TT,s:S.kLk},{label:"ACHD %",v:st.TT?st.A/st.TT:"–",s:S.kPc}],N);
-  kpiBlock(sh,S,[{label:"MONTH TARGET",v:st.T,s:S.kLk},{label:"ASKING RATE / DAY",v:st.ask==null?"Month complete":st.ask,s:st.ask==null?S.kTx:S.kLk},{label:"BEST DAY",v:st.best?`${fl(st.best.a)} L (${st.best.label})`:"–",s:S.kTx}],N);
+  kpiBlock(sh,S,[{label:"MONTH TARGET",v:st.T,s:S.kLk},{label:"ASKING RATE / DAY",v:st.ask==null?"Month complete":st.ask,s:st.ask==null?S.kTx:S.kLk},{label:"BEST DAY",v:st.best?`${fl(st.best.a)} L  ·  ${YL(st.best)}`:"–",s:S.kTx}],N);
   const hc=["Section","Month Target","Till-date Target","Achieved","Failure","Achd %","Asking / day","Best day","Best day date"];
-  const h=sh.row(hc.map(c=>({v:c,s:S.h})),{h:30}); sh.printTitles=[h,h];
-  secs.forEach(s=>{ const x=statsOf(s.days); sh.row([{v:s.name,s:S.txb},{v:x.T,s:S.lk},{v:x.TT,s:S.lk},{v:x.A,s:S.lk},{v:x.fail,s:S.lk},{v:x.TT?x.A/x.TT:null,s:S.pcBand(x.TT?x.A/x.TT:null)},x.ask==null?{v:"–",s:S.dash}:{v:x.ask,s:S.lk},x.best?{v:x.best.a,s:S.lk}:{v:"–",s:S.dash},{v:x.best?x.best.label:"–",s:x.best?S.txc:S.dash}]); });
-  sh.row([{v:"TOTAL",s:S.txbtot},{v:st.T,s:S.lktot},{v:st.TT,s:S.lktot},{v:st.A,s:S.lktot},{v:st.fail,s:S.lktot},{v:st.TT?st.A/st.TT:null,s:S.pctot},st.ask==null?{v:"–",s:S.dashtot}:{v:st.ask,s:S.lktot},st.best?{v:st.best.a,s:S.lktot}:{v:"–",s:S.dashtot},{v:st.best?st.best.label:"",s:S.txctot}],{h:20});
-  sh.blank(); sh.row([{v:"Achd % = achieved ÷ target for the days entered so far (green = met, amber = 60–99%, red = below 60%). Asking / day = balance of month target ÷ remaining working days.",s:S.note}]); sh.merge(sh.r-1,0,sh.r-1,N-1);
-  // Day-wise (same layout as the source sheet)
+  const h=sh.row(hc.map(c=>({v:c,s:S.h})),{h:32}); sh.printTitles=[h,h];
+  const secRow0=sh.r;
+  secs.forEach(s=>{ const x=statsOf(s.days); sh.row([{v:s.name,s:S.txb},{v:x.T,s:S.lk},{v:x.TT,s:S.lk},{v:x.A,s:S.lk},{v:x.fail,s:S.lk},{v:x.TT?x.A/x.TT:null,s:S.pcBand(x.TT?x.A/x.TT:null)},x.ask==null?{v:"–",s:S.dash}:{v:x.ask,s:S.lk},x.best?{v:x.best.a,s:S.lk}:{v:"–",s:S.dash},{v:x.best?YL(x.best):"–",s:x.best?S.txc:S.dash}],{h:18}); });
+  sh.row([{v:"TOTAL",s:S.txbtot},{v:st.T,s:S.lktot},{v:st.TT,s:S.lktot},{v:st.A,s:S.lktot},{v:st.fail,s:S.lktot},{v:st.TT?st.A/st.TT:null,s:S.pctot},st.ask==null?{v:"–",s:S.dashtot}:{v:st.ask,s:S.lktot},st.best?{v:st.best.a,s:S.lktot}:{v:"–",s:S.dashtot},{v:st.best?YL(st.best):"",s:S.txctot}],{h:22});
+  sh.blank(); sh.row([{v:"Achd % = achieved ÷ target for the days entered so far (green = met, amber = 60–99%, red = below 60%). Asking / day = balance of month target ÷ remaining working days.",s:S.noteW}],{h:28}); sh.merge(sh.r-1,0,sh.r-1,N-1);
+  // ---- Charts (A4 portrait, one page)
+  const cg=B.sheet("Charts"); cg.cols(Array(10).fill(9.6)); cg.landscape=false; cg.fitH=1;
+  headBlock(cg,S,10,"MGL PPC – Charts",subT);
+  // ---- Day-wise (A4 landscape, 2 pages wide, Date column repeats)
   const d=B.sheet("Day-wise"); const nS=secs.length, NC=1+nS*3+3+3;
-  d.cols([13,...Array(nS*3+6).fill(10.5)]); d.paper=8;
-  headBlock(d,S,Math.min(NC,12),"MGL PPC – Day-wise Target vs Achieved",`${monthName(m)} · Hard passing · values in ₹ lakh${asOf?" · as on "+asOf:""}`);
+  d.cols([15,...Array(nS*3+6).fill(10)]); d.fitW=2; d.fitH=1; d.printCols=[0,0];
+  headBlock(d,S,Math.min(NC-1,12),"MGL PPC – Day-wise Target vs Achieved",subT,1);
   const r1=[{v:"Date",s:S.h}], r2=[{v:null,s:S.h}];
   secs.forEach(s=>{ r1.push({v:s.name,s:S.h2},{v:null,s:S.h2},{v:null,s:S.h2}); r2.push({v:"Target",s:S.h},{v:"Achd.",s:S.h},{v:"Failure",s:S.h}); });
   r1.push({v:"TOTAL",s:S.h2},{v:null,s:S.h2},{v:null,s:S.h2},{v:"CUMULATIVE",s:S.h2},{v:null,s:S.h2},{v:null,s:S.h2});
@@ -2003,24 +2045,49 @@ async function exportDailyXlsx(){
   d.freeze={r:a2+1,c:1}; d.printTitles=[a1,a2];
   const byKey=secs.map(s=>{ const mp=new Map(); s.days.forEach(x=>mp.set(dKey(x),x)); return mp; });
   let cT=0,cA=0;
-  all.forEach(day=>{ const has=day.a!=null; const k=dKey(day); const row=[{v:day.label,s:has?S.txb:S.txPlan}];
+  all.forEach(day=>{ const has=day.a!=null; const k=dKey(day); const row=[{v:YL(day),s:has?S.txb:S.txPlan}];
     byKey.forEach(mp=>{ const x=mp.get(k)||{t:0,a:null}; const hv=x.a!=null; row.push({v:x.t,s:has?S.lk:S.lkPlan}, hv?{v:x.a,s:S.lk}:{v:null,s:S.lkPlan}, hv?{v:x.a-x.t,s:S.lk}:{v:null,s:S.lkPlan}); });
     if(has){ cT+=day.t; cA+=day.a; }
     row.push({v:day.t,s:has?S.lksub:S.lkPlan}, has?{v:day.a,s:S.lksub}:{v:null,s:S.lkPlan}, has?{v:day.a-day.t,s:S.lksub}:{v:null,s:S.lkPlan},
       has?{v:cT,s:S.lk}:{v:null,s:S.lkPlan}, has?{v:cA,s:S.lk}:{v:null,s:S.lkPlan}, has?{v:cT?cA/cT:null,s:S.pcBand(cT?cA/cT:null)}:{v:null,s:S.lkPlan});
-    d.row(row); });
+    d.row(row,{h:15}); });
   const tr=[{v:"TOTAL",s:S.txbtot}];
   secs.forEach(s=>{ const x=statsOf(s.days); tr.push({v:x.T,s:S.lktot},{v:x.A,s:S.lktot},{v:x.fail,s:S.lktot}); });
   tr.push({v:st.T,s:S.lktot},{v:st.A,s:S.lktot},{v:st.fail,s:S.lktot},{v:st.TT,s:S.lktot},{v:st.A,s:S.lktot},{v:st.TT?st.A/st.TT:null,s:S.pctot});
   d.row(tr,{h:20});
-  d.blank(); d.row([{v:"Grey rows = days still to come (target only). Failure = achieved − target (red when short).",s:S.note}]);
-  // Month comparison
-  const c=B.sheet("Month comparison"); c.cols([20,16,16,18,20,14,14]); c.landscape=false;
+  d.blank(); d.row([null,{v:"Grey rows = days still to come (target only). Failure = achieved − target (red when short).",s:S.note}]); d.merge(d.r-1,1,d.r-1,12);
+  // ---- Month comparison (A4 portrait)
+  const c=B.sheet("Month comparison"); c.cols([18,14,14,13,15,12,16]); c.landscape=false;
   const cut= st.lastDate ? +st.lastDate.slice(8) : 31;
   headBlock(c,S,7,"MGL PPC – Month comparison","All sections · hard passing · values in ₹ lakh");
-  const ch=c.row(["Month","Month Target","Achieved","% of month target",`Achd till day ${cut}`,"Best day","Best day date"].map(v=>({v,s:S.h})),{h:30});
+  c.row(["Month","Month Target","Achieved","% of month target",`Achd till day ${cut}`,"Best day","Best day date"].map(v=>({v,s:S.h})),{h:32});
   dMonths().forEach(mm=>{ const dd=combineDays(dSections(mm)); const x=statsOf(dd); const same=dd.filter(z=>z.a!=null && +z.date.slice(8)<=cut).reduce((a,z)=>a+z.a,0);
-    c.row([{v:monthName(mm),s:mm===m?S.txbsub:S.txb},{v:x.T,s:S.lk},{v:x.A,s:S.lk},{v:x.T?x.A/x.T:null,s:S.pcBand(x.T?x.A/x.T:null)},{v:same,s:S.lk},x.best?{v:x.best.a,s:S.lk}:{v:"–",s:S.dash},{v:x.best?x.best.label:"–",s:S.txc}]); });
+    c.row([{v:monthName(mm),s:mm===m?S.txbsub:S.txb},{v:x.T,s:S.lk},{v:x.A,s:S.lk},{v:x.T?x.A/x.T:null,s:S.pcBand(x.T?x.A/x.T:null)},{v:same,s:S.lk},x.best?{v:x.best.a,s:S.lk}:{v:"–",s:S.dash},{v:x.best?YL(x.best):"–",s:S.txc}],{h:18}); });
+  // ---- Chart data (the numbers behind the charts)
+  const cd=B.sheet("Chart data"); cd.cols([12,12,12,13,13,3,20,12]); cd.landscape=false;
+  headBlock(cd,S,8,"MGL PPC – Chart data",subT);
+  const dh=cd.row(["Date","Day target","Day achieved","Cumulative target","Cumulative achieved",null,"Section","Achd %"].map(v=>v==null?null:{v,s:S.h}),{h:32});
+  const lastA=all.reduce((k,z,i)=>z.a!=null?i:k,-1);
+  let ct=0, ca=0; const L=[],DT=[],DA=[],CT=[],CA=[];
+  all.forEach((z,i)=>{ ct+=z.t||0; if(z.a!=null) ca+=z.a; L.push(z.label); DT.push(z.t||0); DA.push(z.a); CT.push(ct); CA.push(i<=lastA?ca:null); });
+  const SN=[],SP=[]; secs.forEach(s=>{ const x=statsOf(s.days); SN.push(s.name); SP.push(x.TT?x.A/x.TT:null); });
+  const n=Math.max(all.length,secs.length);
+  for(let i=0;i<n;i++){ const row=[];
+    if(i<all.length) row.push({v:L[i],s:S.txc},{v:DT[i],s:S.lk},DA[i]==null?{v:null,s:S.lkPlan}:{v:DA[i],s:S.lk},{v:CT[i],s:S.lk},CA[i]==null?{v:null,s:S.lkPlan}:{v:CA[i],s:S.lk});
+    else row.push(null,null,null,null,null);
+    row.push(null); if(i<secs.length) row.push({v:SN[i],s:S.txb},{v:SP[i],s:S.pcBand(SP[i])});
+    cd.row(row,{h:16}); }
+  const R=(col,cnt)=>`${q(cd.name)}!$${col}$${dh+2}:$${col}$${dh+1+cnt}`;
+  const nd=all.length, ns=secs.length, maxP=Math.max(1.2,Math.ceil(Math.max(0,...SP.filter(v=>v!=null))*5+0.5)/5);
+  const C_A="EA580C", C_T="2563EB";
+  const g0=cg.r;
+  cg.chart(XL.chart({title:"Cumulative: achieved vs target (₹ lakh)",cats:{ref:R("A",nd),vals:L},axFmt:"#,##0",
+    groups:[{type:"line",series:[{name:"Achieved",ref:R("E",nd),vals:CA,color:C_A,w:31750},{name:"Target",ref:R("D",nd),vals:CT,color:C_T,dash:1,w:22225}]}]}), g0,0,g0+20,10);
+  cg.chart(XL.chart({title:"Day by day (₹ lakh)",cats:{ref:R("A",nd),vals:L},axFmt:"#,##0",
+    groups:[{type:"bar",gap:45,series:[{name:"Achieved",ref:R("C",nd),vals:DA,color:C_A}]},{type:"line",series:[{name:"Target",ref:R("B",nd),vals:DT,color:C_T,noLine:1,msize:8}]}]}), g0+21,0,g0+41,10);
+  cg.chart(XL.chart({title:"Achd % by section (achieved ÷ till-date target)",cats:{ref:R("G",ns),vals:SN},dir:"bar",reverse:1,axFmt:"0%",max:maxP,major:0.2,legend:false,
+    groups:[{type:"bar",gap:55,series:[{name:"Achd %",ref:R("H",ns),vals:SP,color:C_A,labels:1,labelFmt:"0.0%"}]}]}), g0+42,0,g0+42+Math.max(14,Math.round(ns*1.9)+4),10);
+  cg.printArea=`$A$1:$J$${g0+42+Math.max(14,Math.round(ns*1.9)+4)}`;
   save(`MGL-PPC-Daily-TA-${m}.xlsx`, await B.blob()); toast("Excel report downloaded");
 }
 $("xlRep").onclick = () => exportReportXlsx().catch(e=>toast("Export failed: "+(e.message||e)));
