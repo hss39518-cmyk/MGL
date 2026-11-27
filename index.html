@@ -360,7 +360,7 @@ tr.bad td{background:var(--bad-l);color:#fecaca}
 .sw{border-color:rgba(255,255,255,.3)}
 details{background:rgba(255,255,255,.04);border-color:var(--line)}
 summary{background:rgba(255,255,255,.05)}
-.bars .tg{background:rgba(254,215,170,.32)}
+.bars .tg,.legend i.tgsw{background:rgba(254,215,170,.32)!important}
 .drop{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.25);color:var(--ink2)}
 .drop:hover,.drop.hov{border-color:#60a5fa;background:rgba(59,130,246,.12)}
 .drop svg.i{color:#93c5fd}.drop b{color:#93c5fd}
@@ -726,7 +726,7 @@ footer{text-align:center;color:var(--mut);font-size:11.5px;padding:8px 0 30px}
       <p class="note" id="tgtNote"></p>
     </div>
     <div class="card"><h3>Value vs Target by Section</h3>
-      <div class="legend"><span><i style="background:var(--brand)"></i>Achieved</span><span><i style="background:#fed7aa"></i>Month target</span></div>
+      <div class="legend"><span><i style="background:var(--brand)"></i>Achieved</span><span><i class="tgsw" style="background:#fed7aa"></i><span id="rTgLeg">Month target</span></span></div>
       <div class="bars" id="bars"></div></div>
     <div class="card" style="display:none"><h3>Part-wise detail by section</h3><div id="detail"></div></div>
   </section>
@@ -1481,11 +1481,11 @@ function dailyReport(f){
   months.forEach(m=>dSections(m).forEach(s=>{ if(f.ln && s.name!==f.ln) return;
     if(!M.has(s.key)) M.set(s.key,{line:"Hard passing",name:s.name,order:s.order||0,n:0,ok:0,rej:0,val:0,rv:0,tq:0,tv:0,parts:new Map(),partList:[],nparts:0});
     const x=M.get(s.key);
-    (s.days||[]).forEach(d=>{ if(d.date>=f.from && d.date<=f.to && d.a!=null){ x.val+=d.a*1e5; x.n++; } if(f.month && m===f.month) x.tv+=(d.t||0)*1e5; }); }));
+    (s.days||[]).forEach(d=>{ if(d.date>=f.from && d.date<=f.to && d.a!=null){ x.val+=d.a*1e5; x.n++; } if(f.month ? m===f.month : (d.date>=f.from && d.date<=f.to && d.a!=null)) x.tv+=(d.t||0)*1e5; }); }));
   if(!M.size) return null;
   const secs=[...M.values()].sort((a,b)=>a.order-b.order);
   const T={n:0,ok:0,rej:0,val:0,rv:0,tq:0,tv:0,nparts:0}; secs.forEach(s=>{ T.n+=s.n; T.val+=s.val; T.tv+=s.tv; });
-  return { f, secs, lines:["Hard passing"], T, hasTarget: !!f.month && T.tv>0, source:"daily" };
+  return { f, secs, lines:["Hard passing"], T, hasTarget: T.tv>0, source:"daily", tgtLbl: f.month?"Month Target":"Target (these dates)" };
 }
 function computeReport(){
   const f=periodFilter();
@@ -1511,10 +1511,10 @@ function renderReport(){
   { const pf=periodFilter(); ensureRange(pf.from,pf.to); }
   $("rDayW").style.display=p==="day"?"":"none"; $("rMonW").style.display=p==="month"?"":"none";
   $("rFromW").style.display=$("rToW").style.display=p==="range"?"":"none";
-  const { f, secs, lines, T, hasTarget, source } = computeReport(); const isD = source==="daily";
-  $("rLabel").textContent=f.label; const upto = isD ? (()=>{ let last=""; monthsBetween(f.from,f.to).forEach(m=>dSections(m).forEach(s=>s.days.forEach(d=>{ if(d.a!=null && d.date>=f.from && d.date<=f.to && d.date>last) last=d.date; }))); return last; })() : "";
+  const { f, secs, lines, T, hasTarget, source, tgtLbl } = computeReport(); const isD = source==="daily";
+  $("rLabel").textContent=f.label; if($("rTgLeg")) $("rTgLeg").textContent = isD && !f.month ? "Target (these dates)" : "Month target"; const upto = isD ? (()=>{ let last=""; monthsBetween(f.from,f.to).forEach(m=>dSections(m).forEach(s=>s.days.forEach(d=>{ if(d.a!=null && d.date>=f.from && d.date<=f.to && d.date>last) last=d.date; }))); return last; })() : "";
   $("rLabelHead").textContent=f.label+" · Hard passing"+(upto?" · data up to "+fmtD(upto):"");
-  $("tgtNote").textContent = isD ? "Achieved and target come from the Hard Section Production Value sheet (hard passing). Achievement here is against the full month target; the Daily T&A tab shows it against the target till date." : hasTarget ? "Target = month target value from the uploaded line sheets." : (f.month ? "No targets for this month yet. Upload the line sheets to add them." : "Targets are monthly, so they show when Period is set to Month.");
+  $("tgtNote").textContent = isD ? "Achieved and target come from the Hard Section Production Value sheet (hard passing). "+(f.month?"Achievement here is against the full month target; the Daily T&A tab shows it against the target till date.":"Target here is the total of the daily targets for the dates chosen that have figures entered (days still to come are left out).") : hasTarget ? "Target = month target value from the uploaded line sheets." : (f.month ? "No targets for this month yet. Upload the line sheets to add them." : "Targets are monthly, so they show when Period is set to Month.");
   const best = secs.filter(s=>s.val>0).sort((a,b)=>b.val-a.val)[0];
   $("kpis").innerHTML = `<div class="kpi accent"><div class="k">Production Value</div><div class="v">${cr(T.val)}</div><div class="s">${inr(T.val)}</div></div>
     <div class="kpi"><div class="k">Target Value</div><div class="v">${hasTarget?cr(T.tv):"–"}</div><div class="s">${hasTarget?inr(T.tv):"Shown in monthly view"}</div></div>
@@ -1523,7 +1523,7 @@ function renderReport(){
     <div class="kpi"><div class="k">Top Section</div><div class="v" style="font-size:15px;line-height:1.3">${best?esc(best.name):"–"}</div><div class="s">${best?esc(best.line)+" · "+cr(best.val):""}</div></div>`;
   const tv = v => hasTarget ? inr(v) : "–";
   let html="";
-  $("secHead").innerHTML = isD ? `<tr><th>Line</th><th class="n">Achieved ₹</th><th class="n">Month Target ₹</th><th class="n">Achv %</th><th class="n">Balance ₹</th><th class="n">Share</th></tr>`
+  $("secHead").innerHTML = isD ? `<tr><th>Line</th><th class="n">Achieved ₹</th><th class="n">${tgtLbl||"Month Target"} ₹</th><th class="n">Achv %</th><th class="n">Balance ₹</th><th class="n">Share</th></tr>`
     : `<tr><th>Section</th><th class="n">Parts</th><th class="n">OK Qty</th><th class="n">Prod. Value ₹</th><th class="n">Target ₹</th><th class="n">Achv %</th><th class="n">Rej Qty</th><th class="n">Rej. Value ₹</th><th class="n">Share</th></tr>`;
   if(isD){
     const pill=(a,b)=>hasTarget&&b?`<span class="pill ${a>=b?"g":a/b<0.4?"r":"w"}">${pct(a,b)}</span>`:"–";
@@ -1967,10 +1967,10 @@ function kpiBlock(sh,S,items,N){
 }
 async function exportReportXlsx(){
   if(typeof JSZip==="undefined"){ toast("Excel export needs the internet once. Reload and try again."); return; }
-  const { f, secs, lines, T, hasTarget, source } = computeReport(); const isD = source==="daily";
+  const { f, secs, lines, T, hasTarget, source, tgtLbl } = computeReport(); const isD = source==="daily";
   if(!secs.length){ toast("Nothing to export for this period"); return; }
   const B=XL.book(), S=XL.kit(B), sh=B.sheet("Summary");
-  const cols = isD ? ["Line","Achieved (₹)","Month Target (₹)","Achievement %","Balance to target (₹)","Share of total"]
+  const cols = isD ? ["Line","Achieved (₹)",(tgtLbl||"Month Target")+" (₹)","Achievement %","Balance to target (₹)","Share of total"]
                    : ["Line","Section","Parts produced","Qty (incl. OB)","Production Value (₹)","Target Value (₹)","Achievement %","Balance to target (₹)","Share of total"];
   const N=cols.length; sh.cols(isD?[28,20,20,16,22,14]:[16,32,12,15,20,20,15,20,13]);
   headBlock(sh,S,N,"MGL PPC – Section-wise Production Value",
@@ -1996,7 +1996,7 @@ async function exportReportXlsx(){
     sh.row([{v:"",s:S.txtot},{v:"GRAND TOTAL",s:S.txbtot},{v:T.nparts,s:S.inttot},{v:T.ok,s:S.inttot},{v:T.val,s:S.rstot},hasTarget?{v:T.tv,s:S.rstot}:{v:"–",s:S.dashtot},{v:pc(T.val,T.tv),s:S.pctot},hasTarget?{v:bal(T.val,T.tv),s:S.rstot}:{v:"–",s:S.dashtot},{v:1,s:S.pctot}],{h:20});
   }
   sh.blank();
-  sh.row([{v:hasTarget?"Achievement %: green = target met, amber = 60–99%, red = below 60%. Targets are full-month targets.":"Targets are monthly; choose Period = Month to include them.",s:S.note}]); sh.merge(sh.r-1,0,sh.r-1,N-1);
+  sh.row([{v:hasTarget?"Achievement %: green = target met, amber = 60–99%, red = below 60%. "+(f.month?"Targets are full-month targets.":"Target = total of the daily targets for the dates chosen that have figures entered."):"Targets are monthly; choose Period = Month to include them.",s:S.note}]); sh.merge(sh.r-1,0,sh.r-1,N-1);
   // part detail
   const parts=[]; secs.forEach(s=>(s.partList||[]).forEach(p=>parts.push({l:s.line,sec:s.name,...p})));
   if(parts.length){
