@@ -245,6 +245,18 @@ body:not([data-role="admin"]) .a-only{display:none!important}
 .dlc span{font-size:10.5px;color:var(--mut);margin-top:6px;text-align:center;line-height:1.2;height:2.4em;overflow:hidden;max-width:100%;word-break:break-word}
 .dlc b{font-size:12px;margin-bottom:6px}
 .dlc.sel .col{outline:2px solid #111827;outline-offset:2px}
+.dgo{cursor:pointer;transition:transform .15s ease, box-shadow .15s ease}
+.dgo:hover{transform:translateY(-2px);box-shadow:0 2px 4px rgba(15,23,42,.05),0 14px 36px rgba(15,23,42,.10)}
+.dgo:active{transform:scale(.99)}
+.dmore{position:absolute;top:20px;right:22px;font-size:12px;font-weight:600;color:var(--mut);display:inline-flex;align-items:center;gap:4px;pointer-events:none}
+.dhot .dmore,.dtop .dmore{color:rgba(255,255,255,.85)}
+.dli,.dhot .rw,.dlc,.drings>div{cursor:pointer;-webkit-tap-highlight-color:transparent}
+.dhot .rw{border-radius:10px;padding:4px 6px;margin:0 -6px}
+.dhot .rw:hover{background:rgba(255,255,255,.14)}
+.dlc:hover .col{filter:brightness(.97);outline:2px solid #cbd5e1;outline-offset:2px}
+.drings>div{border-radius:12px;padding:6px 0}
+.drings>div:hover{background:var(--soft)}
+.dtip{position:fixed;z-index:70;pointer-events:none;background:#0f172a;color:#fff;border-radius:10px;padding:8px 11px;font-size:12px;line-height:1.5;box-shadow:0 8px 24px rgba(15,23,42,.25);display:none;white-space:nowrap}
 footer{text-align:center;color:var(--mut);font-size:11.5px;padding:8px 0 30px}
 @media (max-width:700px){
   .appbar .sub{display:none}
@@ -330,7 +342,7 @@ footer{text-align:center;color:var(--mut);font-size:11.5px;padding:8px 0 30px}
     </div>
     <div id="dbEmpty" class="card empty" style="display:none">No data yet. Upload the <b>Hard Section Production Value</b> workbook on the Upload tab.</div>
     <div class="dgrid" id="dbGrid">
-      <div class="dcard dhero">
+      <div class="dcard dhero dgo" data-go="all" role="button" tabindex="0"><span class="dmore">View details →</span>
         <div class="dk" id="dbHeroK">Month target</div>
         <div class="dt" id="dbHeroT">Close the month <em>stronger</em></div>
         <div class="big"><span id="dbAch">₹0</span><span class="dpill" id="dbAchPill"></span></div>
@@ -343,7 +355,7 @@ footer{text-align:center;color:var(--mut);font-size:11.5px;padding:8px 0 30px}
           <div class="dtile"><small>Best day</small><b id="dbBest">–</b><small id="dbBestS"></small></div>
         </div>
       </div>
-      <div class="dcard dtoday">
+      <div class="dcard dtoday"><span class="dmore">Tap a day or line →</span>
         <div class="dk">Day-wise</div>
         <div class="dt">Today on the floor</div>
         <div class="dstrip" id="dbStrip"></div>
@@ -351,18 +363,18 @@ footer{text-align:center;color:var(--mut);font-size:11.5px;padding:8px 0 30px}
         <div class="dlist" id="dbDayList"></div>
         <div class="drings" id="dbRings"></div>
       </div>
-      <div class="dcard dlines">
+      <div class="dcard dlines"><span class="dmore">Tap a bar →</span>
         <div class="dk">Achieved % of plan to date</div>
         <div class="dt">Lines by achievement</div>
         <div class="dlinesch" id="dbLines"></div>
       </div>
-      <div class="dcard dhot">
+      <div class="dcard dhot"><span class="dmore">Tap a line →</span>
         <div class="dk">Behind plan</div>
         <div class="num" id="dbHotN">0<small>lines</small></div>
         <div class="dk" id="dbHotS"></div>
         <div class="row3" id="dbHotList"></div>
       </div>
-      <div class="dcard dtop">
+      <div class="dcard dtop dgo" id="dbTopCard" role="button" tabindex="0"><span class="dmore">View details →</span>
         <div class="dk">Top line this month</div>
         <div class="name" id="dbTopN">–</div>
         <div class="val" id="dbTopV">–</div>
@@ -631,6 +643,7 @@ footer{text-align:center;color:var(--mut);font-size:11.5px;padding:8px 0 30px}
 </div></div>
 <div class="toast" id="toast"></div>
 <div class="ctip" id="ctip"></div>
+<div class="dtip" id="dtip"></div>
 
 <script>
 /* Target-vs-Achievement sheet reader: values + cell fill colours (works in browser and node). Needs JSZip. */
@@ -1433,25 +1446,40 @@ function renderDash(){
     $("dbDayLbl").textContent=new Date(sel.date+"T00:00:00").toLocaleDateString("en-IN",{weekday:"long",day:"numeric",month:"short"})+(sel.label.includes("/")?" ("+sel.label+")":"");
     $("dbDayA").textContent = sel.a==null ? "Plan" : fl(sel.a)+" L"; $("dbDayT").textContent = "of "+fl(sel.t)+" L";
     $("dbDayList").innerHTML = secs.map(s=>{ const x=s.days.find(d=>dKey(d)===DB.day)||{t:0,a:null}; const f=x.a!=null&&x.t?x.a/x.t:null; const b=x.a==null?"na":band(f);
-      return `<div class="dli"><div class="ic ${b}">${x.a==null?"–":Math.round((f||0)*100)}</div><div class="nm">${esc(s.name)}<small>Target ${fl(x.t)} L</small></div><div class="v">${x.a==null?"–":fl(x.a)+" L"}<small style="color:${x.a==null?"var(--mut)":x.a>=x.t?"#047857":"#b91c1c"}">${x.a==null?"not yet":(x.a>=x.t?"+":"")+fl(x.a-x.t)}</small></div></div>`; }).join("");
+      return `<div class="dli" data-sec="${esc(s.key)}" title="Open ${esc(s.name)} day by day"><div class="ic ${b}">${x.a==null?"–":Math.round((f||0)*100)}</div><div class="nm">${esc(s.name)}<small>Target ${fl(x.t)} L</small></div><div class="v">${x.a==null?"–":fl(x.a)+" L"}<small style="color:${x.a==null?"var(--mut)":x.a>=x.t?"#047857":"#b91c1c"}">${x.a==null?"not yet":(x.a>=x.t?"+":"")+fl(x.a-x.t)}</small></div></div>`; }).join("");
   }
   // rings: lines on track / close / behind (plan to date)
   const lp=secs.map(s=>{ const x=statsOf(s.days); return { s, x, f: x.TT? x.A/x.TT : null }; });
   const nOk=lp.filter(z=>z.f!=null&&z.f>=1).length, nMid=lp.filter(z=>z.f!=null&&z.f>=0.6&&z.f<1).length, nBad=lp.filter(z=>z.f!=null&&z.f<0.6).length, nT=lp.length||1;
-  $("dbRings").innerHTML=`<div>${ring(nOk/nT,"#10b981")}<b>${nOk}</b> on track</div><div>${ring(nMid/nT,"#f59e0b")}<b>${nMid}</b> close (60–99%)</div><div>${ring(nBad/nT,"#f2674f")}<b>${nBad}</b> behind (&lt;60%)</div>`;
+  $("dbRings").innerHTML=`<div data-go="report">${ring(nOk/nT,"#10b981")}<b>${nOk}</b> on track</div><div data-go="report">${ring(nMid/nT,"#f59e0b")}<b>${nMid}</b> close (60–99%)</div><div data-go="report">${ring(nBad/nT,"#f2674f")}<b>${nBad}</b> behind (&lt;60%)</div>`;
   // lines chart
   const mxp=Math.max(1.2,...lp.map(z=>z.f||0));
-  $("dbLines").innerHTML=lp.map(z=>`<div class="dlc" title="${esc(z.s.name)}: ${fl(z.x.A)} L of ${fl(z.x.TT)} L plan to date"><b>${z.f==null?"–":Math.round(z.f*100)+"%"}</b><div class="col"><div class="p100" style="bottom:${(100/mxp).toFixed(1)}%"></div><i class="${band(z.f)}" style="height:${(Math.min(z.f||0,mxp)/mxp*100).toFixed(1)}%"></i></div><span>${esc(z.s.name)}</span></div>`).join("");
+  $("dbLines").innerHTML=lp.map(z=>`<div class="dlc" data-sec="${esc(z.s.key)}" data-tip="<b>${esc(z.s.name)}</b><br>Achieved: <b>${fl(z.x.A)} L</b><br>Plan to date: ${fl(z.x.TT)} L<br>Month target: ${fl(z.x.T)} L<br><span style=&quot;opacity:.75&quot;>Tap to open</span>"><b>${z.f==null?"–":Math.round(z.f*100)+"%"}</b><div class="col"><div class="p100" style="bottom:${(100/mxp).toFixed(1)}%"></div><i class="${band(z.f)}" style="height:${(Math.min(z.f||0,mxp)/mxp*100).toFixed(1)}%"></i></div><span>${esc(z.s.name)}</span></div>`).join("");
   // hot card: behind plan (<100%)
   const behind=lp.filter(z=>z.f!=null&&z.f<1).sort((a,b)=>a.f-b.f);
   $("dbHotN").innerHTML=`${behind.length}<small>of ${lp.length} lines</small>`;
   $("dbHotS").textContent= behind.length ? `Together short by ${crS(behind.reduce((a,z)=>a+(z.x.TT-z.x.A),0))} against plan to date` : "Every line is on plan 🎉";
-  $("dbHotList").innerHTML=behind.slice(0,3).map(z=>`<div class="rw"><div><span>${esc(z.s.name)}</span><b>${(z.f*100).toFixed(1)}%</b></div><div class="tr"><i style="width:${Math.min(100,z.f*100).toFixed(1)}%"></i></div></div>`).join("");
+  $("dbHotList").innerHTML=behind.slice(0,3).map(z=>`<div class="rw" data-sec="${esc(z.s.key)}" title="Open ${esc(z.s.name)} day by day"><div><span>${esc(z.s.name)}</span><b>${(z.f*100).toFixed(1)}%</b></div><div class="tr"><i style="width:${Math.min(100,z.f*100).toFixed(1)}%"></i></div></div>`).join("");
   // top line
   const top=lp.filter(z=>z.f!=null).sort((a,b)=>b.f-a.f)[0];
+  $("dbTopCard").dataset.sec = top ? top.s.key : "";
   if(top){ $("dbTopN").textContent=top.s.name; $("dbTopV").textContent=(top.f*100).toFixed(1)+"%"; $("dbTopS").textContent=`${crS(top.x.A)} of ${crS(top.x.TT)} plan to date · month target ${crS(top.x.T)}`; $("dbTopBar").style.width=Math.min(100,top.f*100).toFixed(1)+"%"; }
 }
 $("dbMonth").addEventListener("change",()=>{ DB.month=$("dbMonth").value; DB.day=""; renderDash(); });
+function openDaily(secKey){ D.month=DB.month; D.sec=secKey||""; hideDTip(); location.hash="daily"; window.scrollTo(0,0); }
+function openReport(){ $("rPeriod").value="month"; $("rMonth").value=DB.month; $("rLine").value=""; hideDTip(); location.hash="report"; window.scrollTo(0,0); }
+$("v-dash").addEventListener("click", ev => {
+  if(ev.target.closest(".dday")) return;            // day strip handled separately
+  const sec = ev.target.closest("[data-sec]");
+  if(sec && sec.dataset.sec){ openDaily(sec.dataset.sec); return; }
+  const go = ev.target.closest("[data-go]");
+  if(go){ if(go.dataset.go==="report") openReport(); else openDaily(""); }
+});
+$("v-dash").addEventListener("keydown", ev => { if((ev.key==="Enter"||ev.key===" ") && ev.target.classList.contains("dgo")){ ev.preventDefault(); ev.target.click(); } });
+const dtip=()=>$("dtip"); function hideDTip(){ dtip().style.display="none"; }
+$("dbLines").addEventListener("pointermove", ev => { const c=ev.target.closest(".dlc"); if(!c){ hideDTip(); return; } const t=dtip(); t.innerHTML=c.dataset.tip; t.style.display="block";
+  const w=t.offsetWidth,h=t.offsetHeight; let x=ev.clientX+14,y=ev.clientY-h-12; if(x+w>innerWidth-8) x=ev.clientX-w-14; if(y<8) y=ev.clientY+16; t.style.left=x+"px"; t.style.top=y+"px"; });
+$("dbLines").addEventListener("pointerleave", hideDTip);
 $("dbStrip").addEventListener("click",ev=>{ const b=ev.target.closest(".dday"); if(!b) return; DB.day=b.dataset.k; renderDash(); });
 
 /* ---------- daily target vs achieved ---------- */
