@@ -626,7 +626,14 @@ footer{text-align:center;color:var(--mut);font-size:11.5px;padding:8px 0 30px}
 <div class="gate" id="gate"><div class="gbox">
   <img class="logo" src="icon-192.png" alt="MGL PPC">
   <h2 id="gTitle">Sign in</h2><p class="note" id="gSub">MGL PPC · Production Planning &amp; Control</p>
-  <div id="gLoading" class="note" style="margin-top:14px">Connecting…</div>
+  <div id="gLoading" style="margin-top:14px">
+    <div class="note" id="gLoadMsg">Connecting…</div>
+    <div id="gNet" hidden>
+      <p class="err" style="margin:10px 0 6px">Can't reach the database from this network.</p>
+      <p class="note" style="margin:0">Your login is fine, but this connection is blocking the app's data. Try mobile data or another Wi-Fi, or ask IT to allow <b>firestore.googleapis.com</b>.</p>
+      <div class="row" style="margin-top:12px"><button class="btn" type="button" id="gRetry">Try again</button><button class="btn ghost" type="button" id="gNetOut">Sign out</button></div>
+    </div>
+  </div>
   <form id="loginForm" hidden autocomplete="on">
     <div><label>Employee code or email</label><input id="lgId" autocapitalize="off" autocomplete="username" required></div>
     <div><label>Password</label><input id="lgPw" type="password" autocomplete="current-password" required></div>
@@ -1032,14 +1039,14 @@ function gate(mode){
   $("setupForm").hidden = mode!=="setup";
   $("gBlocked").hidden = mode!=="blocked";
   $("gCfg").hidden = mode!=="config";
-  $("gTitle").textContent = mode==="blocked" ? "Access pending" : "Sign in";
+  $("gTitle").textContent = mode==="blocked" ? "Access pending" : (mode==="loading" && auth && auth.currentUser) ? "Connecting" : "Sign in";
 }
 async function loadConfig(){
   try{ const r=await fetch("/__/firebase/init.json",{cache:"no-store"}); if(r.ok){ const j=await r.json(); if(j && j.apiKey) return j; } }catch(e){}
   const c=window.FIREBASE_CONFIG; if(c && c.apiKey && !/PASTE/i.test(c.apiKey)) return c;
   return null;
 }
-let profUnsub=null;
+let profUnsub=null, netTimer=null;
 /* data types people can be allowed to upload. Add new ones here (e.g. forging) and they appear as tick boxes. */
 const MODULES=[{ key:"hard", name:"Hard Section Production Value", note:"Daily target vs achieved, 8 lines" }];
 const ROLE_LABEL={ admin:"Admin", editor:"Can upload", viewer:"View only", disabled:"Disabled" };
@@ -1065,7 +1072,9 @@ async function start(){
   CFG = await loadConfig();
   if(!CFG){ gate("config"); setConn("Not connected", false); return; }
   fbApp = initializeApp(CFG); auth = getAuth(fbApp);
-  try{ db = initializeFirestore(fbApp,{ localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }) }); }catch(e){ db = getFirestore(fbApp); }
+  // auto-detect long polling: gets through office firewalls/proxies that block Firestore's streaming connection
+  try{ db = initializeFirestore(fbApp,{ localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }), experimentalAutoDetectLongPolling: true }); }
+  catch(e){ try{ db = initializeFirestore(fbApp,{ experimentalAutoDetectLongPolling: true }); }catch(e2){ db = getFirestore(fbApp); } }
   onAuthStateChanged(auth, async u => {
     if(profUnsub){ profUnsub(); profUnsub=null; }
     stopAll(); S.profile=null;
@@ -1075,14 +1084,20 @@ async function start(){
       return;
     }
     gate("loading");
-    profUnsub = onSnapshot(doc(db,"users",u.uid), snap => {
+    $("gLoadMsg").textContent="Connecting to the database…"; $("gNet").hidden=true;
+    clearTimeout(netTimer); netTimer=setTimeout(()=>{ if(!S.profile && !$("gLoading").hidden){ $("gLoadMsg").textContent=""; $("gNet").hidden=false; } }, 20000);
+    profUnsub = onSnapshot(doc(db,"users",u.uid), { includeMetadataChanges:true }, snap => {
+      const fromCache = !!(snap.metadata && snap.metadata.fromCache);
       const p = snap.exists() ? snap.data() : null;
       const was = S.profile && S.profile.role;
-      if(!p || !["admin","editor","viewer"].includes(p.role)){ S.profile=null; stopAll(); gate("blocked"); return; }
+      if(!p || !["admin","editor","viewer"].includes(p.role)){
+        if(fromCache && !S.profile) return;            // not confirmed by the server yet: keep waiting, don't say "access pending"
+        clearTimeout(netTimer); S.profile=null; stopAll(); gate("blocked"); return; }
+      clearTimeout(netTimer);
       S.profile = p;
       if(was!==p.role){ stopAll(); applyRole(); startData(); } else applyRole();
       gate("none"); renderAll();
-    }, err => { gate("blocked"); });
+    }, err => { clearTimeout(netTimer); if(err && err.code==="permission-denied") gate("blocked"); else { gate("loading"); $("gLoadMsg").textContent=""; $("gNet").hidden=false; } });
   });
 }
 $("loginForm").addEventListener("submit", async ev => { ev.preventDefault(); $("lgErr").textContent=""; $("lgBtn").disabled=true;
@@ -1099,6 +1114,8 @@ $("setupForm").addEventListener("submit", async ev => { ev.preventDefault(); $("
   }catch(e){ $("suErr").textContent = e.code==="permission-denied" ? "An admin already exists. Sign in instead, or ask the admin for an account." : authMsg(e); if(auth.currentUser && e.code==="permission-denied") await signOut(auth); }
   $("suBtn").disabled=false; });
 $("gOut").onclick = () => signOut(auth);
+$("gRetry").onclick = () => location.reload();
+$("gNetOut").onclick = () => signOut(auth);
 $("purgeLines").onclick = async () => {
   $("purgeMsg").textContent="Checking…";
   try{
