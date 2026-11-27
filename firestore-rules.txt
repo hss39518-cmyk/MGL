@@ -6,30 +6,43 @@ service cloud.firestore {
     function role() {
       return signedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid)) ? profile().role : 'none';
     }
-    function canRead()  { return role() in ['admin', 'editor', 'viewer']; }
-    function canWrite() { return role() in ['admin', 'editor']; }
-    function isAdmin()  { return role() == 'admin'; }
+    function canRead() { return role() in ['admin', 'editor', 'viewer']; }
+    function isAdmin() { return role() == 'admin'; }
+    // Upload right for one data type: admins always; "Can upload" users only for the types ticked for them.
+    function canUpload(k) {
+      return isAdmin() || (role() == 'editor' && profile().get('perms', {}).get(k, false) == true);
+    }
 
-    // Production data
-    match /entries/{id} { allow read: if canRead(); allow write: if canWrite(); }
-    match /targets/{id} { allow read: if canRead(); allow write: if canWrite(); }
-    match /config/{id}  { allow read: if canRead(); allow write: if canWrite(); }
+    // Settings (config/main) are admin-only. Hard Section months are stored as config/daily-YYYY-MM-<line>.
+    match /config/{id} {
+      allow read: if canRead();
+      allow write: if isAdmin() || (id.matches('daily-.*') && canUpload('hard'));
+    }
 
-    // Who set the app up (first admin). Can be created once, never changed.
+    // Future data types (e.g. forging plan vs achievement) live under modules/<type>/...
+    match /modules/{mod}/{rest=**} {
+      allow read: if canRead();
+      allow write: if canUpload(mod);
+    }
+
+    // Old line-sheet data: readable, only the admin can change or delete it.
+    match /entries/{id} { allow read: if canRead(); allow write: if isAdmin(); }
+    match /targets/{id} { allow read: if canRead(); allow write: if isAdmin(); }
+
+    // Who set the app up (first admin). Created once, never changed.
     match /meta/owner {
       allow read: if true;
       allow create: if signedIn() && request.resource.data.uid == request.auth.uid;
     }
 
-    // User profiles and roles
+    // People and their access. Only the admin can add, change or remove.
     match /users/{uid} {
       allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
       allow create: if isAdmin() || (
         request.auth.uid == uid
         && request.resource.data.role == 'admin'
         && !exists(/databases/$(database)/documents/meta/owner)
-        && getAfter(/databases/$(database)/documents/meta/owner).data.uid == uid
-      );
+        && getAfter(/databases/$(database)/documents/meta/owner).data.uid == uid);
       allow update, delete: if isAdmin();
     }
   }

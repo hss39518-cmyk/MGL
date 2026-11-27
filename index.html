@@ -146,6 +146,11 @@ tr.dup td{color:var(--mut)}
 .acct-item:hover{background:var(--line2)}
 .acct-item.out{border-top:1px solid var(--line)}
 body[data-role="viewer"] .w-only{display:none!important}
+body[data-canup="0"] .up-only{display:none!important}
+.perms{display:flex;flex-wrap:wrap;gap:8px 16px}
+.perms label,.permcell label{display:inline-flex;align-items:center;gap:7px;text-transform:none;letter-spacing:0;font-size:13px;font-weight:500;color:var(--ink);margin:0;cursor:pointer}
+.perms input,.permcell input{width:16px;height:16px;accent-color:#ea580c}
+.permcell label.off{color:var(--mut);cursor:default}
 body:not([data-role="admin"]) .a-only{display:none!important}
 .charts2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 @media (max-width:900px){.charts2{grid-template-columns:1fr}}
@@ -163,8 +168,86 @@ body:not([data-role="admin"]) .a-only{display:none!important}
 .clegend span{display:inline-flex;align-items:center;gap:6px}
 .clegend i{display:inline-block;width:14px;height:3px;border-radius:2px}
 .clegend i.dash{background:repeating-linear-gradient(90deg,var(--c) 0 5px,transparent 5px 8px)!important}
+
+/* ---------- dashboard ---------- */
+#v-dash{--coral:#f2674f;--coral-d:#d9472f;--soft:#f6f6f8}
+.dgreet{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin:4px 0 18px}
+.dgreet small{display:block;color:var(--mut);font-size:12.5px;margin-bottom:4px}
+.dgreet h2{margin:0;font-size:24px;font-weight:700;letter-spacing:-.3px}
+.dgreet select{width:auto;height:38px;border-radius:999px;padding:0 14px;background:#fff}
+.dgrid{display:grid;grid-template-columns:1.25fr 1fr 1fr;grid-template-areas:"hero hero today" "lines hot today" "lines top today";gap:18px}
+@media (max-width:1050px){.dgrid{grid-template-columns:1fr 1fr;grid-template-areas:"hero hero" "today today" "lines lines" "hot top"}}
+@media (max-width:640px){.dgrid{grid-template-columns:1fr;grid-template-areas:"hero" "today" "hot" "lines" "top"}}
+.dcard{background:#fff;border-radius:24px;padding:22px;box-shadow:0 1px 2px rgba(15,23,42,.04),0 8px 30px rgba(15,23,42,.06);position:relative;min-width:0}
+.dk{font-size:12px;color:var(--mut);font-weight:500}
+.dt{font-size:18px;font-weight:600;letter-spacing:-.2px;margin:4px 0 0}
+.dt em{font-style:normal;color:var(--coral)}
+.dhero .big{font-size:46px;font-weight:700;letter-spacing:-1.5px;margin:10px 0 2px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.dpill{font-size:12px;font-weight:600;padding:4px 10px;border-radius:999px;background:#ecfdf5;color:#047857;letter-spacing:0}
+.dpill.w{background:#fff7ed;color:#c2410c}.dpill.r{background:#fef2f2;color:#b91c1c}
+.dbar{position:relative;height:12px;border-radius:999px;margin:34px 0 10px;background:repeating-linear-gradient(135deg,#eceef2 0 6px,#f7f8fa 6px 12px)}
+.dbar .fill{position:absolute;inset:0 auto 0 0;border-radius:999px;background:linear-gradient(90deg,#f59e7f,var(--coral))}
+.dbar .mark{position:absolute;top:-8px;bottom:-8px;width:2px;background:#0f172a;border-radius:2px}
+.dbar .mark span{position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);background:#0f172a;color:#fff;font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;white-space:nowrap}
+.dbarlbl{display:flex;justify-content:space-between;font-size:11.5px;color:var(--mut)}
+.dtiles{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px}
+@media (max-width:640px){.dtiles{grid-template-columns:1fr 1fr}}
+.dtile{background:var(--soft);border-radius:16px;padding:12px 14px}
+.dtile b{display:block;font-size:19px;font-weight:700;margin-top:3px;letter-spacing:-.3px}
+.dtile small{font-size:11.5px;color:var(--mut)}
+.dhot{background:linear-gradient(160deg,#f7866f,var(--coral) 55%,#e9553c);color:#fff}
+.dhot .dk{color:rgba(255,255,255,.85)}
+.dhot .num{font-size:64px;font-weight:300;line-height:1;margin:14px 0 4px;letter-spacing:-2px}
+.dhot .num small{font-size:14px;font-weight:500;letter-spacing:0;margin-left:6px;opacity:.9}
+.dhot .row3{margin-top:14px;display:grid;gap:10px}
+.dhot .rw{font-size:12px}
+.dhot .rw div{display:flex;justify-content:space-between;margin-bottom:4px}
+.dhot .tr{height:5px;border-radius:9px;background:rgba(255,255,255,.3);overflow:hidden}
+.dhot .tr i{display:block;height:100%;background:#fff;border-radius:9px}
+.dtop{background:#111827;color:#fff}
+.dtop .dk{color:#9ca3af}
+.dtop .name{font-size:22px;font-weight:600;margin:10px 0 2px}
+.dtop .val{font-size:30px;font-weight:700;letter-spacing:-.6px}
+.dtop .sub{color:#9ca3af;font-size:12.5px;margin-top:4px}
+.dtop .tr{height:6px;border-radius:9px;background:#374151;margin-top:14px;overflow:hidden}
+.dtop .tr i{display:block;height:100%;background:var(--coral);border-radius:9px}
+.dtoday{grid-area:today}.dhero{grid-area:hero}.dlines{grid-area:lines}.dhot{grid-area:hot}.dtop{grid-area:top}
+.dstrip{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 8px;margin:12px -2px 6px;scrollbar-width:none}
+.dstrip::-webkit-scrollbar{display:none}
+.dday{flex:none;width:50px;border-radius:16px;background:var(--soft);border:0;padding:8px 0;cursor:pointer;text-align:center;color:var(--ink)}
+.dday small{display:block;font-size:10.5px;color:var(--mut)}
+.dday b{display:block;font-size:16px;margin-top:2px}
+.dday i{display:block;width:6px;height:6px;border-radius:50%;margin:5px auto 0;background:#cbd5e1}
+.dday.ok i{background:#10b981}.dday.mid i{background:#f59e0b}.dday.bad i{background:var(--coral)}
+.dday.on{background:#111827;color:#fff}.dday.on small{color:#9ca3af}
+.dday.plan{opacity:.55}
+.dsum{display:flex;justify-content:space-between;align-items:baseline;margin:8px 0 6px;font-size:13px;color:var(--mut)}
+.dsum b{font-size:20px;color:var(--ink)}
+.dlist{display:grid;gap:2px}
+.dli{display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:center;padding:8px 4px;border-radius:12px}
+.dli:hover{background:var(--soft)}
+.dli .ic{width:28px;height:28px;border-radius:9px;display:grid;place-items:center;font-size:11px;font-weight:700}
+.dli .ic.ok{background:#ecfdf5;color:#047857}.dli .ic.mid{background:#fff7ed;color:#c2410c}.dli .ic.bad{background:#fef2f2;color:#b91c1c}.dli .ic.na{background:var(--soft);color:var(--mut)}
+.dli .nm{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dli .nm small{display:block;font-weight:400;color:var(--mut);font-size:11.5px}
+.dli .v{text-align:right;font-size:13px;font-weight:600;font-variant-numeric:tabular-nums}
+.dli .v small{display:block;font-weight:500;font-size:11.5px}
+.drings{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line2);text-align:center}
+.drings div{font-size:11.5px;color:var(--mut)}
+.drings svg{display:block;margin:0 auto 4px}
+.dlines{display:flex;flex-direction:column}
+.dlinesch{display:flex;align-items:flex-end;gap:10px;flex:1;min-height:210px;margin-top:22px;padding-bottom:4px}
+.dlc{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;height:100%;cursor:default}
+.dlc .col{flex:1;width:100%;max-width:46px;border-radius:14px;position:relative;background:repeating-linear-gradient(135deg,#eceef2 0 6px,#f7f8fa 6px 12px);overflow:hidden}
+.dlc .col i{position:absolute;left:0;right:0;bottom:0;border-radius:14px;background:#e5e7eb}
+.dlc .col i.ok{background:#10b981}.dlc .col i.mid{background:#fbbf6a}.dlc .col i.bad{background:var(--coral)}
+.dlc .col .p100{position:absolute;left:0;right:0;border-top:2px dashed #0f172a;opacity:.55}
+.dlc span{font-size:10.5px;color:var(--mut);margin-top:6px;text-align:center;line-height:1.2;height:2.4em;overflow:hidden;max-width:100%;word-break:break-word}
+.dlc b{font-size:12px;margin-bottom:6px}
+.dlc.sel .col{outline:2px solid #111827;outline-offset:2px}
 footer{text-align:center;color:var(--mut);font-size:11.5px;padding:8px 0 30px}
 @media (max-width:700px){
+  .appbar .sub{display:none}
   main{padding:0 12px;margin-top:14px}
   .meta-r{display:none}
   nav.tabs a{padding:12px 11px;font-size:13px}
@@ -194,9 +277,10 @@ footer{text-align:center;color:var(--mut);font-size:11.5px;padding:8px 0 30px}
   </div>
 </div></div>
 <nav class="tabs"><div class="wrap">
+  <a href="#dash" data-v="dash"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="2"/><rect x="14" y="3" width="7" height="5" rx="2"/><rect x="14" y="12" width="7" height="9" rx="2"/><rect x="3" y="16" width="7" height="5" rx="2"/></svg>Dashboard</a>
   <a href="#report" data-v="report"><svg class="i" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>Report</a>
   <a href="#daily" data-v="daily"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M8 14h2M14 14h2M8 18h2"/></svg>Daily T&amp;A</a>
-  <a href="#upload" data-v="upload" class="w-only"><svg class="i" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></svg>Upload</a>
+  <a href="#upload" data-v="upload" class="up-only"><svg class="i" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></svg>Upload</a>
   <a href="#setup" data-v="setup"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Setup</a>
 </div></nav>
 <main>
@@ -235,6 +319,56 @@ footer{text-align:center;color:var(--mut);font-size:11.5px;padding:8px 0 30px}
         <thead><tr><th>Line · Section</th><th>Part</th><th class="n">OK</th><th class="n">Rej</th><th class="n">Rate</th><th class="n">Value ₹</th><th></th></tr></thead>
         <tbody id="dayRows"></tbody>
       </table></div>
+    </div>
+  </section>
+
+  <!-- DASHBOARD -->
+  <section class="view" id="v-dash">
+    <div class="dgreet">
+      <div><small id="dbDate"></small><h2 id="dbHello">Hello 👋</h2></div>
+      <select id="dbMonth" aria-label="Month"></select>
+    </div>
+    <div id="dbEmpty" class="card empty" style="display:none">No data yet. Upload the <b>Hard Section Production Value</b> workbook on the Upload tab.</div>
+    <div class="dgrid" id="dbGrid">
+      <div class="dcard dhero">
+        <div class="dk" id="dbHeroK">Month target</div>
+        <div class="dt" id="dbHeroT">Close the month <em>stronger</em></div>
+        <div class="big"><span id="dbAch">₹0</span><span class="dpill" id="dbAchPill"></span></div>
+        <div class="dk" id="dbAchSub"></div>
+        <div class="dbar"><div class="fill" id="dbFill"></div><div class="mark" id="dbMark"><span id="dbMarkLbl"></span></div></div>
+        <div class="dbarlbl"><span>₹0</span><span id="dbTgtLbl"></span></div>
+        <div class="dtiles">
+          <div class="dtile"><small>Plan to date</small><b id="dbPlan">–</b><small id="dbPlanS"></small></div>
+          <div class="dtile"><small>Asking rate / day</small><b id="dbAsk">–</b><small id="dbAskS"></small></div>
+          <div class="dtile"><small>Best day</small><b id="dbBest">–</b><small id="dbBestS"></small></div>
+        </div>
+      </div>
+      <div class="dcard dtoday">
+        <div class="dk">Day-wise</div>
+        <div class="dt">Today on the floor</div>
+        <div class="dstrip" id="dbStrip"></div>
+        <div class="dsum"><span id="dbDayLbl"></span><span><b id="dbDayA">–</b> <span id="dbDayT"></span></span></div>
+        <div class="dlist" id="dbDayList"></div>
+        <div class="drings" id="dbRings"></div>
+      </div>
+      <div class="dcard dlines">
+        <div class="dk">Achieved % of plan to date</div>
+        <div class="dt">Lines by achievement</div>
+        <div class="dlinesch" id="dbLines"></div>
+      </div>
+      <div class="dcard dhot">
+        <div class="dk">Behind plan</div>
+        <div class="num" id="dbHotN">0<small>lines</small></div>
+        <div class="dk" id="dbHotS"></div>
+        <div class="row3" id="dbHotList"></div>
+      </div>
+      <div class="dcard dtop">
+        <div class="dk">Top line this month</div>
+        <div class="name" id="dbTopN">–</div>
+        <div class="val" id="dbTopV">–</div>
+        <div class="sub" id="dbTopS"></div>
+        <div class="tr"><i id="dbTopBar"></i></div>
+      </div>
     </div>
   </section>
 
@@ -409,18 +543,20 @@ footer{text-align:center;color:var(--mut);font-size:11.5px;padding:8px 0 30px}
 
   <!-- SETUP -->
   <section class="view" id="v-setup">
-    <div class="pagehead"><div><h2>Setup</h2><p>Users, your account, plant details, lines &amp; sections.</p></div></div>
+    <div class="pagehead"><div><h2>Setup</h2><p>Users &amp; access, your account and plant details.</p></div></div>
     <div class="card a-only">
-      <h3>Users</h3>
-      <p class="note" style="margin-top:-6px">Colleagues sign in with their employee code (or email) and password. <b>Viewer</b> sees reports; <b>Editor</b> can also upload and enter data; <b>Admin</b> can also manage users and settings.</p>
+      <h3>Users &amp; access</h3>
+      <p class="note" style="margin-top:-6px">Everyone signs in with their employee code (or email) and password.
+        <b>View only</b>: see reports and export to Excel. <b>Can upload</b>: also upload/replace the data types you tick. <b>Admin</b>: everything, including users and settings.</p>
       <div class="grid">
         <div><label>Name</label><input id="nuName" placeholder="e.g. Manish Kumar"></div>
         <div><label>Employee code or email</label><input id="nuLogin" placeholder="e.g. 10452" autocapitalize="off"></div>
         <div><label>Password (min 6)</label><input id="nuPass" type="text" autocomplete="new-password"></div>
-        <div><label>Role</label><select id="nuRole"><option value="viewer">Viewer</option><option value="editor" selected>Editor</option><option value="admin">Admin</option></select></div>
+        <div><label>Access</label><select id="nuRole"><option value="viewer" selected>View only</option><option value="editor">Can upload</option><option value="admin">Admin (full access)</option></select></div>
       </div>
-      <div class="row" style="margin-top:10px"><button class="btn" id="nuAdd" type="button">Add user</button><span class="note" id="nuMsg"></span></div>
-      <div class="tw" style="margin-top:12px"><table><thead><tr><th>Name</th><th>Login</th><th>Role</th></tr></thead><tbody id="userRows"></tbody></table></div>
+      <div id="nuPermsW" style="margin-top:12px;display:none"><label>Can upload</label><div class="perms" id="nuPerms"></div></div>
+      <div class="row" style="margin-top:12px"><button class="btn" id="nuAdd" type="button">Add user</button><span class="note" id="nuMsg"></span></div>
+      <div class="tw" style="margin-top:14px"><table><thead><tr><th>Name</th><th>Login</th><th>Access</th><th>Can upload</th></tr></thead><tbody id="userRows"></tbody></table></div>
     </div>
     <div class="card">
       <h3>My account</h3>
@@ -430,7 +566,7 @@ footer{text-align:center;color:var(--mut);font-size:11.5px;padding:8px 0 30px}
       </div>
       <div class="row" style="margin-top:10px"><button class="btn ghost" id="pwBtn" type="button">Change password</button><span class="note" id="pwMsg"></span></div>
     </div>
-    <div class="card w-only">
+    <div class="card a-only">
       <h3>Plant details</h3>
       <div class="grid">
         <div><label>Company / Plant name</label><input id="sName" placeholder="e.g. Milestone Gear Ltd"></div>
@@ -884,12 +1020,17 @@ async function loadConfig(){
   return null;
 }
 let profUnsub=null;
+/* data types people can be allowed to upload. Add new ones here (e.g. forging) and they appear as tick boxes. */
+const MODULES=[{ key:"hard", name:"Hard Section Production Value", note:"Daily target vs achieved, 8 lines" }];
+const ROLE_LABEL={ admin:"Admin", editor:"Can upload", viewer:"View only", disabled:"Disabled" };
+const canUp = k => { const p=S.profile||{}; return p.role==="admin" || (p.role==="editor" && !!(p.perms||{})[k]); };
 function applyRole(){
   const r=(S.profile&&S.profile.role)||"viewer"; document.body.dataset.role=r;
+  document.body.dataset.canup = MODULES.some(m=>canUp(m.key)) ? "1" : "0";
   const nm = S.profile ? (S.profile.name||loginLabel(auth.currentUser&&auth.currentUser.email)||"") : "";
   const ini = (nm.trim()[0]||"?").toUpperCase();
   $("avatarBtn").textContent=ini; $("acctAv").textContent=ini; $("avatarBtn").title=nm?`${nm} (${r})`:"Account";
-  $("acctName").textContent=nm; $("acctLogin").textContent = S.profile ? "Employee code: "+(S.profile.login||loginLabel(auth.currentUser&&auth.currentUser.email)) : ""; $("acctRole").textContent=r;
+  $("acctName").textContent=nm; $("acctLogin").textContent = S.profile ? "Employee code: "+(S.profile.login||loginLabel(auth.currentUser&&auth.currentUser.email)) : ""; $("acctRole").textContent=ROLE_LABEL[r]||r;
   route();
 }
 function startData(){
@@ -919,7 +1060,7 @@ async function start(){
       const was = S.profile && S.profile.role;
       if(!p || !["admin","editor","viewer"].includes(p.role)){ S.profile=null; stopAll(); gate("blocked"); return; }
       S.profile = p;
-      if(was!==p.role){ stopAll(); applyRole(); startData(); }
+      if(was!==p.role){ stopAll(); applyRole(); startData(); } else applyRole();
       gate("none"); renderAll();
     }, err => { gate("blocked"); });
   });
@@ -965,11 +1106,23 @@ window.addEventListener("offline", ()=>{ $("localBanner").style.display="block";
 /* ---------- users (admin) ---------- */
 function renderUsers(){
   const me = auth && auth.currentUser && auth.currentUser.uid;
-  const rows = S.users.slice().sort((a,b)=>String(a.name).localeCompare(String(b.name)));
-  $("userRows").innerHTML = rows.map(u=>`<tr><td><b>${esc(u.name||"")}</b>${u.uid===me?' <span class="pill">you</span>':""}</td><td>${esc(u.login||loginLabel(u.email))}</td><td><select data-uid="${esc(u.uid)}" style="width:150px;height:32px;padding:4px 8px" ${u.uid===me?"disabled":""}>${["admin","editor","viewer","disabled"].map(r=>`<option value="${r}" ${u.role===r?"selected":""}>${r[0].toUpperCase()+r.slice(1)}</option>`).join("")}</select></td></tr>`).join("") || `<tr><td colspan="3" class="empty">No users yet.</td></tr>`;
+  const rows = S.users.slice().sort((a,b)=>(a.role==="admin"?0:1)-(b.role==="admin"?0:1) || String(a.name).localeCompare(String(b.name)));
+  $("userRows").innerHTML = rows.map(u=>{
+    const sel = `<select data-uid="${esc(u.uid)}" data-kind="role" style="width:150px;height:32px;padding:4px 8px" ${u.uid===me?"disabled title=\"You can't change your own access\"":""}>${["admin","editor","viewer","disabled"].map(r=>`<option value="${r}" ${u.role===r?"selected":""}>${ROLE_LABEL[r]}</option>`).join("")}</select>`;
+    const perms = u.role==="admin" ? `<span class="note">Everything</span>` : u.role!=="editor" ? `<span class="note">–</span>`
+      : `<div class="permcell perms">${MODULES.map(m=>`<label title="${esc(m.note)}"><input type="checkbox" data-uid="${esc(u.uid)}" data-kind="perm" data-k="${m.key}" ${(u.perms||{})[m.key]?"checked":""}>${esc(m.name)}</label>`).join("")}</div>${MODULES.some(m=>(u.perms||{})[m.key])?"":'<div class="note" style="color:var(--warn)">Nothing ticked: can only view</div>'}`;
+    return `<tr><td><b>${esc(u.name||"")}</b>${u.uid===me?' <span class="pill">you</span>':""}</td><td>${esc(u.login||loginLabel(u.email))}</td><td>${sel}</td><td>${perms}</td></tr>`; }).join("") || `<tr><td colspan="4" class="empty">No users yet.</td></tr>`;
 }
-$("userRows").addEventListener("change", async ev => { const uid=ev.target.dataset.uid; if(!uid) return;
-  try{ await updateDoc(doc(db,"users",uid),{ role: ev.target.value }); toast("Role updated"); }catch(e){ toast(authMsg(e)); } });
+function renderNewUserPerms(){
+  $("nuPermsW").style.display = $("nuRole").value==="editor" ? "" : "none";
+  if(!$("nuPerms").children.length) $("nuPerms").innerHTML = MODULES.map(m=>`<label title="${esc(m.note)}"><input type="checkbox" data-k="${m.key}" checked>${esc(m.name)}</label>`).join("");
+}
+$("nuRole").addEventListener("change", renderNewUserPerms); renderNewUserPerms();
+$("userRows").addEventListener("change", async ev => { const t=ev.target, uid=t.dataset.uid; if(!uid) return;
+  try{
+    if(t.dataset.kind==="role"){ await updateDoc(doc(db,"users",uid),{ role: t.value }); toast("Access updated"); }
+    else if(t.dataset.kind==="perm"){ await updateDoc(doc(db,"users",uid),{ ["perms."+t.dataset.k]: t.checked }); toast(t.checked?"Upload allowed":"Upload removed"); }
+  }catch(e){ toast(authMsg(e)); renderUsers(); } });
 $("nuAdd").onclick = async () => {
   const name=$("nuName").value.trim(), login=$("nuLogin").value.trim(), pw=$("nuPass").value, role=$("nuRole").value;
   if(!name||!login){ $("nuMsg").textContent="Enter a name and employee code."; return; }
@@ -980,7 +1133,8 @@ $("nuAdd").onclick = async () => {
     sec = initializeApp(CFG, "add-"+Date.now()); const sa=getAuth(sec);
     const cred = await createUserWithEmailAndPassword(sa, toEmail(login), pw);
     await signOut(sa);
-    await setDoc(doc(db,"users",cred.user.uid),{ name, login, email:toEmail(login), role, createdAt:Date.now() });
+    const perms={}; if(role==="editor") $("nuPerms").querySelectorAll("input[data-k]").forEach(c=>{ perms[c.dataset.k]=c.checked; });
+    await setDoc(doc(db,"users",cred.user.uid),{ name, login, email:toEmail(login), role, perms, createdAt:Date.now() });
     $("nuMsg").textContent=`Added ${name}. They sign in with “${login}” and the password you set.`; $("nuName").value=$("nuLogin").value=$("nuPass").value="";
   }catch(e){ $("nuMsg").textContent=authMsg(e); }
   if(sec) try{ await deleteApp(sec); }catch(e){}
@@ -993,11 +1147,11 @@ $("pwBtn").onclick = async () => {
 };
 
 /* ---------- routing ---------- */
-const VIEWS=["report","daily","upload","setup"];
-function route(){ const h=(location.hash||"").slice(1); let v=VIEWS.includes(h)?h:"report"; if(document.body.dataset.role==="viewer" && (v==="upload"||v==="entry")) v="report";
+const VIEWS=["dash","report","daily","upload","setup"];
+function route(){ const h=(location.hash||"").slice(1); let v=VIEWS.includes(h)?h:"dash"; if((document.body.dataset.role==="viewer" || document.body.dataset.canup==="0") && (v==="upload"||v==="entry")) v="report";
   VIEWS.forEach(x=>{ $("v-"+x).classList.toggle("on",x===v); });
   document.querySelectorAll("nav.tabs a").forEach(a=>a.classList.toggle("on",a.dataset.v===v));
-  if (v==="report") renderReport(); if (v==="daily") renderDaily(); }
+  if (v==="report") renderReport(); if (v==="daily") renderDaily(); if (v==="dash") renderDash(); }
 window.addEventListener("hashchange", route);
 
 /* ---------- entry ---------- */
@@ -1236,6 +1390,70 @@ $("tvaImport").onclick=async()=>{
 };
 
 
+
+/* ---------- dashboard ---------- */
+const DB={ month:"", day:"" };
+const band = f => f==null ? "na" : f>=1 ? "ok" : f>=0.6 ? "mid" : "bad";
+function ring(f, color){ const r=22, c=2*Math.PI*r, v=Math.max(0,Math.min(1,f||0));
+  return `<svg width="56" height="56" viewBox="0 0 56 56"><circle cx="28" cy="28" r="${r}" fill="none" stroke="#eef0f3" stroke-width="6"/><circle cx="28" cy="28" r="${r}" fill="none" stroke="${color}" stroke-width="6" stroke-linecap="round" stroke-dasharray="${(c*v).toFixed(1)} ${c.toFixed(1)}" transform="rotate(-90 28 28)"/></svg>`; }
+const crS = n => n==null ? "–" : cr(n*1e5).replace(" Cr"," Cr").replace(" L"," L");
+function renderDash(){
+  const months=dMonths();
+  const now=new Date(), h=now.getHours();
+  const first=((S.profile&&S.profile.name)||"").trim().split(/\s+/)[0]||"";
+  $("dbHello").textContent=(h<12?"Good morning":h<17?"Good afternoon":"Good evening")+(first?", "+first:"")+" 👋";
+  $("dbEmpty").style.display=months.length?"none":""; $("dbGrid").style.display=months.length?"":"none";
+  if(!months.length){ $("dbDate").textContent=now.toLocaleDateString("en-IN",{weekday:"long",day:"numeric",month:"long"}); $("dbMonth").innerHTML=""; return; }
+  if(!months.includes(DB.month)) DB.month=months[0];
+  $("dbMonth").innerHTML=months.map(m=>`<option value="${m}" ${m===DB.month?"selected":""}>${monthName(m)}</option>`).join("");
+  const secs=dSections(DB.month), days=combineDays(secs), st=statsOf(days);
+  const mname=monthName(DB.month).split(" ")[0];
+  $("dbDate").textContent=now.toLocaleDateString("en-IN",{weekday:"long",day:"numeric",month:"long"})+(st.lastDate?" · data up to "+fmtD(st.lastDate):"");
+  // hero
+  const fullPct = st.T ? st.A/st.T : 0, planPct = st.T ? st.TT/st.T : 0, ach = st.TT ? st.A/st.TT : null;
+  $("dbHeroK").textContent=`Month target ${crS(st.T)} · ${monthName(DB.month)}`;
+  $("dbHeroT").innerHTML = st.ask==null ? `${esc(mname)} <em>closed</em>` : `Close ${esc(mname)} <em>stronger</em>`;
+  $("dbAch").textContent=crS(st.A);
+  $("dbAchPill").textContent = ach==null ? "" : (ach*100).toFixed(1)+"% of plan to date"; $("dbAchPill").className="dpill "+(ach>=1?"":ach>=0.6?"w":"r");
+  $("dbAchSub").textContent=`Achieved till date · ${(fullPct*100).toFixed(1)}% of the month target`;
+  $("dbFill").style.width=(Math.min(1,fullPct)*100).toFixed(1)+"%";
+  $("dbMark").style.left=`calc(${(Math.min(1,planPct)*100).toFixed(1)}% - 1px)`; $("dbMarkLbl").textContent="Plan to date "+crS(st.TT);
+  $("dbTgtLbl").textContent="Target "+crS(st.T);
+  $("dbPlan").textContent=crS(st.TT); $("dbPlanS").textContent=`Short by ${crS(Math.max(0,st.TT-st.A))}`;
+  $("dbAsk").textContent=st.ask==null?"Done":crS(st.ask); $("dbAskS").textContent=st.ask==null?"Month complete":`${st.remDays.toFixed(1)} working days left`;
+  $("dbBest").textContent=st.best?crS(st.best.a):"–"; $("dbBestS").textContent=st.best?st.best.label:"";
+  // day strip
+  const withA=days.filter(d=>d.a!=null);
+  if(!days.some(d=>dKey(d)===DB.day)) DB.day = withA.length ? dKey(withA[withA.length-1]) : (days[0]?dKey(days[0]):"");
+  const wd=d=>new Date(d.date+"T00:00:00").toLocaleDateString("en-IN",{weekday:"short"});
+  $("dbStrip").innerHTML=days.map(d=>{ const f=d.a!=null&&d.t?d.a/d.t:null; return `<button class="dday ${d.a==null?"plan":band(f)} ${dKey(d)===DB.day?"on":""}" data-k="${esc(dKey(d))}" title="${esc(d.label)}"><small>${wd(d)}</small><b>${esc(d.label.split(".")[0].split("/").pop())}</b><i></i></button>`; }).join("");
+  const sel=days.find(d=>dKey(d)===DB.day);
+  setTimeout(()=>{ const b=$("dbStrip").querySelector(".on"); if(b) b.scrollIntoView({block:"nearest",inline:"center"}); },0);
+  if(sel){
+    $("dbDayLbl").textContent=new Date(sel.date+"T00:00:00").toLocaleDateString("en-IN",{weekday:"long",day:"numeric",month:"short"})+(sel.label.includes("/")?" ("+sel.label+")":"");
+    $("dbDayA").textContent = sel.a==null ? "Plan" : fl(sel.a)+" L"; $("dbDayT").textContent = "of "+fl(sel.t)+" L";
+    $("dbDayList").innerHTML = secs.map(s=>{ const x=s.days.find(d=>dKey(d)===DB.day)||{t:0,a:null}; const f=x.a!=null&&x.t?x.a/x.t:null; const b=x.a==null?"na":band(f);
+      return `<div class="dli"><div class="ic ${b}">${x.a==null?"–":Math.round((f||0)*100)}</div><div class="nm">${esc(s.name)}<small>Target ${fl(x.t)} L</small></div><div class="v">${x.a==null?"–":fl(x.a)+" L"}<small style="color:${x.a==null?"var(--mut)":x.a>=x.t?"#047857":"#b91c1c"}">${x.a==null?"not yet":(x.a>=x.t?"+":"")+fl(x.a-x.t)}</small></div></div>`; }).join("");
+  }
+  // rings: lines on track / close / behind (plan to date)
+  const lp=secs.map(s=>{ const x=statsOf(s.days); return { s, x, f: x.TT? x.A/x.TT : null }; });
+  const nOk=lp.filter(z=>z.f!=null&&z.f>=1).length, nMid=lp.filter(z=>z.f!=null&&z.f>=0.6&&z.f<1).length, nBad=lp.filter(z=>z.f!=null&&z.f<0.6).length, nT=lp.length||1;
+  $("dbRings").innerHTML=`<div>${ring(nOk/nT,"#10b981")}<b>${nOk}</b> on track</div><div>${ring(nMid/nT,"#f59e0b")}<b>${nMid}</b> close (60–99%)</div><div>${ring(nBad/nT,"#f2674f")}<b>${nBad}</b> behind (&lt;60%)</div>`;
+  // lines chart
+  const mxp=Math.max(1.2,...lp.map(z=>z.f||0));
+  $("dbLines").innerHTML=lp.map(z=>`<div class="dlc" title="${esc(z.s.name)}: ${fl(z.x.A)} L of ${fl(z.x.TT)} L plan to date"><b>${z.f==null?"–":Math.round(z.f*100)+"%"}</b><div class="col"><div class="p100" style="bottom:${(100/mxp).toFixed(1)}%"></div><i class="${band(z.f)}" style="height:${(Math.min(z.f||0,mxp)/mxp*100).toFixed(1)}%"></i></div><span>${esc(z.s.name)}</span></div>`).join("");
+  // hot card: behind plan (<100%)
+  const behind=lp.filter(z=>z.f!=null&&z.f<1).sort((a,b)=>a.f-b.f);
+  $("dbHotN").innerHTML=`${behind.length}<small>of ${lp.length} lines</small>`;
+  $("dbHotS").textContent= behind.length ? `Together short by ${crS(behind.reduce((a,z)=>a+(z.x.TT-z.x.A),0))} against plan to date` : "Every line is on plan 🎉";
+  $("dbHotList").innerHTML=behind.slice(0,3).map(z=>`<div class="rw"><div><span>${esc(z.s.name)}</span><b>${(z.f*100).toFixed(1)}%</b></div><div class="tr"><i style="width:${Math.min(100,z.f*100).toFixed(1)}%"></i></div></div>`).join("");
+  // top line
+  const top=lp.filter(z=>z.f!=null).sort((a,b)=>b.f-a.f)[0];
+  if(top){ $("dbTopN").textContent=top.s.name; $("dbTopV").textContent=(top.f*100).toFixed(1)+"%"; $("dbTopS").textContent=`${crS(top.x.A)} of ${crS(top.x.TT)} plan to date · month target ${crS(top.x.T)}`; $("dbTopBar").style.width=Math.min(100,top.f*100).toFixed(1)+"%"; }
+}
+$("dbMonth").addEventListener("change",()=>{ DB.month=$("dbMonth").value; DB.day=""; renderDash(); });
+$("dbStrip").addEventListener("click",ev=>{ const b=ev.target.closest(".dday"); if(!b) return; DB.day=b.dataset.k; renderDash(); });
+
 /* ---------- daily target vs achieved ---------- */
 const D2 = { items: [] };
 const fl = n => (n==null?"–":(Math.round(n*100)/100).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2}));
@@ -1252,6 +1470,7 @@ function renderDta(){
 }
 $("dtaCancel").onclick=()=>{ D2.items=[]; renderDta(); };
 $("dtaImport").onclick=async()=>{
+  if(!canUp("hard")){ toast("You don't have permission to upload this data. Ask your admin."); return; }
   const now=Date.now(), ops=[], keep=new Set(), months=new Set();
   D2.items.forEach(({file,p})=>{ months.add(p.month);
     p.sections.forEach(sec=>{ const id="daily-"+p.month+"-"+sec.key; keep.add(id);
@@ -1722,7 +1941,7 @@ function renderHeader(){
   $("plantTitle").textContent = "MGL PPC";
   $("plantSub").textContent = [S.cfg.name, S.cfg.unit].filter(Boolean).join(" · ") || "Production Planning & Control · Production value · Target vs achievement";
 }
-function renderAll(){ renderHeader(); fillSectionSelect(); fillUpSelects(); fillLineSelects(); renderDay(); renderSetup(); const v=(location.hash||"").slice(1); if(v==="report") renderReport(); if(v==="daily") renderDaily(); }
+function renderAll(){ renderHeader(); fillSectionSelect(); fillUpSelects(); fillLineSelects(); renderDay(); renderSetup(); const v=(location.hash||"").slice(1)||"dash"; if(v==="report") renderReport(); if(v==="daily") renderDaily(); if(v==="dash") renderDash(); }
 
 /* ---------- init ---------- */
 $("fDate").value=today(); $("listDate").value=today(); $("rDay").value=today(); $("rMonth").value=today().slice(0,7); $("rFrom").value=today().slice(0,8)+"01"; $("rTo").value=today(); $("clrMonth").value=today().slice(0,7);
