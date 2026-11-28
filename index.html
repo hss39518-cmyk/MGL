@@ -428,6 +428,75 @@ summary{background:rgba(255,255,255,.05)}
 }
 @media (prefers-reduced-motion:reduce){.side,.sidebk{transition:none}}
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.side,body>main,.appbar{background:rgba(28,25,23,.94)}.gbox,.modal .box,.acct{background:#24201e}}
+/* ---------- Friday assistant ---------- */
+.fri-btn{position:fixed;right:22px;bottom:22px;z-index:60;display:flex;align-items:center;gap:9px;padding:7px 16px 7px 7px;border-radius:999px;border:1px solid rgba(255,255,255,.3);cursor:pointer;color:#fff;font:600 14px Inter,system-ui,sans-serif;
+  background:linear-gradient(140deg,rgba(96,165,250,.95),rgba(37,99,235,.92));box-shadow:0 1px 0 rgba(255,255,255,.35) inset,0 12px 30px rgba(29,78,216,.45);transition:transform .15s}
+.fri-btn:hover{transform:translateY(-2px)}
+.fri-btn.on{background:linear-gradient(140deg,rgba(59,130,246,.95),rgba(29,78,216,.95))}
+.fri-btn[hidden]{display:none}
+.fri-orb{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.22);color:#fff;flex:none}
+.fri-panel{position:fixed;right:22px;bottom:84px;z-index:61;width:390px;height:min(620px,calc(100vh - 110px));display:flex;flex-direction:column;border-radius:26px;overflow:hidden;color:var(--ink);
+  background:rgba(28,25,23,.78);-webkit-backdrop-filter:blur(30px) saturate(150%);backdrop-filter:blur(30px) saturate(150%);border:1px solid rgba(255,255,255,.16);box-shadow:0 30px 80px rgba(0,0,0,.5);animation:friIn .22s ease-out}
+.fri-panel[hidden]{display:none}
+@keyframes friIn{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
+.fri-head{display:flex;align-items:center;gap:11px;padding:14px 14px 12px 16px;border-bottom:1px solid rgba(255,255,255,.09)}
+.fri-head .fri-orb{background:linear-gradient(140deg,#60a5fa,#2563eb)}
+.fri-head b{display:block;font-family:var(--serif);font-weight:400;font-size:21px;color:#fff;line-height:1.1}
+.fri-head small{display:block;font-size:11px;color:var(--mut)}
+.fri-head div{flex:1}
+.fri-x{border:0;background:rgba(255,255,255,.08);color:#fff;width:32px;height:32px;border-radius:10px;cursor:pointer;font-size:13px}
+.fri-x:hover{background:rgba(255,255,255,.16)}
+.fri-msgs{flex:1;overflow-y:auto;padding:14px 14px 6px;display:flex;flex-direction:column;gap:10px;scrollbar-width:thin}
+.fri-m{max-width:92%;padding:10px 13px;border-radius:16px;font-size:13.5px;line-height:1.5;overflow-wrap:anywhere}
+.fri-m.bot{align-self:flex-start;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.08);border-bottom-left-radius:6px}
+.fri-m.me{align-self:flex-end;background:#3b82f6;color:#fff;border-bottom-right-radius:6px}
+.fri-m b{color:#fff}
+.fri-m .note{color:var(--mut);font-size:12px}
+.fri-m .up{color:#86efac;font-weight:600}.fri-m .dn{color:#fca5a5;font-weight:600}
+.fri-m .pill{font-size:11.5px;padding:1px 7px}
+.fri-m hr{border:0;border-top:1px solid rgba(255,255,255,.1);margin:9px 0}
+.fri-t{width:100%;border-collapse:collapse;margin-top:8px;font-size:12px}
+.fri-t th{background:none;color:var(--mut);font-weight:600;font-size:10.5px;text-transform:uppercase;letter-spacing:.4px;padding:4px 5px;border-bottom:1px solid rgba(255,255,255,.12);text-align:left;white-space:nowrap}
+.fri-t td{padding:4px 5px;border-bottom:1px solid rgba(255,255,255,.06);white-space:nowrap}
+.fri-t .n{text-align:right;font-variant-numeric:tabular-nums}
+.fri-t tr.tot td{font-weight:700;color:#fff;border-top:1px solid rgba(255,255,255,.3);background:none}
+.fri-t tbody tr:hover td{background:none}
+.fri-chips{display:flex;gap:6px;overflow-x:auto;padding:6px 14px 8px;scrollbar-width:none}
+.fri-chips::-webkit-scrollbar{display:none}
+.fri-chip{flex:none;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.07);color:var(--ink);border-radius:999px;padding:6px 11px;font:500 12px Inter,system-ui,sans-serif;cursor:pointer;white-space:nowrap}
+.fri-chip:hover{background:rgba(59,130,246,.25);border-color:rgba(96,165,250,.6)}
+.fri-copy{margin-top:8px}
+.fri-in{display:flex;gap:8px;padding:10px 12px 12px;border-top:1px solid rgba(255,255,255,.09)}
+.fri-in input{flex:1;border-radius:999px;padding:10px 14px;font-size:14px}
+.fri-in button{width:42px;height:42px;border-radius:50%;border:0;background:#3b82f6;color:#fff;display:grid;place-items:center;cursor:pointer;flex:none}
+.fri-in button:hover{background:#2563eb}
+.fri-dots{display:inline-flex;gap:4px;padding:3px 0}
+.fri-dots i{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.6);animation:friDot 1s infinite}
+.fri-dots i:nth-child(2){animation-delay:.15s}.fri-dots i:nth-child(3){animation-delay:.3s}
+@keyframes friDot{0%,80%,100%{opacity:.25;transform:translateY(0)}40%{opacity:1;transform:translateY(-3px)}}
+body.nav-open .fri-btn{display:none}
+@media (max-width:900px){
+  .fri-btn{right:14px;bottom:14px;padding:6px}
+  .fri-btn .fri-lbl{display:none}
+  .fri-btn .fri-orb{width:40px;height:40px}
+  .fri-panel{left:8px;right:8px;bottom:8px;width:auto;height:min(78vh,640px);border-radius:22px}
+  .fri-btn.on{display:none}
+}
+@media (prefers-reduced-motion:reduce){.fri-panel,.fri-dots i{animation:none}}
+/* Friday logo animation */
+.fri-orb{position:relative;isolation:isolate}
+.fri-orb::before{content:"";position:absolute;inset:-3px;border-radius:50%;z-index:-1;background:conic-gradient(from 0deg,#93c5fd,#a78bfa,#f0abfc,#60a5fa,#93c5fd);animation:friSpin 4s linear infinite;opacity:.95}
+.fri-orb::after{content:"";position:absolute;inset:1px;border-radius:50%;z-index:-1;background:linear-gradient(140deg,#3b82f6,#1d4ed8)}
+.fri-orb svg{overflow:visible}
+.fri-orb .fs1{transform-origin:12px 9px;animation:friPulse 2.4s ease-in-out infinite;fill:rgba(255,255,255,.25)}
+.fri-orb .fs2{transform-origin:19.8px 17.8px;animation:friTwinkle 2.4s ease-in-out infinite}
+.fri-btn{animation:friGlow 3s ease-in-out infinite}
+@keyframes friSpin{to{transform:rotate(360deg)}}
+@keyframes friPulse{0%,100%{transform:scale(1) rotate(0)}50%{transform:scale(1.14) rotate(8deg)}}
+@keyframes friTwinkle{0%,100%{transform:scale(.6);opacity:.45}45%{transform:scale(1.25) rotate(45deg);opacity:1}}
+@keyframes friGlow{0%,100%{box-shadow:0 1px 0 rgba(255,255,255,.35) inset,0 12px 30px rgba(29,78,216,.45)}50%{box-shadow:0 1px 0 rgba(255,255,255,.35) inset,0 12px 38px rgba(96,165,250,.75),0 0 0 6px rgba(96,165,250,.12)}}
+@media (prefers-reduced-motion:reduce){.fri-orb::before,.fri-orb .fs1,.fri-orb .fs2,.fri-btn{animation:none}}
+
 footer{text-align:center;color:var(--mut);font-size:11.5px;padding:8px 0 30px}
 @media (max-width:700px){
   .appbar .sub{display:none}
@@ -1240,6 +1309,7 @@ function saveCfg(){ const snap = JSON.parse(JSON.stringify(S.cfg)); cfgBusy = cf
 /* ---------- sign-in gate ---------- */
 function gate(mode){
   $("gate").hidden = mode==="none";
+  if(window.FRI) window.FRI.show(mode==="none");
   $("gLoading").hidden = mode!=="loading";
   $("loginForm").hidden = !(mode==="login"||mode==="setup");
   $("setupForm").hidden = mode!=="setup";
@@ -2291,6 +2361,233 @@ $("fVal").value=inr(0);
 document.body.dataset.role="viewer";
 renderAll(); route();
 setConn("Connecting…", false);
+/* ---------- Friday: built-in assistant. Answers from the app's own data; nothing leaves the app. ---------- */
+(function(){
+  const MONS=["jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec"];
+  const ALIAS=[["devender",["small gear and shaft","small gear shaft","small gear","smallgear","devender","small"]],["bp",["bp shaft","b p shaft","bpshaft","bp"]],
+    ["speed",["speed gear","speedgear","speed"]],["bull",["bull gear","bullgear","bull"]],["ring",["ring gear","ringgear","ring"]],
+    ["jcb",["jcb"]],["jd",["john deere","jd"]],["axle",["axle","axel"]]];
+  const pad=n=>String(n).padStart(2,"0");
+  const iso=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  const addD=(s,n)=>{ const d=new Date(s+"T00:00:00"); d.setDate(d.getDate()+n); return iso(d); };
+  const longD=s=>{ const d=new Date(s+"T00:00:00"); return d.toLocaleDateString("en-GB",{weekday:"short"})+" "+d.getDate()+" "+d.toLocaleDateString("en-GB",{month:"short"})+" "+d.getFullYear(); };
+  const shortD=s=>{ const d=new Date(s+"T00:00:00"); return d.getDate()+" "+d.toLocaleDateString("en-GB",{month:"short"}); };
+  const prevM=m=>{ const [y,mm]=m.split("-").map(Number); return mm===1?`${y-1}-12`:`${y}-${pad(mm-1)}`; };
+  const L=v=>fl(v)+" L";
+  const pc=(a,t)=>t?a*100/t:null;
+  const pill=v=>v==null?"–":`<span class="pill ${v>=100?"g":v<60?"r":"w"}">${v.toFixed(1)}%</span>`;
+  const norm=t=>(" "+String(t).toLowerCase().replace(/&/g," and ").replace(/\b([a-z])\s?\.\s?([a-z])\b/g,"$1$2")
+    .replace(/(\d)(st|nd|rd|th)\b/g,"$1").replace(/[?!,;:()"']/g," ").replace(/\s+/g," ").trim()+" ");
+  const has=(t,...w)=>w.some(x=>t.includes(" "+x+" "));
+  const months=()=>dMonths();
+  const curMonth=()=>{ const ms=months(), m=iso(new Date()).slice(0,7); return ms.includes(m)?m:(ms[0]||m); };
+  const yearFor=mm=>{ const n=new Date(); return mm>n.getMonth()+1 ? n.getFullYear()-1 : n.getFullYear(); };
+  const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
+  const firstName=()=>{ const n=(document.getElementById("sideName")||{}).textContent||""; return n&&n!=="Account"?n.split(" ")[0]:""; };
+
+  function secsIn(t){ const out=[]; let u=t;
+    ALIAS.forEach(([k,al])=>{ for(const a of al){ if(u.includes(" "+a+" ")){ out.push(k); u=u.split(" "+a+" ").join(" "); break; } } });
+    return out; }
+  function periodIn(t){
+    const today=iso(new Date());
+    if(has(t,"day before yesterday","parso")) return {k:"day",d:addD(today,-2),word:"day before yesterday"};
+    if(has(t,"today","todays","today s","aaj","aj")) return {k:"day",d:today,word:"today"};
+    if(has(t,"yesterday","yesterdays","kal","yday")) return {k:"day",d:addD(today,-1),word:"yesterday"};
+    if(has(t,"this week","last week","week","last 7 days","7 days","hafte","hafta","weekly")) return {k:"week"};
+    if(has(t,"last month","previous month","prev month","pichle mahine","pichla mahina","pichhle mahine")) return {k:"month",m:prevM(curMonth())};
+    let m=t.match(/ (\d{1,2})[\/\.\-](\d{1,2})(?:[\/\.\-](\d{2,4}))? /);
+    if(m && +m[2]>=1 && +m[2]<=12){ const y=m[3]?(m[3].length===2?"20"+m[3]:m[3]):yearFor(+m[2]); return {k:"day",d:`${y}-${pad(m[2])}-${pad(m[1])}`}; }
+    const MR="(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*";
+    m=t.match(new RegExp(` (\\d{1,2}) (?:of )?${MR}(?: (\\d{4}))? `));
+    if(m){ const mm=MONS.indexOf(m[2])+1; const y=m[3]||yearFor(mm); return {k:"day",d:`${y}-${pad(mm)}-${pad(m[1])}`}; }
+    m=t.match(new RegExp(` ${MR} (\\d{1,2})(?: (\\d{4}))? `));
+    if(m && +m[2]<=31){ const mm=MONS.indexOf(m[1])+1; const y=m[3]||yearFor(mm); return {k:"day",d:`${y}-${pad(mm)}-${pad(m[2])}`}; }
+    m=t.match(new RegExp(` ${MR}(?: (\\d{4}))? `));
+    if(m && (m[1]!=="may"||m[2])){ const mm=MONS.indexOf(m[1])+1; const y=m[2]||yearFor(mm); return {k:"month",m:`${y}-${pad(mm)}`}; }
+    if(has(t,"this month","month","mahine","mahina","mtd","month to date","monthly")) return {k:"month",m:curMonth()};
+    m=t.match(/ (?:on |date )?(\d{1,2}) (?:tarikh|tareekh|date) /) || t.match(/ on (\d{1,2}) /);
+    if(m && +m[1]>=1 && +m[1]<=31){ const cm=curMonth(); return {k:"day",d:`${cm}-${pad(m[1])}`}; }
+    return null;
+  }
+  function covers(d,isoD){ if(d.date===isoD) return true; const [dd,mm]=String(d.label||"").split(".");
+    if(!mm || `${d.date.slice(0,4)}-${pad(mm)}`!==isoD.slice(0,7)) return false; return dd.split("/").map(Number).includes(+isoD.slice(8)); }
+  const multi=d=>String(d.label||"").split(".")[0].includes("/");
+  const pickSecs=(mo,keys)=>{ const s=dSections(mo); return keys&&keys.length?s.filter(x=>keys.includes(x.key)):s; };
+  const nameList=keys=>keys.map(k=>DTA.NAMES[k]||k).join(", ");
+  const noMonth=mo=>`I don't have any Hard Section data for <b>${monthName(mo)}</b> yet. ${months().length?`Data is available for ${months().slice(0,4).map(monthName).join(", ")}.`:"Upload the Hard Section sheet first."}`;
+  const table=(head,rows,tot)=>`<table class="fri-t"><thead><tr>${head.map((h,i)=>`<th${i?' class="n"':""}>${h}</th>`).join("")}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map((c,i)=>`<td${i?' class="n"':""}>${c}</td>`).join("")}</tr>`).join("")}${tot?`<tr class="tot">${tot.map((c,i)=>`<td${i?' class="n"':""}>${c}</td>`).join("")}</tr>`:""}</tbody></table>`;
+
+  // ---------- answers ----------
+  function dayAnswer(keys,isoD,word){
+    const mo=isoD.slice(0,7); if(!dSections(mo).length) return noMonth(mo);
+    const secs=pickSecs(mo,keys); const find=s=>s.days.find(d=>covers(d,isoD));
+    let use=isoD, lead="";
+    if(!secs.some(s=>{ const d=find(s); return d&&d.a!=null; })){
+      const all=combineDays(secs).filter(d=>d.a!=null && d.date<=isoD); const last=all.pop();
+      if(!last) return `No figures have been entered for ${keys.length?nameList(keys)+" on ":""}<b>${longD(isoD)}</b> yet.`;
+      lead=`${word?cap(word)+"'s":"The"} figures (${shortD(isoD)}) aren't uploaded yet. Latest is <b>${longD(last.date)}</b>:<br>`; use=last.date;
+    }
+    const rows=secs.map(s=>({s,d:s.days.find(d=>covers(d,use))})).filter(x=>x.d);
+    const lbl=rows[0]&&multi(rows[0].d)?` <span class="note">(combined day ${esc(yLbl(rows[0].d))})</span>`:"";
+    if(rows.length===1){ const {s,d}=rows[0]; if(d.a==null) return lead+`<b>${esc(s.name)}</b> has no figure for ${longD(use)} yet (target ${L(d.t)}).`;
+      const diff=d.a-d.t;
+      return lead+`<b>${esc(s.name)}</b> · ${longD(use)}${lbl}<br>Passed <b>${L(d.a)}</b> against target ${L(d.t)} — ${pill(pc(d.a,d.t))}, ${diff>=0?`<span class="up">ahead by ${L(diff)}</span>`:`<span class="dn">short by ${L(-diff)}</span>`}.`; }
+    let TA=0,TT=0; const R=rows.map(({s,d})=>{ if(d.a!=null){ TA+=d.a; TT+=d.t||0; } return [esc(s.name), d.a==null?"–":fl(d.a), fl(d.t), d.a==null?"–":pill(pc(d.a,d.t))]; });
+    return lead+`<b>${keys.length?"":"All sections · "}${longD(use)}</b>${lbl}<br>Passed <b>${L(TA)}</b> of ${L(TT)} — ${pill(pc(TA,TT))}`+table(["Section","Achd","Target","%"],R,["Total",fl(TA),fl(TT),pill(pc(TA,TT))]);
+  }
+  function monthAnswer(keys,mo){
+    if(!dSections(mo).length) return noMonth(mo);
+    const secs=pickSecs(mo,keys); const all=combineDays(secs), st=statsOf(all);
+    const upto=st.lastDate?` <span class="note">(data up to ${shortD(st.lastDate)})</span>`:"";
+    const askTxt=x=>x.ask==null?`Month finished at ${pill(pc(x.A,x.T))} of the month target.`:`Month target ${L(x.T)}; needs <b>${L(x.ask)}/day</b> for the rest of the month.`;
+    if(secs.length===1){ const s=secs[0], x=statsOf(s.days);
+      return `<b>${esc(s.name)}</b> · ${monthName(mo)}${upto}<br>Passed <b>${L(x.A)}</b> against ${L(x.TT)} target to date — ${pill(x.pct)}${x.fail<0?`, short by ${L(-x.fail)}`:""}.<br>${askTxt(x)}${x.best?`<br>Best day: ${L(x.best.a)} on ${esc(yLbl(x.best))}.`:""}`; }
+    const R=secs.map(s=>{ const x=statsOf(s.days); return [esc(s.name),fl(x.A),fl(x.TT),pill(x.pct),x.ask==null?"–":fl(x.ask)]; });
+    return `<b>${keys.length?nameList(keys):"All sections"} · ${monthName(mo)}</b>${upto}<br>Passed <b>${L(st.A)}</b> (${lakhCr(st.A)}) against ${L(st.TT)} target to date — ${pill(st.pct)}.<br>${askTxt(st)}`
+      +table(["Section","Achd","Target to date","%","Need/day"],R,["Total",fl(st.A),fl(st.TT),pill(st.pct),st.ask==null?"–":fl(st.ask)]);
+  }
+  function weekAnswer(keys){
+    const mo=curMonth(); const pool=[...pickSecs(mo,keys),...pickSecs(prevM(mo),keys)];
+    const last=combineDays(pickSecs(mo,keys)).filter(d=>d.a!=null).pop(); if(!last) return noMonth(mo);
+    const from=addD(last.date,-6), byKey=new Map();
+    pool.forEach(s=>{ const o=byKey.get(s.key)||{name:s.name,A:0,T:0}; s.days.forEach(d=>{ if(d.a!=null && d.date>=from && d.date<=last.date){ o.A+=d.a; o.T+=d.t||0; } }); byKey.set(s.key,o); });
+    const rows=[...byKey.values()]; let A=0,T=0; rows.forEach(r=>{A+=r.A;T+=r.T;});
+    const head=`<b>Last 7 days</b> · ${shortD(from)} – ${shortD(last.date)}`;
+    if(rows.length===1) return `${head}<br><b>${esc(rows[0].name)}</b> passed <b>${L(A)}</b> against ${L(T)} — ${pill(pc(A,T))}.`;
+    return `${head}<br>Passed <b>${L(A)}</b> against ${L(T)} — ${pill(pc(A,T))}`+table(["Section","Achd","Target","%"],rows.map(r=>[esc(r.name),fl(r.A),fl(r.T),pill(pc(r.A,r.T))]),["Total",fl(A),fl(T),pill(pc(A,T))]);
+  }
+  function rankSecs(per){ // [{name,key,A,T,p}] for a day or month
+    if(per&&per.k==="day"){ const mo=per.d.slice(0,7); let use=per.d; const secs=dSections(mo);
+      if(!secs.some(s=>{const d=s.days.find(d=>covers(d,use)); return d&&d.a!=null;})){ const l=combineDays(secs).filter(d=>d.a!=null&&d.date<=use).pop(); if(!l) return {rows:[],lbl:longD(use)}; use=l.date; }
+      return {lbl:longD(use), rows:secs.map(s=>{ const d=s.days.find(d=>covers(d,use)); return d&&d.a!=null?{name:s.name,key:s.key,A:d.a,T:d.t,p:pc(d.a,d.t)}:null; }).filter(Boolean)}; }
+    const mo=per&&per.k==="month"?per.m:curMonth();
+    return {lbl:monthName(mo), rows:dSections(mo).map(s=>{ const x=statsOf(s.days); return {name:s.name,key:s.key,A:x.A,T:x.TT,p:x.pct}; }).filter(r=>r.p!=null)};
+  }
+  function behindAnswer(per){ const {rows,lbl}=rankSecs(per); if(!rows.length) return `No figures to compare for ${lbl} yet.`;
+    const b=rows.filter(r=>r.p<100).sort((a,c)=>a.p-c.p);
+    if(!b.length) return `Every section is on or ahead of target for <b>${lbl}</b>. 🎉`;
+    return `<b>${b.length} of ${rows.length} sections behind</b> · ${lbl}<br>Furthest behind: <b>${esc(b[0].name)}</b> at ${pill(b[0].p)}, short by ${L(b[0].T-b[0].A)}.`
+      +table(["Section","%","Short by"],b.map(r=>[esc(r.name),pill(r.p),fl(r.T-r.A)])); }
+  function topAnswer(per){ const {rows,lbl}=rankSecs(per); if(!rows.length) return `No figures for ${lbl} yet.`;
+    const byP=rows.slice().sort((a,c)=>c.p-a.p), byA=rows.slice().sort((a,c)=>c.A-a.A);
+    return `<b>Top sections · ${lbl}</b><br>Best against target: <b>${esc(byP[0].name)}</b> ${pill(byP[0].p)}.<br>Biggest passing: <b>${esc(byA[0].name)}</b> with ${L(byA[0].A)}.`
+      +table(["Section","Achd","%"],byP.map(r=>[esc(r.name),fl(r.A),pill(r.p)])); }
+  function bestDayAnswer(keys,mo,worst){ if(!dSections(mo).length) return noMonth(mo);
+    const days=combineDays(pickSecs(mo,keys)).filter(d=>d.a!=null); if(!days.length) return `No figures for ${monthName(mo)} yet.`;
+    const d=worst?days.slice().sort((a,c)=>pc(a.a,a.t)-pc(c.a,c.t))[0]:days.slice().sort((a,c)=>c.a-a.a)[0];
+    return `<b>${worst?"Weakest":"Best"} day · ${keys.length?nameList(keys):"All sections"} · ${monthName(mo)}</b><br>${esc(yLbl(d))}: passed <b>${L(d.a)}</b> against ${L(d.t)} — ${pill(pc(d.a,d.t))}.`; }
+  function askAnswer(keys,mo){ if(!dSections(mo).length) return noMonth(mo);
+    const st=statsOf(combineDays(pickSecs(mo,keys))); const who=keys.length?nameList(keys):"the plant";
+    if(st.ask==null) return `${monthName(mo)} is finished — ${who} ended at ${L(st.A)}, ${pill(pc(st.A,st.T))} of the month target ${L(st.T)}.`;
+    return `To reach the <b>${monthName(mo)}</b> target of ${L(st.T)}, ${who} needs <b>${L(st.ask)} per working day</b> (about ${st.remDays.toFixed(1)} days left). Balance: ${L(st.T-st.A)}.`; }
+  function targetAnswer(keys,per){
+    if(per&&per.k==="day"){ const mo=per.d.slice(0,7), secs=pickSecs(mo,keys); const R=secs.map(s=>({s,d:s.days.find(d=>covers(d,per.d))})).filter(x=>x.d);
+      if(!R.length) return `I can't find a target for ${longD(per.d)} — it may be a holiday or the month isn't uploaded.`;
+      const T=R.reduce((a,x)=>a+(x.d.t||0),0);
+      return R.length===1?`<b>${esc(R[0].s.name)}</b> target for ${longD(per.d)}: <b>${L(T)}</b>.`:`Target for <b>${longD(per.d)}</b>: <b>${L(T)}</b>`+table(["Section","Target"],R.map(x=>[esc(x.s.name),fl(x.d.t)])); }
+    const mo=per&&per.k==="month"?per.m:curMonth(); if(!dSections(mo).length) return noMonth(mo);
+    const secs=pickSecs(mo,keys), st=statsOf(combineDays(secs));
+    return secs.length===1?`<b>${esc(secs[0].name)}</b> target for ${monthName(mo)}: <b>${L(st.T)}</b> (${L(st.TT)} due so far).`
+      :`Month target for <b>${monthName(mo)}</b>: <b>${L(st.T)}</b> (${lakhCr(st.T)}), ${L(st.TT)} due so far.`+table(["Section","Month target"],secs.map(s=>[esc(s.name),fl(statsOf(s.days).T)])); }
+  function compareAnswer(keys,mo){ const pm=prevM(mo); if(!dSections(mo).length) return noMonth(mo); if(!dSections(pm).length) return `I don't have ${monthName(pm)} data to compare with.`;
+    const cur=statsOf(combineDays(pickSecs(mo,keys))); const cut=cur.lastDate?+cur.lastDate.slice(8):31;
+    const till=m=>combineDays(pickSecs(m,keys)).filter(d=>d.a!=null && +d.date.slice(8)<=cut).reduce((a,d)=>a+d.a,0);
+    const a=till(mo), b=till(pm), prev=statsOf(combineDays(pickSecs(pm,keys))); const diff=a-b;
+    return `<b>${keys.length?nameList(keys):"All sections"} · up to day ${cut}</b><br>${monthName(mo)}: <b>${L(a)}</b><br>${monthName(pm)}: <b>${L(b)}</b><br>${diff>=0?`<span class="up">Ahead by ${L(diff)}</span>`:`<span class="dn">Behind by ${L(-diff)}</span>`} (${b?((diff/b)*100).toFixed(1):"–"}%). ${monthName(pm)} finished at ${L(prev.A)} (${pill(pc(prev.A,prev.T))} of its target).`; }
+  function summaryAnswer(mo){ if(!dSections(mo).length) return noMonth(mo);
+    const secs=dSections(mo), st=statsOf(combineDays(secs)); const {rows}=rankSecs({k:"month",m:mo}); const s=rows.slice().sort((a,c)=>a.p-c.p);
+    const last=combineDays(secs).filter(d=>d.a!=null).pop();
+    return `<b>${monthName(mo)} summary</b>${st.lastDate?` <span class="note">(data up to ${shortD(st.lastDate)})</span>`:""}<br>`
+      +`• Passed <b>${L(st.A)}</b> (${lakhCr(st.A)}) against ${L(st.TT)} target to date — ${pill(st.pct)}.<br>`
+      +`• Month target ${L(st.T)}; ${st.ask==null?"month finished.":`needs <b>${L(st.ask)}/day</b> from here.`}<br>`
+      +(s.length?`• Strongest: ${esc(s[s.length-1].name)} ${pill(s[s.length-1].p)} · Weakest: ${esc(s[0].name)} ${pill(s[0].p)}.<br>`:"")
+      +`• ${s.filter(r=>r.p<100).length} of ${s.length} sections behind plan.<br>`
+      +(last?`• Latest day ${esc(yLbl(last))}: ${L(last.a)} of ${L(last.t)} — ${pill(pc(last.a,last.t))}.`:"")
+      +`<div class="fri-copy"><button type="button" class="fri-chip" data-copy="1">Copy as text</button></div>`; }
+  const HELP={
+    upload:"<b>Uploading</b>: open <b>Upload</b> in the menu and drop in the Hard Section Production Value Excel file. Only the Admin, or people with the Hard Section box ticked in Setup, can upload.",
+    excel:"<b>Excel reports</b>: open <b>Daily T&A</b> or <b>Report</b> and tap the <b>Excel</b> button. The Daily T&A file has Summary, Charts, Day-wise and Month comparison sheets, all set for A4.",
+    users:"<b>Adding people</b>: the Admin opens <b>Setup → Users & access</b>, adds name, employee code and password, then picks View only or Can upload.",
+    password:"<b>Changing your password</b>: tap your name at the bottom of the menu, then <b>Change password</b>.",
+    install:"<b>Install as an app</b>: on phone, Chrome ⋮ → <b>Add to Home screen</b>. On PC, click the install icon at the right end of Chrome's address bar.",
+    pct:"<b>Achd %</b> = achieved ÷ target for the days entered so far. Green = target met, amber = 60–99%, red = below 60%. <b>Asking rate</b> = balance of the month target ÷ working days left."};
+  const CAN=`I can tell you, for any section or the whole plant:<br>• a day's passing vs target (<i>"today B.P Shaft passing"</i>, <i>"JCB on 21 Nov"</i>)<br>• month to date and asking rate<br>• which sections are behind or on top<br>• best / weakest day, last 7 days<br>• this month vs last month, and a summary to copy<br>• help with using the app`;
+
+  let ctx={keys:[],per:null};
+  function answer(q){
+    const t=norm(q); let keys=secsIn(t); let per=periodIn(t);
+    const follow=/^ (and|what about|aur|or|how about|then|uska|iska) /.test(t);
+    if(!keys.length && follow && ctx.keys.length && !has(t,"all","total","plant","overall","sab")) keys=ctx.keys;
+    if(!per && ctx.per && keys.length && (follow || t.trim().split(" ").length<=3)) per=ctx.per;
+    if(has(t,"all","total","plant","overall","sab","sabhi","everyone","every section","all sections")) keys=secsIn(t);
+    const howTo=/ (how|kaise|kaisa|where|kahan) /.test(t);
+    let out;
+    if(/^ (hi|hello|hey|hii|namaste|good morning|good evening|good afternoon|hola|yo) $/.test(t)) out=`Hi${firstName()?" "+firstName():""}! 👋 Ask me about passing, targets or any section.`;
+    else if(has(t,"thanks","thank you","thx","ty","shukriya","dhanyavad")) out="You're welcome! 😊";
+    else if(has(t,"who are you","what can you do","help","what can i ask","kya kar sakte")&&!howTo) out=CAN;
+    else if(howTo && has(t,"upload","uploading","sheet","file")) out=HELP.upload;
+    else if(howTo && has(t,"excel","export","download","print","pdf")) out=HELP.excel;
+    else if(howTo && has(t,"user","users","colleague","colleagues","access","login","account","add")) out=HELP.users;
+    else if(has(t,"password")) out=HELP.password;
+    else if(howTo && has(t,"install","home screen","app","apk")) out=HELP.install;
+    else if(has(t,"what is achd","what does achd","meaning","mean","matlab","asking rate mean","what is asking")) out=HELP.pct;
+    else if(has(t,"compare","comparison","vs","versus","than last month","compared")) out=compareAnswer(keys,per&&per.k==="month"&&!has(t,"last month","previous month","prev month","pichle mahine","pichla mahina","pichhle mahine")?per.m:curMonth());
+    else if(has(t,"summary","summarise","summarize","status","overview","update","brief","how are we doing","how is it going","kaisa chal","report card")) out=summaryAnswer(per&&per.k==="month"?per.m:curMonth());
+    else if(has(t,"asking","asking rate","required","per day needed","need per day","run rate","remaining","balance","kitna chahiye")) out=askAnswer(keys,per&&per.k==="month"?per.m:curMonth());
+    else if(has(t,"worst day","weakest day","lowest day","bad day")) out=bestDayAnswer(keys,per&&per.k==="month"?per.m:curMonth(),true);
+    else if(has(t,"best day","highest day","top day","max day","record day","best date")) out=bestDayAnswer(keys,per&&per.k==="month"?per.m:curMonth(),false);
+    else if(!keys.length && has(t,"behind","lagging","short","shortfall","worst","lowest","weak","poor","below","red","peeche","peechhe","failing","failure")) out=behindAnswer(per);
+    else if(!keys.length && has(t,"best","top","highest","leading","strongest","sabse zyada","most","ahead","winner")) out=topAnswer(per);
+    else if(has(t,"target","plan","lakshya")&&!has(t,"passing","passed","achieved","achd","production","output","pass")) out=targetAnswer(keys,per);
+    else if(per&&per.k==="week") out=weekAnswer(keys);
+    else if(per&&per.k==="day") out=dayAnswer(keys,per.d,per.word);
+    else if(per&&per.k==="month") out=monthAnswer(keys,per.m);
+    else if(keys.length||has(t,"passing","passed","pass","production","achieved","achd","output","value","kitna","kitni","how much","total","plant")){
+      const last=combineDays(pickSecs(curMonth(),keys)).filter(d=>d.a!=null).pop();
+      out=(last?dayAnswer(keys,last.date)+"<hr>":"")+monthAnswer(keys,curMonth()); }
+    else out=`Sorry, I didn't catch that. Try asking like:<br>• <i>Today B.P Shaft passing</i><br>• <i>Which sections are behind?</i><br>• <i>JCB this month</i><br>• <i>Asking rate</i>`;
+    ctx={keys,per:per||ctx.per};
+    return out;
+  }
+  function chips(){
+    const k=ctx.keys[0]; const n=k?(DTA.NAMES[k]||k):null;
+    return n?[`${n} this month`,`${n} best day`,"Which sections are behind?","This month summary"]
+            :["Today B.P Shaft passing","Which sections are behind?","This month summary","Asking rate","Compare with last month","Best day this month"];
+  }
+
+  // ---------- UI ----------
+  const host=document.createElement("div");
+  host.innerHTML=`<button class="fri-btn" id="friBtn" type="button" aria-label="Open Friday assistant" hidden><span class="fri-orb"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path class="fs1" d="M12 3l1.8 4.6L18.5 9l-4.7 1.5L12 15l-1.8-4.5L5.5 9l4.7-1.4z"/><path class="fs2" d="M19 15l.8 2 2 .8-2 .7-.8 2-.7-2-2-.7 2-.8z"/></svg></span><span class="fri-lbl">Friday</span></button>
+  <section class="fri-panel" id="friPanel" role="dialog" aria-label="Friday assistant" hidden>
+    <header class="fri-head"><span class="fri-orb"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path class="fs1" d="M12 3l1.8 4.6L18.5 9l-4.7 1.5L12 15l-1.8-4.5L5.5 9l4.7-1.4z"/><path class="fs2" d="M19 15l.8 2 2 .8-2 .7-.8 2-.7-2-2-.7 2-.8z"/></svg></span><div><b>Friday</b><small>Your production assistant · works offline, free</small></div><button type="button" class="fri-x" id="friClose" aria-label="Close">✕</button></header>
+    <div class="fri-msgs" id="friMsgs" aria-live="polite"></div>
+    <div class="fri-chips" id="friChips"></div>
+    <form class="fri-in" id="friForm" autocomplete="off"><input id="friQ" placeholder="Ask Friday… e.g. today JCB passing" maxlength="200"><button type="submit" aria-label="Send"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button></form>
+  </section>`;
+  document.body.appendChild(host);
+  const P=$("friPanel"), M=$("friMsgs");
+  const add=(html,me)=>{ const d=document.createElement("div"); d.className="fri-m "+(me?"me":"bot"); d.innerHTML=html; M.appendChild(d); M.scrollTop=M.scrollHeight; return d; };
+  const setChips=()=>{ $("friChips").innerHTML=chips().map(c=>`<button type="button" class="fri-chip">${esc(c)}</button>`).join(""); };
+  function ask(q){ q=String(q||"").trim(); if(!q) return; add(esc(q),true); $("friQ").value="";
+    const typing=add('<span class="fri-dots"><i></i><i></i><i></i></span>');
+    setTimeout(()=>{ let html; try{ html=answer(q); }catch(e){ console.error(e); html="Sorry, something went wrong working that out."; }
+      typing.innerHTML=html; M.scrollTop=M.scrollHeight; setChips(); }, 320); }
+  let greeted=false;
+  function open(){ P.hidden=false; $("friBtn").classList.add("on"); if(!greeted){ greeted=true;
+      add(`Hi${firstName()?" "+firstName():""} 👋 I'm <b>Friday</b>. Ask me about passing, targets and sections — for a day, this month or last month.`); setChips(); }
+    setTimeout(()=>$("friQ").focus(),60); }
+  function close(){ P.hidden=true; $("friBtn").classList.remove("on"); }
+  $("friBtn").addEventListener("click",()=>P.hidden?open():close());
+  $("friClose").addEventListener("click",close);
+  $("friForm").addEventListener("submit",e=>{ e.preventDefault(); ask($("friQ").value); });
+  $("friChips").addEventListener("click",e=>{ const b=e.target.closest(".fri-chip"); if(b) ask(b.textContent); });
+  M.addEventListener("click",e=>{ const b=e.target.closest("[data-copy]"); if(!b) return; const m=b.closest(".fri-m"); const c=m.cloneNode(true); c.querySelectorAll(".fri-copy").forEach(x=>x.remove());
+    const txt=c.innerHTML.replace(/<br\s*\/?>/g,"\n").replace(/<[^>]+>/g,"").replace(/&amp;/g,"&").replace(/\n{2,}/g,"\n").trim();
+    (navigator.clipboard?navigator.clipboard.writeText(txt):Promise.reject()).then(()=>toast("Summary copied — paste it in WhatsApp or email"),()=>toast("Couldn't copy on this device")); });
+  document.addEventListener("keydown",e=>{ if(e.key==="Escape" && !P.hidden) close(); });
+  window.FRI={ open, close, ask, answer, show:on=>{ $("friBtn").hidden=!on; if(!on) close(); } };
+})();
+
 if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(()=>{});
 start();
 })();
