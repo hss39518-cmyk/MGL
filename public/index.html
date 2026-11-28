@@ -669,6 +669,9 @@ body.line-open .fri-btn{display:none}
   .lgrid{grid-template-columns:1fr}
 }
 @media (prefers-reduced-motion:reduce){.lsheet,.lbox{animation:none}}
+.seen-sum{margin-top:16px;font-size:13px;color:var(--ink2)}
+.seen-sum b{color:var(--ink)}
+.seen-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--ok);margin-right:6px;vertical-align:1px;box-shadow:0 0 0 3px var(--ok-l)}
 footer{text-align:center;color:var(--mut);font-size:11.5px;padding:8px 0 30px}
 @media (max-width:700px){
   .appbar .sub{display:none}
@@ -989,7 +992,7 @@ footer{text-align:center;color:var(--mut);font-size:11.5px;padding:8px 0 30px}
       </div>
       <div id="nuPermsW" style="margin-top:12px;display:none"><label>Can upload</label><div class="perms" id="nuPerms"></div></div>
       <div class="row" style="margin-top:12px"><button class="btn" id="nuAdd" type="button">Add user</button><span class="note" id="nuMsg"></span></div>
-      <div class="tw" style="margin-top:14px"><table><thead><tr><th>Name</th><th>Login</th><th>Access</th><th>Can upload</th></tr></thead><tbody id="userRows"></tbody></table></div>
+      <div class="seen-sum" id="seenSum"></div><div class="tw" style="margin-top:8px"><table><thead><tr><th>Name</th><th>Login</th><th>Access</th><th>Can upload</th><th>Last seen</th></tr></thead><tbody id="userRows"></tbody></table></div>
     </div>
     <div class="card">
       <h3>My account</h3>
@@ -1424,7 +1427,7 @@ const XL = (() => {
 <script type="module">
 import { initializeApp, deleteApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc, onSnapshot, query, where, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc, onSnapshot, query, where, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 (() => {
 const $ = id => document.getElementById(id);
 const SAVE_IC = '<svg class="i" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>';
@@ -1462,7 +1465,7 @@ let unsubs=[];
 const pad2 = n => String(n).padStart(2,"0");
 function setConn(txt, ok){ $("conn").textContent = txt; $("conn").dataset.ok = ok?"1":"0"; $("conn").style.color = ""; }
 function normCfg(d){ const c=Object.assign({ name:"",unit:"",sections:[],sectionLine:{},rates:{} }, d||{}); if(!Array.isArray(c.sections)) c.sections=[]; c.sectionLine=c.sectionLine||{}; c.rates=c.rates||{}; return c; }
-S.months={}; S.tmonths={}; S.subs={}; S.users=[]; S.profile=null; S.daily=[];
+S.months={}; S.tmonths={}; S.subs={}; S.users=[]; S.profile=null; S.daily=[]; S.presence={}; S.presenceOk=null;
 function rebuild(){ S.entries=[].concat(...Object.values(S.months)); S.targets=[].concat(...Object.values(S.tmonths)); }
 let rT=null; const rerender = () => { clearTimeout(rT); rT=setTimeout(renderAll,120); };
 const monthOf = d => String(d||"").slice(0,7);
@@ -1532,6 +1535,8 @@ function applyRole(){
 function startData(){
   unsubs.push(onSnapshot(doc(db,"config","main"), snap => { if(snap.exists()) S.cfg=normCfg(snap.data()); rerender(); }, err=>toast("Couldn't load settings: "+authMsg(err))));
   if(S.profile.role==="admin") unsubs.push(onSnapshot(collection(db,"users"), snap => { S.users=snap.docs.map(d=>Object.assign({},d.data(),{uid:d.id})); renderUsers(); }, ()=>{}));
+  if(S.profile.role==="admin") unsubs.push(onSnapshot(collection(db,"presence"), snap => { S.presence={}; S.presenceOk=true; snap.docs.forEach(d=>S.presence[d.id]=d.data()); renderUsers(); }, ()=>{ S.presenceOk=false; renderUsers(); }));
+  notePresence();
   document.body.classList.add("loading-data"); clearTimeout(window.__skT); window.__skT=setTimeout(()=>document.body.classList.remove("loading-data"),15000);
   unsubs.push(onSnapshot(query(collection(db,"config"), where("kind","==","daily")), { includeMetadataChanges:true }, snap => {
     if(snap.empty && snap.metadata.fromCache) return;   // nothing saved on this device yet: keep the placeholders until the server answers
@@ -1616,6 +1621,21 @@ window.addEventListener("online", ()=>{ $("localBanner").style.display="none"; s
 window.addEventListener("offline", ()=>{ $("localBanner").style.display="block"; setConn("Offline", false); });
 
 /* ---------- users (admin) ---------- */
+/* ---------- last seen (who's using the app) ---------- */
+const LAUNCH_TWA = (()=>{ try{ if(document.referrer.startsWith("android-app://")) sessionStorage.setItem("mgl-twa","1"); return sessionStorage.getItem("mgl-twa")==="1"; }catch(e){ return false; } })();
+function deviceKind(){ const mob=/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent); let st=false; try{ st=matchMedia("(display-mode: standalone)").matches; }catch(e){}
+  return LAUNCH_TWA ? "Phone app" : mob ? (st?"Phone (installed)":"Phone browser") : (st?"PC app":"PC browser"); }
+async function notePresence(){ try{ const u=auth&&auth.currentUser; if(!u||!S.profile||S.profile.role==="disabled") return;
+    const k="mgl-seen-"+u.uid; let last=0; try{ last=+(sessionStorage.getItem(k)||0); }catch(e){} if(Date.now()-last<10*60e3) return;
+    try{ sessionStorage.setItem(k,String(Date.now())); }catch(e){}
+    await setDoc(doc(db,"presence",u.uid),{ lastSeen: serverTimestamp(), device: deviceKind(), name: S.profile.name||"" }); }catch(e){} }
+document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible") notePresence(); });
+const tsDate = v => !v ? null : v.toDate ? v.toDate() : v.seconds ? new Date(v.seconds*1000) : v.__ts ? new Date(v.__ts) : null;
+function seenTxt(p){ const d=tsDate(p&&p.lastSeen); if(!d) return {t:"Never",c:"var(--mut)",ago:Infinity};
+  const now=new Date(), ago=now-d, tm=d.toLocaleTimeString("en-IN",{hour:"numeric",minute:"2-digit"}).toLowerCase();
+  const day=new Date(d.getFullYear(),d.getMonth(),d.getDate()), today=new Date(now.getFullYear(),now.getMonth(),now.getDate()), dd=Math.round((today-day)/864e5);
+  const t = ago<10*60e3 ? "Active now" : dd===0 ? "Today, "+tm : dd===1 ? "Yesterday, "+tm : dd<7 ? d.toLocaleDateString("en-GB",{weekday:"short"})+", "+tm : d.getDate()+" "+d.toLocaleDateString("en-GB",{month:"short"})+" "+d.getFullYear();
+  return {t, c: ago<10*60e3?"var(--ok)":dd<=1?"var(--ink)":dd<7?"var(--ink2)":"var(--mut)", ago}; }
 function renderUsers(){
   const me = auth && auth.currentUser && auth.currentUser.uid;
   const rows = S.users.slice().sort((a,b)=>(a.role==="admin"?0:1)-(b.role==="admin"?0:1) || String(a.name).localeCompare(String(b.name)));
@@ -1623,7 +1643,12 @@ function renderUsers(){
     const sel = `<select data-uid="${esc(u.uid)}" data-kind="role" style="width:150px;height:32px;padding:4px 8px" ${u.uid===me?"disabled title=\"You can't change your own access\"":""}>${["admin","editor","viewer","disabled"].map(r=>`<option value="${r}" ${u.role===r?"selected":""}>${ROLE_LABEL[r]}</option>`).join("")}</select>`;
     const perms = u.role==="admin" ? `<span class="note">Everything</span>` : u.role!=="editor" ? `<span class="note">–</span>`
       : `<div class="permcell perms">${MODULES.map(m=>`<label title="${esc(m.note)}"><input type="checkbox" data-uid="${esc(u.uid)}" data-kind="perm" data-k="${m.key}" ${(u.perms||{})[m.key]?"checked":""}>${esc(m.name)}</label>`).join("")}</div>${MODULES.some(m=>(u.perms||{})[m.key])?"":'<div class="note" style="color:var(--warn)">Nothing ticked: can only view</div>'}`;
-    return `<tr><td><b>${esc(u.name||"")}</b>${u.uid===me?' <span class="pill">you</span>':""}</td><td>${esc(u.login||loginLabel(u.email))}</td><td>${sel}</td><td>${perms}</td></tr>`; }).join("") || `<tr><td colspan="4" class="empty">No users yet.</td></tr>`;
+    const p=S.presence[u.uid], sn=seenTxt(p);
+    const seen = S.presenceOk===false ? '<span class="note">–</span>' : `<span style="color:${sn.c};font-weight:${sn.ago<10*60e3?600:500}">${sn.ago<10*60e3?'<i class="seen-dot"></i>':""}${esc(sn.t)}</span>${p&&p.device?`<div class="note">${esc(p.device)}</div>`:""}`;
+    return `<tr><td><b>${esc(u.name||"")}</b>${u.uid===me?' <span class="pill">you</span>':""}</td><td>${esc(u.login||loginLabel(u.email))}</td><td>${sel}</td><td>${perms}</td><td>${seen}</td></tr>`; }).join("") || `<tr><td colspan="5" class="empty">No users yet.</td></tr>`;
+  const sum=$("seenSum"); if(sum){ if(S.presenceOk===false){ sum.innerHTML='<span style="color:var(--warn)">Last seen needs the updated Firebase security rules.</span>'; }
+    else { const act=S.users.filter(u=>u.role!=="disabled"); const ago=u=>seenTxt(S.presence[u.uid]).ago; const now=act.filter(u=>ago(u)<10*60e3).length, d1=act.filter(u=>ago(u)<864e5).length, d7=act.filter(u=>ago(u)<7*864e5).length, never=act.filter(u=>ago(u)===Infinity).length;
+      sum.innerHTML=`<b>${now}</b> active now · <b>${d1}</b> in the last 24 hours · <b>${d7}</b> this week${never?` · <b>${never}</b> never opened`:""} <span class="note">(of ${act.length} people with access)</span>`; } }
 }
 function renderNewUserPerms(){
   $("nuPermsW").style.display = $("nuRole").value==="editor" ? "" : "none";

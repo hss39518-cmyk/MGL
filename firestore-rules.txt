@@ -35,6 +35,13 @@ service cloud.firestore {
       allow create: if signedIn() && request.resource.data.uid == request.auth.uid;
     }
 
+    // Last seen: each person can only write their own time and device; only the admin can read them.
+    match /presence/{uid} {
+      allow read: if isAdmin();
+      allow write: if canRead() && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['lastSeen', 'device', 'name']);
+    }
+
     // People and their access. Only the admin can add, change or remove.
     match /users/{uid} {
       allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
