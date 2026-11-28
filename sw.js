@@ -1,14 +1,7 @@
-// Keeps the app shell available offline. Data sync is handled by Firebase.
-const CACHE = "pvr-gh-v27";
-const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./firebase-config.js", "./icon-192.png", "./icon-512.png", "./mountain-bg.svg"];
-self.addEventListener("install", e => { self.skipWaiting(); e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).catch(() => {})); });
-self.addEventListener("activate", e => e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())));
-self.addEventListener("fetch", e => {
-  const req = e.request, url = new URL(req.url);
-  if (req.method !== "GET") return;
-  const own = url.origin === location.origin && !url.pathname.startsWith("/__/");
-  const cdn = /(^|\.)(cdnjs\.cloudflare\.com|gstatic\.com|fonts\.googleapis\.com)$/.test(url.hostname) && !url.pathname.includes("/channel");
-  if (!own && !cdn) return;
-  e.respondWith(fetch(req).then(r => { if (r.ok) { const cp = r.clone(); caches.open(CACHE).then(c => c.put(req, cp)); } return r; })
-    .catch(() => caches.match(req).then(m => m || (req.mode === "navigate" ? caches.match("./index.html") : undefined))));
-});
+// The app has moved to https://mgl-ppc.web.app — this clears the old offline copy and sends open windows there.
+self.addEventListener("install", () => self.skipWaiting());
+self.addEventListener("activate", e => e.waitUntil((async () => {
+  try { const ks = await caches.keys(); await Promise.all(ks.map(k => caches.delete(k))); } catch (err) {}
+  try { await self.registration.unregister(); } catch (err) {}
+  try { const cs = await self.clients.matchAll({ type: "window" }); cs.forEach(c => { try { c.navigate("https://mgl-ppc.web.app/"); } catch (err) {} }); } catch (err) {}
+})()));
