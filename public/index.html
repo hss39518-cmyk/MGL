@@ -2474,7 +2474,13 @@ setConn("Connecting…", false);
     const byP=rows.slice().sort((a,c)=>c.p-a.p), byA=rows.slice().sort((a,c)=>c.A-a.A);
     return `<b>Top sections · ${lbl}</b><br>Best against target: <b>${esc(byP[0].name)}</b> ${pill(byP[0].p)}.<br>Biggest passing: <b>${esc(byA[0].name)}</b> with ${L(byA[0].A)}.`
       +table(["Section","Achd","%"],byP.map(r=>[esc(r.name),fl(r.A),pill(r.p)])); }
-  function bestDayAnswer(keys,mo,worst){ if(!dSections(mo).length) return noMonth(mo);
+  function bestDayAnswer(keys,mo,worst,each){ if(!dSections(mo).length) return noMonth(mo);
+    if(each || keys.length>1){ const secs=pickSecs(mo,keys); const R=[];
+      secs.forEach(s=>{ const ds=s.days.filter(d=>d.a!=null); if(!ds.length) return;
+        const d=worst?ds.slice().sort((a,c)=>pc(a.a,a.t)-pc(c.a,c.t))[0]:ds.slice().sort((a,c)=>c.a-a.a)[0];
+        R.push([esc(s.name),esc(yLbl(d)),fl(d.a),fl(d.t),pill(pc(d.a,d.t))]); });
+      if(!R.length) return `No figures for ${monthName(mo)} yet.`;
+      return `<b>${worst?"Weakest":"Best"} day of each line · ${monthName(mo)}</b>`+table(["Section","Day","Achd","Target","%"],R); }
     const days=combineDays(pickSecs(mo,keys)).filter(d=>d.a!=null); if(!days.length) return `No figures for ${monthName(mo)} yet.`;
     const d=worst?days.slice().sort((a,c)=>pc(a.a,a.t)-pc(c.a,c.t))[0]:days.slice().sort((a,c)=>c.a-a.a)[0];
     return `<b>${worst?"Weakest":"Best"} day · ${keys.length?nameList(keys):"All sections"} · ${monthName(mo)}</b><br>${esc(yLbl(d))}: passed <b>${L(d.a)}</b> against ${L(d.t)} — ${pill(pc(d.a,d.t))}.`; }
@@ -2520,13 +2526,13 @@ setConn("Connecting…", false);
     const t=norm(q); let keys=secsIn(t); let per=periodIn(t);
     const follow=/^ (and|what about|aur|or|how about|then|uska|iska) /.test(t);
     if(!keys.length && follow && ctx.keys.length && !has(t,"all","total","plant","overall","sab")) keys=ctx.keys;
-    if(!per && ctx.per && keys.length && (follow || t.trim().split(" ").length<=3)) per=ctx.per;
+    if(!per && ctx.per && keys.length && (follow || t.trim().split(" ").length<=2)) per=ctx.per;
     if(has(t,"all","total","plant","overall","sab","sabhi","everyone","every section","all sections")) keys=secsIn(t);
     const howTo=/ (how|kaise|kaisa|where|kahan) /.test(t);
     const fix=/ (i mean|i meant|matlab|mera matlab|no i want|not that|nahi) /.test(t);
     if(fix && ctx.last && !secsIn(t).length && !has(t,"behind","top","best","worst","asking","target","summary","compare")){
       const k=ctx.keys, p=per||ctx.per; const o=ctx.last(k,p); ctx={keys:k,per:p,last:ctx.last}; return o; }
-    let last=null;
+    let last=null; const each=!secsIn(t).length && has(t,"lines","sections","separately","separate","each","every","table","section wise","sectionwise","line wise","linewise","all lines","all sections","har line","sab line");
     let out;
     if(/^ (hi|hello|hey|hii|namaste|good morning|good evening|good afternoon|hola|yo) $/.test(t)) out=`Hi${firstName()?" "+firstName():""}! 👋 How can I help you?`;
     else if(has(t,"thanks","thank you","thx","ty","shukriya","dhanyavad")) out="You're welcome! 😊";
@@ -2540,8 +2546,8 @@ setConn("Connecting…", false);
     else if(has(t,"compare","comparison","vs","versus","than last month","compared")) { last=(k,p)=>compareAnswer(k,p&&p.k==="month"?p.m:curMonth()); out=compareAnswer(keys,per&&per.k==="month"&&!has(t,"last month","previous month","prev month","pichle mahine","pichla mahina","pichhle mahine")?per.m:curMonth()); }
     else if(has(t,"summary","summarise","summarize","status","overview","update","brief","how are we doing","how is it going","kaisa chal","report card")) { last=(k,p)=>summaryAnswer(p&&p.k==="month"?p.m:curMonth()); out=summaryAnswer(per&&per.k==="month"?per.m:curMonth()); }
     else if(has(t,"asking","asking rate","required","per day needed","need per day","run rate","remaining","balance","kitna chahiye")) { last=(k,p)=>askAnswer(k,p&&p.k==="month"?p.m:curMonth()); out=askAnswer(keys,per&&per.k==="month"?per.m:curMonth()); }
-    else if(has(t,"worst day","weakest day","lowest day","bad day")) { last=(k,p)=>bestDayAnswer(k,p&&p.k==="month"?p.m:curMonth(),true); out=bestDayAnswer(keys,per&&per.k==="month"?per.m:curMonth(),true); }
-    else if(has(t,"best day","highest day","top day","max day","record day","best date")) { last=(k,p)=>bestDayAnswer(k,p&&p.k==="month"?p.m:curMonth(),false); out=bestDayAnswer(keys,per&&per.k==="month"?per.m:curMonth(),false); }
+    else if(has(t,"worst day","worst days","weakest day","lowest day","bad day")) { last=(k,p)=>bestDayAnswer(k,p&&p.k==="month"?p.m:curMonth(),true,each); out=bestDayAnswer(keys,per&&per.k==="month"?per.m:curMonth(),true,each); }
+    else if(has(t,"best day","best days","highest day","top day","max day","record day","best date")) { last=(k,p)=>bestDayAnswer(k,p&&p.k==="month"?p.m:curMonth(),false,each); out=bestDayAnswer(keys,per&&per.k==="month"?per.m:curMonth(),false,each); }
     else if(!keys.length && has(t,"behind","lagging","short","shortfall","worst","lowest","weak","poor","below","red","peeche","peechhe","failing","failure")) { last=(k,p)=>behindAnswer(p); out=behindAnswer(per); }
     else if(!keys.length && has(t,"best","top","highest","leading","strongest","sabse zyada","most","ahead","winner")) { last=(k,p)=>topAnswer(p); out=topAnswer(per); }
     else if(has(t,"target","plan","lakshya")&&!has(t,"passing","passed","achieved","achd","production","output","pass")) { last=(k,p)=>targetAnswer(k,p); out=targetAnswer(keys,per); }
