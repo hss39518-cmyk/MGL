@@ -672,6 +672,29 @@ body.line-open .fri-btn{display:none}
 .seen-sum{margin-top:16px;font-size:13px;color:var(--ink2)}
 .seen-sum b{color:var(--ink)}
 .seen-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--ok);margin-right:6px;vertical-align:1px;box-shadow:0 0 0 3px var(--ok-l)}
+/* ---------- new-figures banner & share ---------- */
+.dg-r{display:flex;gap:10px;align-items:center}
+.sharebtn{display:inline-flex;align-items:center;gap:7px;height:42px;padding:0 16px}
+.sharebtn svg.i,.sharebtn2 svg.i{width:17px;height:17px}
+.sharebtn2{display:grid;place-items:center}
+.newdata{display:flex;align-items:center;gap:14px;margin:0 0 16px;padding:12px 14px 12px 16px;border-radius:18px;background:linear-gradient(120deg,rgba(59,130,246,.28),rgba(37,99,235,.16));border:1px solid rgba(147,197,253,.4);animation:ndIn .35s ease-out}
+.newdata[hidden]{display:none}
+@keyframes ndIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.nd-ic{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(140deg,#60a5fa,#2563eb);color:#fff;flex:none;font-size:15px}
+.nd-t{flex:1;min-width:0;line-height:1.35}.nd-t b{display:block;color:var(--ink)}.nd-t span{color:var(--ink2);font-size:13px}
+.newdata .btn{height:36px;padding:0 14px;flex:none}
+.nd-x{border:0;background:transparent;color:var(--mut);font-size:14px;cursor:pointer;width:30px;height:30px;border-radius:8px;flex:none}
+.nd-x:hover{background:rgba(255,255,255,.1)}
+html.light .newdata{background:linear-gradient(120deg,#dbeafe,#eff6ff);border-color:#bfdbfe}
+.side nav.tabs a{position:relative}
+.ndot{display:none;position:absolute;left:24px;top:8px;width:8px;height:8px;border-radius:50%;background:#f97316;box-shadow:0 0 0 2px rgba(15,23,42,.6)}
+body.has-new .ndot{display:block}
+body.has-new .menubtn{position:relative}
+body.has-new .menubtn::after{content:"";position:absolute;top:6px;right:6px;width:8px;height:8px;border-radius:50%;background:#f97316}
+#shareM{z-index:70}
+.sharebox{max-width:560px;width:100%}
+.sharebox img{display:block;width:100%;max-height:62vh;object-fit:contain;border-radius:14px;background:#0b1430}
+@media (max-width:900px){.sharebtn span{display:none}.sharebtn{padding:0 12px}.newdata{flex-wrap:wrap}.newdata .nd-t{flex:1 1 calc(100% - 90px)}}
 footer{text-align:center;color:var(--mut);font-size:11.5px;padding:8px 0 30px}
 @media (max-width:700px){
   .appbar .sub{display:none}
@@ -695,7 +718,7 @@ footer{text-align:center;color:var(--mut);font-size:11.5px;padding:8px 0 30px}
   <div class="side-brand"><img class="logo" src="icon-192.png" alt=""><div><b>MGL PPC</b><small>Production Planning &amp; Control</small></div></div>
   <div class="side-lbl">Menu</div>
   <nav class="tabs"><div class="wrap">
-  <a href="#dash" data-v="dash"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="2"/><rect x="14" y="3" width="7" height="5" rx="2"/><rect x="14" y="12" width="7" height="9" rx="2"/><rect x="3" y="16" width="7" height="5" rx="2"/></svg>Dashboard</a>
+  <a href="#dash" data-v="dash"><i class="ndot" aria-hidden="true"></i><svg class="i" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="2"/><rect x="14" y="3" width="7" height="5" rx="2"/><rect x="14" y="12" width="7" height="9" rx="2"/><rect x="3" y="16" width="7" height="5" rx="2"/></svg>Dashboard</a>
   <a href="#report" data-v="report"><svg class="i" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>Report</a>
   <a href="#daily" data-v="daily"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M8 14h2M14 14h2M8 18h2"/></svg>Daily T&amp;A</a>
   <a href="#upload" data-v="upload" class="up-only"><svg class="i" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></svg>Upload</a>
@@ -762,8 +785,9 @@ footer{text-align:center;color:var(--mut);font-size:11.5px;padding:8px 0 30px}
   <section class="view" id="v-dash">
     <div class="dgreet">
       <div><small id="dbDate"></small><h2 id="dbHello">Hello 👋</h2></div>
-      <select id="dbMonth" aria-label="Month"></select>
+      <div class="dg-r"><button type="button" class="btn ghost sharebtn" id="dbShare"><svg class="i" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg><span>Share</span></button><select id="dbMonth" aria-label="Month"></select></div>
     </div>
+    <div class="newdata" id="newData" hidden></div>
     <div id="dbEmpty" class="card empty" style="display:none">No data yet. Upload the <b>Hard Section Production Value</b> workbook on the Upload tab.</div>
     <div class="dgrid" id="dbGrid">
       <div class="dcard dhero dgo" data-go="all" role="button" tabindex="0"><span class="dmore">View details →</span>
@@ -1041,6 +1065,7 @@ footer{text-align:center;color:var(--mut);font-size:11.5px;padding:8px 0 30px}
     <button type="button" class="lnav" id="linePrev" aria-label="Previous line">‹</button>
     <div class="ltitle"><small id="lineSub">Line · November 2026</small><h2 id="lineName">Line</h2></div>
     <button type="button" class="lnav" id="lineNext" aria-label="Next line">›</button>
+    <button type="button" class="lnav sharebtn2" id="lineShare" aria-label="Share as picture" title="Share as picture"><svg class="i" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg></button>
     <select id="lineMonth" aria-label="Month"></select>
     <button type="button" class="lnav lx" id="lineClose" aria-label="Close">✕</button>
   </header>
@@ -1056,6 +1081,15 @@ footer{text-align:center;color:var(--mut);font-size:11.5px;padding:8px 0 30px}
   <div class="card"><h3>Day-wise</h3><div class="twrap"><table><thead><tr><th>Day</th><th class="n">Target</th><th class="n">Achieved</th><th class="n">Failure</th><th class="n">Achd %</th><th class="n">Cum. Achd %</th></tr></thead><tbody id="lineRows"></tbody></table></div></div>
   <div class="row" style="justify-content:flex-end;margin-top:4px"><button type="button" class="btn ghost" id="lineToDaily">Open in Daily T&amp;A</button></div>
 </div></div>
+<div class="modal" id="shareM"><div class="box sharebox">
+  <h3 style="margin:0 0 4px">Share as a picture</h3><p class="note" style="margin:0 0 12px">Copy or download it, then send it in WhatsApp. It's marked "internal use".</p>
+  <img id="shareImg" alt="Picture to share">
+  <div class="row" style="justify-content:flex-end;gap:8px;margin-top:12px;flex-wrap:wrap">
+    <button type="button" class="btn ghost" id="shareClose">Close</button>
+    <button type="button" class="btn ghost" id="shareWa">Open WhatsApp Web</button>
+    <button type="button" class="btn ghost" id="shareDl">Download</button>
+    <button type="button" class="btn" id="shareCopy">Copy picture</button>
+  </div></div></div>
 <div class="modal" id="confirmM"><div class="box">
   <h3 id="cTitle">Delete entry?</h3><p class="note" id="cMsg"></p>
   <div class="row" style="justify-content:flex-end"><button class="btn ghost" id="cNo">Cancel</button><button class="btn" style="background:var(--bad)" id="cYes">Delete</button></div>
@@ -1541,7 +1575,7 @@ function startData(){
   unsubs.push(onSnapshot(query(collection(db,"config"), where("kind","==","daily")), { includeMetadataChanges:true }, snap => {
     if(snap.empty && snap.metadata.fromCache) return;   // nothing saved on this device yet: keep the placeholders until the server answers
     const was=document.body.classList.contains("loading-data");
-    S.daily=snap.docs.map(d=>Object.assign({},d.data(),{id:d.id}));
+    S.daily=snap.docs.map(d=>Object.assign({},d.data(),{id:d.id})); setTimeout(()=>{ try{ checkNewData(); }catch(e){} },200);
     if(was){ document.body.classList.remove("loading-data"); clearTimeout(window.__skT); }
     rerender(); }, err=>{ document.body.classList.remove("loading-data"); toast("Couldn't load daily data: "+authMsg(err)); }));
   ensureMonth(today().slice(0,7)).then(()=>{ setConn(navigator.onLine?"Live · synced":"Offline", navigator.onLine); });
@@ -2042,6 +2076,119 @@ function renderDash(){
 $("dbMonth").addEventListener("change",()=>{ DB.month=$("dbMonth").value; DB.day=""; DB.anim=true; renderDash(); });
 function openDaily(secKey){ D.month=DB.month; D.sec=secKey||""; hideDTip(); location.hash="daily"; window.scrollTo(0,0); }
 function openReport(){ $("rPeriod").value="month"; $("rMonth").value=DB.month; $("rLine").value=""; hideDTip(); location.hash="report"; window.scrollTo(0,0); }
+/* ---------- "new figures" banner ---------- */
+function latestDay(){ const m=dMonths()[0]; if(!m) return null; const d=combineDays(dSections(m)).filter(x=>x.a!=null).pop(); return d?Object.assign({month:m},d):null; }
+function seenKey(){ const u=auth&&auth.currentUser; return u?"mgl-lastday-"+u.uid:null; }
+function checkNewData(){
+  const k=seenKey(), d=latestDay(), box=$("newData"); if(!k||!d||!box) return;
+  const cur=d.date+"|"+d.label; let seen=null; try{ seen=localStorage.getItem(k); }catch(e){}
+  if(!seen){ try{ localStorage.setItem(k,cur); }catch(e){} box.hidden=true; document.body.classList.remove("has-new"); return; }
+  const isNew = cur.split("|")[0] > seen.split("|")[0] || (cur.split("|")[0]===seen.split("|")[0] && cur!==seen);
+  if(!isNew){ box.hidden=true; document.body.classList.remove("has-new"); return; }
+  const p=d.t?d.a*100/d.t:null, wd=new Date(d.date+"T00:00:00").toLocaleDateString("en-GB",{weekday:"short"});
+  box.innerHTML=`<span class="nd-ic">✦</span><div class="nd-t"><b>New figures are in</b><span>${esc(wd)} ${esc(yLbl(d))}: ${fl(d.a)} L of ${fl(d.t)} L · ${pctTxt(p)}</span></div><button type="button" class="btn" id="ndView">View day</button><button type="button" class="nd-x" id="ndX" aria-label="Dismiss">✕</button>`;
+  box.hidden=false; document.body.classList.add("has-new");
+  const mark=()=>{ try{ localStorage.setItem(k,cur); }catch(e){} box.hidden=true; document.body.classList.remove("has-new"); };
+  $("ndX").onclick=mark;
+  $("ndView").onclick=()=>{ mark(); DB.month=d.month; DB.day=dKey(d); DB.dayAnim=true; if(location.hash!=="#dash") location.hash="dash"; renderDash(); setTimeout(()=>{ const s=$("dbStrip"); if(s) s.closest(".dcard").scrollIntoView({behavior:"smooth",block:"center"}); },80); };
+}
+
+/* ---------- share as a picture (WhatsApp) ---------- */
+const SHARE={blob:null,name:"",title:""};
+function rr(c,x,y,w,h,r){ c.beginPath(); c.moveTo(x+r,y); c.arcTo(x+w,y,x+w,y+h,r); c.arcTo(x+w,y+h,x,y+h,r); c.arcTo(x,y+h,x,y,r); c.arcTo(x,y,x+w,y,r); c.closePath(); }
+const bandCol=p=>p==null?"#64748b":p>=100?"#22c55e":p<60?"#f87171":"#fbbf24";
+function loadImg(src){ return new Promise(res=>{ const i=new Image(); i.onload=()=>res(i); i.onerror=()=>res(null); i.src=src; }); }
+async function cardBase(title, sub, upto){
+  try{ await document.fonts.ready; }catch(e){}
+  const W=1080, H=1350, cv=document.createElement("canvas"); cv.width=W; cv.height=H; const c=cv.getContext("2d");
+  const g=c.createLinearGradient(0,0,W*.4,H); g.addColorStop(0,"#0b1430"); g.addColorStop(.55,"#14244f"); g.addColorStop(1,"#1d3a7a"); c.fillStyle=g; c.fillRect(0,0,W,H);
+  const rg=c.createRadialGradient(W*.85,H*.12,10,W*.85,H*.12,520); rg.addColorStop(0,"rgba(251,146,60,.28)"); rg.addColorStop(1,"rgba(251,146,60,0)"); c.fillStyle=rg; c.fillRect(0,0,W,H);
+  // soft mountain ridge at the bottom
+  c.fillStyle="rgba(255,255,255,.04)"; c.beginPath(); c.moveTo(0,H); [[0,1180],[160,1120],[300,1170],[470,1080],[640,1160],[800,1100],[960,1150],[1080,1110],[1080,H]].forEach(([x,y])=>c.lineTo(x,y)); c.fill();
+  const logo=await loadImg("icon-192.png"); if(logo){ c.save(); rr(c,64,60,84,84,20); c.clip(); c.drawImage(logo,64,60,84,84); c.restore(); }
+  c.fillStyle="#fff"; c.font="700 34px Inter, system-ui, sans-serif"; c.fillText("MGL PPC",168,96);
+  c.fillStyle="rgba(226,232,240,.7)"; c.font="400 24px Inter, system-ui, sans-serif"; c.fillText("Production Planning & Control",168,132);
+  c.fillStyle="#fff"; c.font='400 66px "DM Serif Display", Georgia, serif'; c.fillText(title,64,250);
+  c.fillStyle="rgba(226,232,240,.75)"; c.font="500 27px Inter, system-ui, sans-serif"; c.fillText(sub+(upto?"  ·  data up to "+upto:""),64,296);
+  return {cv,c,W,H};
+}
+function cardFooter(c,W,H){
+  c.fillStyle="rgba(251,191,36,.9)"; c.font="700 22px Inter, system-ui, sans-serif"; c.fillText("CONFIDENTIAL · INTERNAL USE ONLY",64,H-92);
+  c.fillStyle="rgba(226,232,240,.55)"; c.font="400 22px Inter, system-ui, sans-serif";
+  c.fillText("Values in ₹ lakh (L) · Hard passing · Generated "+genStamp(),64,H-56);
+}
+function kpiTiles(c,y,tiles){ const gap=20, w=(1080-128-gap*(tiles.length-1))/tiles.length;
+  tiles.forEach((t,i)=>{ const x=64+i*(w+gap); rr(c,x,y,w,150,24); c.fillStyle="rgba(255,255,255,.07)"; c.fill(); c.strokeStyle="rgba(255,255,255,.12)"; c.lineWidth=2; c.stroke();
+    c.fillStyle="rgba(226,232,240,.65)"; c.font="600 20px Inter, system-ui, sans-serif"; c.fillText(t.k.toUpperCase(),x+24,y+44);
+    c.fillStyle=t.col||"#fff"; c.font='400 46px "DM Serif Display", Georgia, serif'; c.fillText(t.v,x+24,y+102);
+    if(t.s){ c.fillStyle="rgba(226,232,240,.6)"; c.font="400 19px Inter, system-ui, sans-serif"; c.fillText(t.s,x+24,y+132); } }); }
+async function buildDashCard(){
+  const m=DB.month||dMonths()[0]; const secs=dSections(m); if(!secs.length) return null; const st=statsOf(combineDays(secs));
+  const {cv,c,W,H}=await cardBase("Hard Section · "+monthName(m), "Target vs achievement", st.lastDate?fmtD(st.lastDate):"");
+  const pp=st.pct;
+  kpiTiles(c,340,[{k:"Achieved",v:lakhCr(st.A),s:fl(st.A)+" L"},{k:"Plan to date",v:lakhCr(st.TT),s:"Month "+lakhCr(st.T)},{k:"Achd %",v:pctTxt(pp),col:bandCol(pp),s:st.ask==null?"Month complete":"Need "+fl(st.ask)+" L/day"}]);
+  c.fillStyle="#fff"; c.font="700 28px Inter, system-ui, sans-serif"; c.fillText("Lines · achieved vs plan to date",64,560);
+  const rows=secs.map(s=>{ const x=statsOf(s.days); return {n:s.name,p:x.pct,a:x.A}; });
+  const top=590, rh=Math.min(64,(1000-top)/Math.max(1,rows.length)), bx=380, bw=470, maxP=Math.max(120,...rows.map(r=>r.p||0));
+  rows.forEach((r,i)=>{ const y=top+i*rh;
+    c.fillStyle="rgba(241,245,249,.92)"; c.font="600 25px Inter, system-ui, sans-serif"; c.fillText(r.n,64,y+rh/2+9);
+    rr(c,bx,y+rh/2-13,bw,26,13); c.fillStyle="rgba(255,255,255,.08)"; c.fill();
+    const w=Math.max(6,bw*Math.min(r.p||0,maxP)/maxP); rr(c,bx,y+rh/2-13,w,26,13); c.fillStyle=bandCol(r.p); c.fill();
+    const x100=bx+bw*100/maxP; c.strokeStyle="rgba(255,255,255,.55)"; c.setLineDash([5,5]); c.lineWidth=2; c.beginPath(); c.moveTo(x100,y+rh/2-20); c.lineTo(x100,y+rh/2+20); c.stroke(); c.setLineDash([]);
+    c.textAlign="right"; c.fillStyle=bandCol(r.p); c.font="700 25px Inter, system-ui, sans-serif"; c.fillText(pctTxt(r.p),W-200,y+rh/2+9);
+    c.fillStyle="rgba(226,232,240,.7)"; c.font="400 22px Inter, system-ui, sans-serif"; c.fillText(fl(r.a)+" L",W-64,y+rh/2+8); c.textAlign="left"; });
+  const ld=combineDays(secs).filter(d=>d.a!=null).pop();
+  if(ld){ const y=1040; rr(c,64,y,W-128,96,22); c.fillStyle="rgba(59,130,246,.18)"; c.fill(); c.strokeStyle="rgba(147,197,253,.35)"; c.lineWidth=2; c.stroke();
+    c.fillStyle="rgba(191,219,254,.9)"; c.font="600 21px Inter, system-ui, sans-serif"; c.fillText("LATEST DAY · "+yLbl(ld),92,y+38);
+    c.fillStyle="#fff"; c.font="500 29px Inter, system-ui, sans-serif"; c.fillText(`${fl(ld.a)} L passed of ${fl(ld.t)} L target  ·  ${pctTxt(ld.t?ld.a*100/ld.t:null)}`,92,y+76); }
+  cardFooter(c,W,H);
+  return {cv, name:`MGL-PPC-${m}-summary.png`, title:`MGL PPC · ${monthName(m)}`};
+}
+async function buildLineCard(){
+  const m=LP.month, s=dSections(m).find(q=>q.key===LP.key); if(!s) return null; const x=statsOf(s.days);
+  const {cv,c,W,H}=await cardBase(s.name, monthName(m)+" · Hard passing", x.lastDate?fmtD(x.lastDate):"");
+  kpiTiles(c,340,[{k:"Achieved",v:fl(x.A)+" L",s:lakhCr(x.A)},{k:"Plan to date",v:fl(x.TT)+" L",s:"Month "+fl(x.T)+" L"},{k:"Achd %",v:pctTxt(x.pct),col:bandCol(x.pct),s:x.ask==null?"Month complete":"Need "+fl(x.ask)+" L/day"}]);
+  c.fillStyle="#fff"; c.font="700 28px Inter, system-ui, sans-serif"; c.fillText("Day by day · achieved vs target",64,560);
+  const days=s.days, cx=64, cy=600, cw=W-128, ch=330; const max=Math.max(1,...days.map(d=>Math.max(d.a||0,d.t||0)))*1.1;
+  c.strokeStyle="rgba(255,255,255,.1)"; c.lineWidth=1; for(let i=0;i<=4;i++){ const y=cy+ch-ch*i/4; c.beginPath(); c.moveTo(cx,y); c.lineTo(cx+cw,y); c.stroke(); }
+  const bw=cw/days.length;
+  days.forEach((d,i)=>{ const x0=cx+i*bw; if(d.a!=null){ const h=ch*d.a/max; rr(c,x0+bw*.18,cy+ch-h,bw*.64,h,Math.min(6,bw*.3)); c.fillStyle="#ea580c"; c.fill(); }
+    if(d.t){ const y=cy+ch-ch*d.t/max; c.strokeStyle="#60a5fa"; c.lineWidth=4; c.beginPath(); c.moveTo(x0+bw*.08,y); c.lineTo(x0+bw*.92,y); c.stroke(); } });
+  c.fillStyle="rgba(226,232,240,.6)"; c.font="400 19px Inter, system-ui, sans-serif"; c.fillText(String(days[0]?days[0].label.split(".")[0]:""),cx,cy+ch+30); c.textAlign="right"; c.fillText(String(days.length?days[days.length-1].label.split(".")[0]:""),cx+cw,cy+ch+30); c.textAlign="left";
+  c.fillStyle="#ea580c"; c.fillRect(cx,cy+ch+52,22,14); c.fillStyle="rgba(226,232,240,.8)"; c.font="400 21px Inter, system-ui, sans-serif"; c.fillText("Achieved",cx+32,cy+ch+66);
+  c.fillStyle="#60a5fa"; c.fillRect(cx+160,cy+ch+57,26,5); c.fillStyle="rgba(226,232,240,.8)"; c.fillText("Target",cx+196,cy+ch+66);
+  const ds=days.filter(d=>d.a!=null), best=ds.slice().sort((a,b)=>b.a-a.a)[0], worst=ds.filter(d=>d.t>0).sort((a,b)=>a.a/a.t-b.a/b.t)[0];
+  const y=1040, w=(W-128-20)/2;
+  [[best,"BEST DAY"],[worst,"WEAKEST DAY"]].forEach(([d,lab],i)=>{ if(!d) return; const x0=64+i*(w+20); rr(c,x0,y,w,110,22); c.fillStyle="rgba(255,255,255,.07)"; c.fill();
+    c.fillStyle="rgba(226,232,240,.65)"; c.font="600 20px Inter, system-ui, sans-serif"; c.fillText(lab+" · "+yLbl(d),x0+24,y+40);
+    c.fillStyle="#fff"; c.font='400 40px "DM Serif Display", Georgia, serif'; c.fillText(fl(d.a)+" L",x0+24,y+90);
+    c.fillStyle=bandCol(d.t?d.a*100/d.t:null); c.font="700 24px Inter, system-ui, sans-serif"; c.textAlign="right"; c.fillText(pctTxt(d.t?d.a*100/d.t:null),x0+w-24,y+88); c.textAlign="left"; });
+  cardFooter(c,W,H);
+  return {cv, name:`MGL-PPC-${s.name.replace(/[^A-Za-z0-9]+/g,"-")}-${m}.png`, title:`MGL PPC · ${s.name} · ${monthName(m)}`};
+}
+async function shareCard(kind){
+  const btns=[$("dbShare"),$("lineShare")].filter(Boolean); btns.forEach(b=>b.disabled=true);
+  try{
+    const r = kind==="line" ? await buildLineCard() : await buildDashCard(); if(!r){ toast("No figures to share yet"); return; }
+    const blob=await new Promise(res=>r.cv.toBlob(res,"image/png")); SHARE.blob=blob; SHARE.name=r.name; SHARE.title=r.title;
+    const file=new File([blob],r.name,{type:"image/png"});
+    const mobile=/Android|iPhone|iPad|Mobile/i.test(navigator.userAgent);
+    if(mobile && navigator.canShare && navigator.canShare({files:[file]})){
+      try{ await navigator.share({files:[file], title:r.title}); return; }catch(e){ if(e && e.name==="AbortError") return; }
+    }
+    const url=URL.createObjectURL(blob); $("shareImg").src=url; $("shareM").classList.add("on");
+    $("shareCopy").style.display = (navigator.clipboard && window.ClipboardItem) ? "" : "none";
+  }catch(e){ console.error(e); toast("Couldn't make the picture on this device"); }
+  finally{ btns.forEach(b=>b.disabled=false); }
+}
+function closeShare(){ $("shareM").classList.remove("on"); const s=$("shareImg").src; if(s.startsWith("blob:")) setTimeout(()=>URL.revokeObjectURL(s),1000); }
+$("shareClose").addEventListener("click",closeShare);
+$("shareM").addEventListener("click",ev=>{ if(ev.target.id==="shareM") closeShare(); });
+$("shareDl").addEventListener("click",()=>{ if(!SHARE.blob) return; save(SHARE.name,SHARE.blob); toast("Picture downloaded — attach it in WhatsApp"); });
+$("shareCopy").addEventListener("click",async()=>{ try{ await navigator.clipboard.write([new ClipboardItem({"image/png":SHARE.blob})]); toast("Picture copied — paste it in a WhatsApp chat (Ctrl+V)"); }catch(e){ toast("Couldn't copy here — use Download instead"); } });
+$("shareWa").addEventListener("click",()=>{ window.open("https://web.whatsapp.com/","_blank","noopener"); });
+$("dbShare").addEventListener("click",()=>shareCard("dash"));
+$("lineShare").addEventListener("click",()=>shareCard("line"));
 /* ---------- line detail page ---------- */
 const LP={key:"",month:""};
 function openLine(key){ if(!key) return; LP.key=key; LP.month=DB.month||dMonths()[0]; hideDTip(); const sh=$("lineSheet");
