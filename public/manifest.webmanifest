@@ -1,0 +1,32 @@
+{
+  "name": "MGL PPC",
+  "short_name": "MGL PPC",
+  "description": "MGL PPC \u2013 Production Planning & Control: production value, daily target vs achievement",
+  "id": "./",
+  "start_url": "./#report",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#00195b",
+  "theme_color": "#0f172a",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
