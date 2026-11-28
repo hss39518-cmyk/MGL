@@ -153,6 +153,7 @@ body[data-canup="0"] .up-only{display:none!important}
 .perms input,.permcell input{width:16px;height:16px;accent-color:#ea580c}
 .permcell label.off{color:var(--mut);cursor:default}
 body:not([data-role="admin"]) .a-only{display:none!important}
+body[data-role="admin"] .na-only{display:none!important}
 .charts2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 @media (max-width:900px){.charts2{grid-template-columns:1fr}}
 .chart{position:relative;width:100%}
@@ -636,7 +637,7 @@ footer{text-align:center;color:var(--mut);font-size:11.5px;padding:8px 0 30px}
   <a href="#report" data-v="report"><svg class="i" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>Report</a>
   <a href="#daily" data-v="daily"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M8 14h2M14 14h2M8 18h2"/></svg>Daily T&amp;A</a>
   <a href="#upload" data-v="upload" class="up-only"><svg class="i" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></svg>Upload</a>
-  <a href="#setup" data-v="setup"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Setup</a>
+  <a href="#setup" data-v="setup"><svg class="i a-only" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><svg class="i na-only" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span class="a-only">Setup</span><span class="na-only">My account</span></a>
 </div></nav>
   <button type="button" class="theme-tg" id="themeTg" aria-pressed="false"><svg class="ti" id="themeIc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg><span id="themeLbl">Light mode</span><i class="sw2"></i></button>
   <div class="meta-r"><div id="clock">--</div><div id="conn">Connecting…</div></div>
@@ -916,7 +917,7 @@ footer{text-align:center;color:var(--mut);font-size:11.5px;padding:8px 0 30px}
 
   <!-- SETUP -->
   <section class="view" id="v-setup">
-    <div class="pagehead"><div><h2>Setup</h2><p>Users &amp; access, your account and plant details.</p></div></div>
+    <div class="pagehead"><div><h2><span class="a-only">Setup</span><span class="na-only">My account</span></h2><p><span class="a-only">Users &amp; access, your account and plant details.</span><span class="na-only">Change your password.</span></p></div></div>
     <div class="card a-only">
       <h3>Users &amp; access</h3>
       <p class="note" style="margin-top:-6px">Everyone signs in with their employee code (or email) and password.
