@@ -693,7 +693,17 @@ body.has-new .menubtn{position:relative}
 body.has-new .menubtn::after{content:"";position:absolute;top:6px;right:6px;width:8px;height:8px;border-radius:50%;background:#f97316}
 #shareM{z-index:70}
 .sharebox{max-width:560px;width:100%}
-.sharebox img{display:block;width:100%;max-height:62vh;object-fit:contain;border-radius:14px;background:#0b1430}
+.sharebox{max-width:620px}
+.sh-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.seg{display:inline-flex;padding:3px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid var(--line)}
+.seg button{border:0;background:transparent;color:var(--ink2);font:600 12.5px Inter,system-ui,sans-serif;padding:7px 13px;border-radius:999px;cursor:pointer}
+.seg button.on{background:#3b82f6;color:#fff}
+html.light .seg{background:rgba(15,23,42,.05)}
+.sh-prev{position:relative;max-height:62vh;overflow:auto;border-radius:14px;background:rgba(0,0,0,.25);border:1px solid var(--line)}
+.sh-prev img{display:block;width:100%;height:auto;transition:opacity .2s}
+.sh-busy{position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-weight:600;font-size:14px}
+.sh-busy[hidden]{display:none}
+@media (max-width:900px){#shareM .box{padding:14px}.sh-prev{max-height:58vh}}
 @media (max-width:900px){.sharebtn span{display:none}.sharebtn{padding:0 12px}.newdata{flex-wrap:wrap}.newdata .nd-t{flex:1 1 calc(100% - 90px)}}
 footer{text-align:center;color:var(--mut);font-size:11.5px;padding:8px 0 30px}
 @media (max-width:700px){
@@ -1065,7 +1075,7 @@ footer{text-align:center;color:var(--mut);font-size:11.5px;padding:8px 0 30px}
     <button type="button" class="lnav" id="linePrev" aria-label="Previous line">‹</button>
     <div class="ltitle"><small id="lineSub">Line · November 2026</small><h2 id="lineName">Line</h2></div>
     <button type="button" class="lnav" id="lineNext" aria-label="Next line">›</button>
-    <button type="button" class="lnav sharebtn2" id="lineShare" aria-label="Share as picture" title="Share as picture"><svg class="i" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg></button>
+    <button type="button" class="lnav sharebtn2" id="lineShare" aria-label="Share or A4 sheet" title="Share / A4 sheet"><svg class="i" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg></button>
     <select id="lineMonth" aria-label="Month"></select>
     <button type="button" class="lnav lx" id="lineClose" aria-label="Close">✕</button>
   </header>
@@ -1082,13 +1092,16 @@ footer{text-align:center;color:var(--mut);font-size:11.5px;padding:8px 0 30px}
   <div class="row" style="justify-content:flex-end;margin-top:4px"><button type="button" class="btn ghost" id="lineToDaily">Open in Daily T&amp;A</button></div>
 </div></div>
 <div class="modal" id="shareM"><div class="box sharebox">
-  <h3 style="margin:0 0 4px">Share as a picture</h3><p class="note" style="margin:0 0 12px">Copy or download it, then send it in WhatsApp. It's marked "internal use".</p>
-  <img id="shareImg" alt="Picture to share">
+  <div class="sh-head"><h3 style="margin:0">Share</h3><div class="seg" id="shareFmt" role="tablist"><button type="button" data-f="wa" class="on">WhatsApp picture</button><button type="button" data-f="a4">A4 sheet (PDF)</button></div></div>
+  <p class="note" id="shareNote" style="margin:6px 0 10px">Sized for WhatsApp. Send it as a picture.</p>
+  <div class="sh-prev"><img id="shareImg" alt="Preview"><div class="sh-busy" id="shareBusy" hidden>Preparing…</div></div>
   <div class="row" style="justify-content:flex-end;gap:8px;margin-top:12px;flex-wrap:wrap">
     <button type="button" class="btn ghost" id="shareClose">Close</button>
     <button type="button" class="btn ghost" id="shareWa">Open WhatsApp Web</button>
-    <button type="button" class="btn ghost" id="shareDl">Download</button>
-    <button type="button" class="btn" id="shareCopy">Copy picture</button>
+    <button type="button" class="btn ghost" id="sharePrint">Print</button>
+    <button type="button" class="btn ghost" id="shareDl">Download picture</button>
+    <button type="button" class="btn ghost" id="shareCopy">Copy picture</button>
+    <button type="button" class="btn" id="shareSend">Share…</button>
   </div></div></div>
 <div class="modal" id="confirmM"><div class="box">
   <h3 id="cTitle">Delete entry?</h3><p class="note" id="cMsg"></p>
@@ -2166,29 +2179,145 @@ async function buildLineCard(){
   cardFooter(c,W,H);
   return {cv, name:`MGL-PPC-${s.name.replace(/[^A-Za-z0-9]+/g,"-")}-${m}.png`, title:`MGL PPC · ${s.name} · ${monthName(m)}`};
 }
-async function shareCard(kind){
-  const btns=[$("dbShare"),$("lineShare")].filter(Boolean); btns.forEach(b=>b.disabled=true);
-  try{
-    const r = kind==="line" ? await buildLineCard() : await buildDashCard(); if(!r){ toast("No figures to share yet"); return; }
-    const blob=await new Promise(res=>r.cv.toBlob(res,"image/png")); SHARE.blob=blob; SHARE.name=r.name; SHARE.title=r.title;
-    const file=new File([blob],r.name,{type:"image/png"});
-    const mobile=/Android|iPhone|iPad|Mobile/i.test(navigator.userAgent);
-    if(mobile && navigator.canShare && navigator.canShare({files:[file]})){
-      try{ await navigator.share({files:[file], title:r.title}); return; }catch(e){ if(e && e.name==="AbortError") return; }
-    }
-    const url=URL.createObjectURL(blob); $("shareImg").src=url; $("shareM").classList.add("on");
-    $("shareCopy").style.display = (navigator.clipboard && window.ClipboardItem) ? "" : "none";
-  }catch(e){ console.error(e); toast("Couldn't make the picture on this device"); }
-  finally{ btns.forEach(b=>b.disabled=false); }
+/* ---------- A4 sheet (print-ready, white) ---------- */
+const A4={W:1240,H:1754,M:70};
+async function a4Base(title, sub){
+  try{ await document.fonts.ready; }catch(e){}
+  const {W,H,M}=A4, cv=document.createElement("canvas"); cv.width=W; cv.height=H; const c=cv.getContext("2d");
+  c.fillStyle="#fff"; c.fillRect(0,0,W,H);
+  c.fillStyle="#0f1f4b"; c.fillRect(0,0,W,150);
+  const logo=await loadImg("icon-192.png"); if(logo){ c.save(); rr(c,M,35,80,80,18); c.clip(); c.drawImage(logo,M,35,80,80); c.restore(); }
+  c.fillStyle="#fff"; c.font="700 30px Inter, system-ui, sans-serif"; c.fillText("MGL PPC",M+100,70);
+  c.fillStyle="rgba(226,232,240,.8)"; c.font="400 21px Inter, system-ui, sans-serif"; c.fillText("Production Planning & Control",M+100,102);
+  c.textAlign="right"; c.fillStyle="#fbbf24"; c.font="700 19px Inter, system-ui, sans-serif"; c.fillText("CONFIDENTIAL · INTERNAL USE ONLY",W-M,70);
+  c.fillStyle="rgba(226,232,240,.75)"; c.font="400 19px Inter, system-ui, sans-serif"; c.fillText("Generated "+genStamp(),W-M,102); c.textAlign="left";
+  c.fillStyle="#0f172a"; c.font='400 54px "DM Serif Display", Georgia, serif'; c.fillText(title,M,232);
+  c.fillStyle="#475569"; c.font="500 23px Inter, system-ui, sans-serif"; c.fillText(sub,M,272);
+  return {cv,c,W,H,M};
 }
-function closeShare(){ $("shareM").classList.remove("on"); const s=$("shareImg").src; if(s.startsWith("blob:")) setTimeout(()=>URL.revokeObjectURL(s),1000); }
+const a4Col=p=>p==null?"#64748b":p>=100?"#047857":p<60?"#b91c1c":"#b45309";
+const a4Bg=p=>p==null?"#f1f5f9":p>=100?"#d1fae5":p<60?"#fee2e2":"#fef3c7";
+function a4Kpis(c,y,tiles){ const {W,M}=A4, gap=18, w=(W-2*M-gap*(tiles.length-1))/tiles.length;
+  tiles.forEach((t,i)=>{ const x=M+i*(w+gap); rr(c,x,y,w,128,16); c.fillStyle="#f8fafc"; c.fill(); c.strokeStyle="#e2e8f0"; c.lineWidth=2; c.stroke();
+    c.fillStyle="#64748b"; c.font="600 17px Inter, system-ui, sans-serif"; c.fillText(t.k.toUpperCase(),x+20,y+36);
+    c.fillStyle=t.col||"#0f172a"; c.font='400 38px "DM Serif Display", Georgia, serif'; c.fillText(t.v,x+20,y+82);
+    if(t.s){ c.fillStyle="#64748b"; c.font="400 16px Inter, system-ui, sans-serif"; c.fillText(t.s,x+20,y+110); } }); }
+function a4H(c,y,txt){ c.fillStyle="#0f172a"; c.font="700 24px Inter, system-ui, sans-serif"; c.fillText(txt,A4.M,y); }
+function a4Table(c,y,cols,rows,opt){ // cols: [{h,w,al}] ; rows: [[{t,col,bg,b}]] ; returns y after
+  const {M}=A4, rh=(opt&&opt.rh)||40, fs=(opt&&opt.fs)||18; let x=M; const W=cols.reduce((a,k)=>a+k.w,0);
+  c.fillStyle="#0f1f4b"; rr(c,M,y,W,rh+4,8); c.fill();
+  c.fillStyle="#fff"; c.font=`700 ${fs-2}px Inter, system-ui, sans-serif`;
+  cols.forEach(k=>{ c.textAlign=k.al==="r"?"right":"left"; c.fillText(k.h,k.al==="r"?x+k.w-12:x+12,y+rh/2+8); x+=k.w; });
+  y+=rh+4;
+  rows.forEach((r,ri)=>{ const tot=opt&&opt.totLast&&ri===rows.length-1; x=M;
+    c.fillStyle=tot?"#e2e8f0":ri%2?"#f8fafc":"#fff"; c.fillRect(M,y,W,rh);
+    if(tot){ c.fillStyle="#0f172a"; c.fillRect(M,y,W,2); }
+    r.forEach((cell,ci)=>{ const k=cols[ci]; const t=cell==null?"":typeof cell==="object"?cell.t:String(cell);
+      if(cell&&cell.bg){ c.fillStyle=cell.bg; rr(c,x+k.w-12-Math.max(70,c.measureText(t).width+20),y+7,Math.max(70,c.measureText(t).width+20),rh-14,8); c.fill(); }
+      c.fillStyle=(cell&&cell.col)||"#0f172a"; c.font=`${(cell&&cell.b)||tot||ci===0?700:400} ${fs}px Inter, system-ui, sans-serif`;
+      c.textAlign=k.al==="r"?"right":"left"; c.fillText(t,k.al==="r"?x+k.w-(cell&&cell.bg?22:12):x+12,y+rh/2+7); x+=k.w; });
+    c.strokeStyle="#e2e8f0"; c.lineWidth=1; c.beginPath(); c.moveTo(M,y+rh); c.lineTo(M+W,y+rh); c.stroke(); y+=rh; });
+  c.textAlign="left"; return y; }
+function a4DayChart(c,y,h,days,cum){ const {W,M}=A4, cw=W-2*M, x0=M+60, w=cw-60;
+  let pts=days; if(cum){ let ct=0,ca=0; pts=days.map(d=>{ ct+=d.t||0; if(d.a!=null) ca+=d.a; return {label:d.label,t:ct,a:d.a!=null?ca:null}; }); }
+  const max=Math.max(1,...pts.map(d=>Math.max(d.a||0,d.t||0)))*1.08;
+  c.font="400 15px Inter, system-ui, sans-serif"; c.fillStyle="#64748b"; c.strokeStyle="#e2e8f0"; c.lineWidth=1; c.textAlign="right";
+  for(let i=0;i<=4;i++){ const v=max*i/4, yy=y+h-h*i/4; c.beginPath(); c.moveTo(x0,yy); c.lineTo(x0+w,yy); c.stroke(); c.fillText(shortL(v),x0-10,yy+5); }
+  c.textAlign="left"; const bw=w/Math.max(1,pts.length);
+  if(cum){ c.lineWidth=4; c.strokeStyle="#2563eb"; c.setLineDash([10,8]); c.beginPath(); pts.forEach((d,i)=>{ const xx=x0+bw*(i+.5), yy=y+h-h*d.t/max; i?c.lineTo(xx,yy):c.moveTo(xx,yy); }); c.stroke(); c.setLineDash([]);
+    c.strokeStyle="#ea580c"; c.lineWidth=5; c.beginPath(); let st=false; pts.forEach((d,i)=>{ if(d.a==null) return; const xx=x0+bw*(i+.5), yy=y+h-h*d.a/max; st?c.lineTo(xx,yy):(c.moveTo(xx,yy),st=true); }); c.stroke(); }
+  else pts.forEach((d,i)=>{ const xx=x0+i*bw; if(d.a!=null){ const hh=h*d.a/max; rr(c,xx+bw*.18,y+h-hh,bw*.64,hh,Math.min(5,bw*.25)); c.fillStyle="#ea580c"; c.fill(); }
+    if(d.t){ const yy=y+h-h*d.t/max; c.strokeStyle="#2563eb"; c.lineWidth=4; c.beginPath(); c.moveTo(xx+bw*.08,yy); c.lineTo(xx+bw*.92,yy); c.stroke(); } });
+  c.fillStyle="#64748b"; c.font="400 14px Inter, system-ui, sans-serif";
+  const step=Math.ceil(pts.length/10); pts.forEach((d,i)=>{ if(i%step) return; c.textAlign="center"; c.fillText(String(d.label).split(".")[0],x0+bw*(i+.5),y+h+24); }); c.textAlign="left";
+  c.fillStyle="#ea580c"; c.fillRect(x0,y+h+40,20,12); c.fillStyle="#334155"; c.font="400 16px Inter, system-ui, sans-serif"; c.fillText("Achieved",x0+28,y+h+52);
+  c.fillStyle="#2563eb"; c.fillRect(x0+130,y+h+44,24,4); c.fillStyle="#334155"; c.fillText("Target",x0+162,y+h+52);
+  return y+h+64; }
+function a4Footer(c){ const {W,H,M}=A4; c.strokeStyle="#e2e8f0"; c.lineWidth=2; c.beginPath(); c.moveTo(M,H-70); c.lineTo(W-M,H-70); c.stroke();
+  c.fillStyle="#64748b"; c.font="400 16px Inter, system-ui, sans-serif"; c.fillText("Values in ₹ lakh (L) · Hard passing · Source: Hard Section Production Value sheet",M,H-40);
+  c.textAlign="right"; c.fillStyle="#b45309"; c.font="700 16px Inter, system-ui, sans-serif"; c.fillText("CONFIDENTIAL",W-M,H-40); c.textAlign="left"; }
+async function buildDashA4(){
+  const m=DB.month||dMonths()[0]; const secs=dSections(m); if(!secs.length) return null; const all=combineDays(secs), st=statsOf(all);
+  const {cv,c}=await a4Base("Hard Section · "+monthName(m), "Daily target vs achievement"+(st.lastDate?"  ·  data up to "+fmtD(st.lastDate):""));
+  a4Kpis(c,310,[{k:"Achieved",v:lakhCr(st.A),s:fl(st.A)+" L"},{k:"Plan to date",v:lakhCr(st.TT),s:"Month target "+lakhCr(st.T)},{k:"Achd %",v:pctTxt(st.pct),col:a4Col(st.pct),s:"Failure "+fl(st.fail)+" L"},{k:"Asking / day",v:st.ask==null?"–":fl(st.ask)+" L",s:st.ask==null?"Month complete":"Balance "+fl(Math.max(0,st.T-st.A))+" L"}]);
+  a4H(c,500,"Section-wise");
+  const cols=[{h:"Section",w:230},{h:"Month target",w:130,al:"r"},{h:"Target to date",w:140,al:"r"},{h:"Achieved",w:120,al:"r"},{h:"Failure",w:115,al:"r"},{h:"Achd %",w:115,al:"r"},{h:"Need / day",w:115,al:"r"},{h:"Best day",w:135,al:"r"}];
+  const rows=secs.map(s=>{ const x=statsOf(s.days); return [s.name,fl(x.T),fl(x.TT),{t:fl(x.A),b:1},{t:fl(x.fail),col:x.fail<0?"#b91c1c":"#047857"},{t:pctTxt(x.pct),col:a4Col(x.pct),bg:a4Bg(x.pct),b:1},x.ask==null?"–":fl(x.ask),x.best?fl(x.best.a):"–"]; });
+  rows.push(["TOTAL",fl(st.T),fl(st.TT),fl(st.A),{t:fl(st.fail),col:st.fail<0?"#b91c1c":"#047857"},{t:pctTxt(st.pct),col:a4Col(st.pct)},st.ask==null?"–":fl(st.ask),st.best?fl(st.best.a):"–"]);
+  let y=a4Table(c,520,cols,rows,{rh:40,fs:18,totLast:1});
+  a4H(c,y+56,"Day by day · all sections"); y=a4DayChart(c,y+80,250,all,false);
+  a4H(c,y+46,"Cumulative · achieved vs target"); a4DayChart(c,y+70,230,all,true);
+  a4Footer(c);
+  return {cv,name:`MGL-PPC-${m}-report`,title:`MGL PPC · ${monthName(m)}`};
+}
+async function buildLineA4(){
+  const m=LP.month, s=dSections(m).find(q=>q.key===LP.key); if(!s) return null; const x=statsOf(s.days);
+  const {cv,c}=await a4Base(s.name+" · "+monthName(m), "Hard passing · daily target vs achievement"+(x.lastDate?"  ·  data up to "+fmtD(x.lastDate):""));
+  a4Kpis(c,310,[{k:"Achieved",v:fl(x.A)+" L",s:lakhCr(x.A)},{k:"Plan to date",v:fl(x.TT)+" L",s:"Month target "+fl(x.T)+" L"},{k:"Achd %",v:pctTxt(x.pct),col:a4Col(x.pct),s:"Failure "+fl(x.fail)+" L"},{k:"Asking / day",v:x.ask==null?"–":fl(x.ask)+" L",s:x.ask==null?"Month complete":"Balance "+fl(Math.max(0,x.T-x.A))+" L"}]);
+  a4H(c,500,"Day by day"); let y=a4DayChart(c,524,220,s.days,false);
+  a4H(c,y+46,"Day-wise");
+  const n=s.days.length, rh=Math.max(24,Math.min(34,Math.floor((A4.H-130-(y+66))/(n+2))));
+  let ct=0,ca=0; const rows=s.days.map(d=>{ const has=d.a!=null; if(has){ ct+=d.t||0; ca+=d.a; } const p=has&&d.t?d.a*100/d.t:null;
+    return [yLbl(d),fl(d.t),has?{t:fl(d.a),b:1}:"–",has?{t:fl(d.a-d.t),col:d.a<d.t?"#b91c1c":"#047857"}:"–",has?{t:pctTxt(p),col:a4Col(p),bg:a4Bg(p),b:1}:"–",has?pctTxt(ct?ca*100/ct:null):"–"]; });
+  rows.push(["TOTAL",fl(x.T),fl(x.A),{t:fl(x.fail),col:x.fail<0?"#b91c1c":"#047857"},{t:pctTxt(x.pct),col:a4Col(x.pct)},""]);
+  a4Table(c,y+66,[{h:"Day",w:260},{h:"Target",w:170,al:"r"},{h:"Achieved",w:170,al:"r"},{h:"Failure",w:170,al:"r"},{h:"Achd %",w:160,al:"r"},{h:"Cum. Achd %",w:170,al:"r"}],rows,{rh,fs:rh<30?15:17,totLast:1});
+  a4Footer(c);
+  return {cv,name:`MGL-PPC-${s.name.replace(/[^A-Za-z0-9]+/g,"-")}-${m}-report`,title:`MGL PPC · ${s.name} · ${monthName(m)}`};
+}
+// one-page PDF holding the sheet as a high-quality JPEG
+async function pdfFromCanvas(cv){
+  const jb=await new Promise(r=>cv.toBlob(r,"image/jpeg",0.92)); const jpg=new Uint8Array(await jb.arrayBuffer());
+  const enc=new TextEncoder(), parts=[], offs=[]; let len=0; const push=b=>{ const u=typeof b==="string"?enc.encode(b):b; parts.push(u); len+=u.length; };
+  const obj=(n,body)=>{ offs[n]=len; push(`${n} 0 obj\n`); body(); push("\nendobj\n"); };
+  const PW=595.28, PH=841.89, content=`q ${PW} 0 0 ${PH} 0 0 cm /Im0 Do Q`;
+  push("%PDF-1.4\n%\xE2\xE3\xCF\xD3\n");
+  obj(1,()=>push("<< /Type /Catalog /Pages 2 0 R >>"));
+  obj(2,()=>push("<< /Type /Pages /Kids [3 0 R] /Count 1 >>"));
+  obj(3,()=>push(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${PW} ${PH}] /Resources << /XObject << /Im0 4 0 R >> >> /Contents 5 0 R >>`));
+  obj(4,()=>{ push(`<< /Type /XObject /Subtype /Image /Width ${cv.width} /Height ${cv.height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${jpg.length} >>\nstream\n`); push(jpg); push("\nendstream"); });
+  obj(5,()=>push(`<< /Length ${content.length} >>\nstream\n${content}\nendstream`));
+  const xref=len; push(`xref\n0 6\n0000000000 65535 f \n${[1,2,3,4,5].map(n=>String(offs[n]).padStart(10,"0")+" 00000 n \n").join("")}trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`);
+  return new Blob(parts,{type:"application/pdf"});
+}
+
+/* ---------- share window: preview, choose WhatsApp picture or A4 sheet ---------- */
+const SH={kind:"dash",fmt:"wa",file:null,img:null,url:""};
+const isMobile=()=>/Android|iPhone|iPad|Mobile/i.test(navigator.userAgent);
+async function renderShare(){
+  const btns=["shareSend","shareDl","shareCopy"].map(id=>$(id)); btns.forEach(b=>b.disabled=true);
+  $("shareImg").style.opacity=".35"; $("shareBusy").hidden=false;
+  document.querySelectorAll("#shareFmt button").forEach(b=>b.classList.toggle("on",b.dataset.f===SH.fmt));
+  try{
+    const r = SH.fmt==="a4" ? (SH.kind==="line"?await buildLineA4():await buildDashA4()) : (SH.kind==="line"?await buildLineCard():await buildDashCard());
+    if(!r){ toast("No figures to share yet"); closeShare(); return; }
+    const png=await new Promise(res=>r.cv.toBlob(res,"image/png"));
+    if(SH.url) URL.revokeObjectURL(SH.url); SH.url=URL.createObjectURL(png); $("shareImg").src=SH.url; SH.img=png;
+    if(SH.fmt==="a4"){ const pdf=await pdfFromCanvas(r.cv); SH.file=new File([pdf], r.name+".pdf", {type:"application/pdf"}); }
+    else SH.file=new File([png], r.name.replace(/\.png$/,"")+".png", {type:"image/png"});
+    SH.title=r.title;
+    const canSend = isMobile() && navigator.canShare && navigator.canShare({files:[SH.file]});
+    $("shareSend").style.display = canSend ? "" : "none";
+    $("shareCopy").style.display = (SH.fmt==="wa" && navigator.clipboard && window.ClipboardItem) ? "" : "none";
+    $("sharePrint").style.display = SH.fmt==="a4" && !isMobile() ? "" : "none";
+    $("shareWa").style.display = SH.fmt==="wa" && !isMobile() ? "" : "none";
+    $("shareDl").textContent = SH.fmt==="a4" ? "Download PDF" : "Download picture";
+    $("shareNote").textContent = SH.fmt==="a4" ? "A4 page, ready to print or attach as a PDF." : "Sized for WhatsApp. Send it as a picture.";
+  }catch(e){ console.error(e); toast("Couldn't make it on this device"); }
+  finally{ btns.forEach(b=>b.disabled=false); $("shareImg").style.opacity="1"; $("shareBusy").hidden=true; }
+}
+function openShare(kind){ SH.kind=kind; SH.fmt="wa"; $("shareM").classList.add("on"); renderShare(); }
+function closeShare(){ $("shareM").classList.remove("on"); }
+$("shareFmt").addEventListener("click",ev=>{ const b=ev.target.closest("button[data-f]"); if(!b||b.dataset.f===SH.fmt) return; SH.fmt=b.dataset.f; renderShare(); });
 $("shareClose").addEventListener("click",closeShare);
 $("shareM").addEventListener("click",ev=>{ if(ev.target.id==="shareM") closeShare(); });
-$("shareDl").addEventListener("click",()=>{ if(!SHARE.blob) return; save(SHARE.name,SHARE.blob); toast("Picture downloaded — attach it in WhatsApp"); });
-$("shareCopy").addEventListener("click",async()=>{ try{ await navigator.clipboard.write([new ClipboardItem({"image/png":SHARE.blob})]); toast("Picture copied — paste it in a WhatsApp chat (Ctrl+V)"); }catch(e){ toast("Couldn't copy here — use Download instead"); } });
+$("shareSend").addEventListener("click",async()=>{ if(!SH.file) return; try{ await navigator.share({files:[SH.file], title:SH.title}); }catch(e){ if(!(e&&e.name==="AbortError")) toast("Couldn't open sharing — use Download instead"); } });
+$("shareDl").addEventListener("click",()=>{ if(!SH.file) return; save(SH.file.name,SH.file); toast(SH.fmt==="a4"?"PDF downloaded":"Picture downloaded — attach it in WhatsApp"); });
+$("shareCopy").addEventListener("click",async()=>{ try{ await navigator.clipboard.write([new ClipboardItem({"image/png":SH.img})]); toast("Picture copied — paste it in a WhatsApp chat (Ctrl+V)"); }catch(e){ toast("Couldn't copy here — use Download instead"); } });
 $("shareWa").addEventListener("click",()=>{ window.open("https://web.whatsapp.com/","_blank","noopener"); });
-$("dbShare").addEventListener("click",()=>shareCard("dash"));
-$("lineShare").addEventListener("click",()=>shareCard("line"));
+$("sharePrint").addEventListener("click",()=>{ if(!SH.url) return; const w=window.open("","_blank"); if(!w){ toast("Allow pop-ups to print, or use Download PDF"); return; }
+  w.document.write(`<!DOCTYPE html><html><head><title>${esc(SH.title||"MGL PPC")}</title><style>@page{size:A4;margin:0}html,body{margin:0}img{width:210mm;height:297mm;display:block}</style></head><body><img src="${SH.url}" onload="setTimeout(function(){window.print()},200)"></body></html>`); w.document.close(); });
+$("dbShare").addEventListener("click",()=>openShare("dash"));
+$("lineShare").addEventListener("click",()=>openShare("line"));
 /* ---------- line detail page ---------- */
 const LP={key:"",month:""};
 function openLine(key){ if(!key) return; LP.key=key; LP.month=DB.month||dMonths()[0]; hideDTip(); const sh=$("lineSheet");
