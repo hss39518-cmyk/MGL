@@ -455,7 +455,9 @@ summary{background:rgba(255,255,255,.05)}
 .fri-m .up{color:#86efac;font-weight:600}.fri-m .dn{color:#fca5a5;font-weight:600}
 .fri-m .pill{font-size:11.5px;padding:1px 7px}
 .fri-m hr{border:0;border-top:1px solid rgba(255,255,255,.1);margin:9px 0}
-.fri-t{width:100%;border-collapse:collapse;margin-top:8px;font-size:12px}
+.fri-tw{overflow-x:auto;margin:8px -4px 0;-webkit-overflow-scrolling:touch}
+.fri-t{width:100%;border-collapse:collapse;font-size:12px}
+@media (max-width:900px){.fri-t{font-size:11px}.fri-t th,.fri-t td{padding:4px 3px}.fri-t th{font-size:9.5px;letter-spacing:0}.fri-t td:first-child{white-space:normal;min-width:64px}.fri-t .pill{padding:0 4px;font-size:10px}.fri-m{max-width:97%;padding:10px 10px}.fri-msgs{padding:12px 10px 6px}}
 .fri-t th{background:none;color:var(--mut);font-weight:600;font-size:10.5px;text-transform:uppercase;letter-spacing:.4px;padding:4px 5px;border-bottom:1px solid rgba(255,255,255,.12);text-align:left;white-space:nowrap}
 .fri-t td{padding:4px 5px;border-bottom:1px solid rgba(255,255,255,.06);white-space:nowrap}
 .fri-t .n{text-align:right;font-variant-numeric:tabular-nums}
@@ -2397,7 +2399,7 @@ setConn("Connecting…", false);
     if(has(t,"last month","previous month","prev month","pichle mahine","pichla mahina","pichhle mahine")) return {k:"month",m:prevM(curMonth())};
     let m=t.match(/ (\d{1,2})[\/\.\-](\d{1,2})(?:[\/\.\-](\d{2,4}))? /);
     if(m && +m[2]>=1 && +m[2]<=12){ const y=m[3]?(m[3].length===2?"20"+m[3]:m[3]):yearFor(+m[2]); return {k:"day",d:`${y}-${pad(m[2])}-${pad(m[1])}`}; }
-    const MR="(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*";
+    const MR="(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)(?:uary|ruary|ch|il|e|y|ust|t|tember|ober|ember)?";
     m=t.match(new RegExp(` (\\d{1,2}) (?:of )?${MR}(?: (\\d{4}))? `));
     if(m){ const mm=MONS.indexOf(m[2])+1; const y=m[3]||yearFor(mm); return {k:"day",d:`${y}-${pad(mm)}-${pad(m[1])}`}; }
     m=t.match(new RegExp(` ${MR} (\\d{1,2})(?: (\\d{4}))? `));
@@ -2415,7 +2417,7 @@ setConn("Connecting…", false);
   const pickSecs=(mo,keys)=>{ const s=dSections(mo); return keys&&keys.length?s.filter(x=>keys.includes(x.key)):s; };
   const nameList=keys=>keys.map(k=>DTA.NAMES[k]||k).join(", ");
   const noMonth=mo=>`I don't have any Hard Section data for <b>${monthName(mo)}</b> yet. ${months().length?`Data is available for ${months().slice(0,4).map(monthName).join(", ")}.`:"Upload the Hard Section sheet first."}`;
-  const table=(head,rows,tot)=>`<table class="fri-t"><thead><tr>${head.map((h,i)=>`<th${i?' class="n"':""}>${h}</th>`).join("")}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map((c,i)=>`<td${i?' class="n"':""}>${c}</td>`).join("")}</tr>`).join("")}${tot?`<tr class="tot">${tot.map((c,i)=>`<td${i?' class="n"':""}>${c}</td>`).join("")}</tr>`:""}</tbody></table>`;
+  const table=(head,rows,tot)=>`<div class="fri-tw"><table class="fri-t"><thead><tr>${head.map((h,i)=>`<th${i?' class="n"':""}>${h}</th>`).join("")}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map((c,i)=>`<td${i?' class="n"':""}>${c}</td>`).join("")}</tr>`).join("")}${tot?`<tr class="tot">${tot.map((c,i)=>`<td${i?' class="n"':""}>${c}</td>`).join("")}</tr>`:""}</tbody></table></div>`;
 
   // ---------- answers ----------
   function dayAnswer(keys,isoD,word){
@@ -2442,9 +2444,9 @@ setConn("Connecting…", false);
     const askTxt=x=>x.ask==null?`Month finished at ${pill(pc(x.A,x.T))} of the month target.`:`Month target ${L(x.T)}; needs <b>${L(x.ask)}/day</b> for the rest of the month.`;
     if(secs.length===1){ const s=secs[0], x=statsOf(s.days);
       return `<b>${esc(s.name)}</b> · ${monthName(mo)}${upto}<br>Passed <b>${L(x.A)}</b> against ${L(x.TT)} target to date — ${pill(x.pct)}${x.fail<0?`, short by ${L(-x.fail)}`:""}.<br>${askTxt(x)}${x.best?`<br>Best day: ${L(x.best.a)} on ${esc(yLbl(x.best))}.`:""}`; }
-    const R=secs.map(s=>{ const x=statsOf(s.days); return [esc(s.name),fl(x.A),fl(x.TT),pill(x.pct),x.ask==null?"–":fl(x.ask)]; });
+    const live=st.ask!=null; const R=secs.map(s=>{ const x=statsOf(s.days); const r=[esc(s.name),fl(x.A),fl(x.TT),pill(x.pct)]; if(live) r.push(x.ask==null?"–":fl(x.ask)); return r; });
     return `<b>${keys.length?nameList(keys):"All sections"} · ${monthName(mo)}</b>${upto}<br>Passed <b>${L(st.A)}</b> (${lakhCr(st.A)}) against ${L(st.TT)} target to date — ${pill(st.pct)}.<br>${askTxt(st)}`
-      +table(["Section","Achd","Target to date","%","Need/day"],R,["Total",fl(st.A),fl(st.TT),pill(st.pct),st.ask==null?"–":fl(st.ask)]);
+      +table(live?["Section","Achd","Target","%","Need/day"]:["Section","Achd","Target","%"],R,live?["Total",fl(st.A),fl(st.TT),pill(st.pct),fl(st.ask)]:["Total",fl(st.A),fl(st.TT),pill(st.pct)]);
   }
   function weekAnswer(keys){
     const mo=curMonth(); const pool=[...pickSecs(mo,keys),...pickSecs(prevM(mo),keys)];
@@ -2521,6 +2523,10 @@ setConn("Connecting…", false);
     if(!per && ctx.per && keys.length && (follow || t.trim().split(" ").length<=3)) per=ctx.per;
     if(has(t,"all","total","plant","overall","sab","sabhi","everyone","every section","all sections")) keys=secsIn(t);
     const howTo=/ (how|kaise|kaisa|where|kahan) /.test(t);
+    const fix=/ (i mean|i meant|matlab|mera matlab|no i want|not that|nahi) /.test(t);
+    if(fix && ctx.last && !secsIn(t).length && !has(t,"behind","top","best","worst","asking","target","summary","compare")){
+      const k=ctx.keys, p=per||ctx.per; const o=ctx.last(k,p); ctx={keys:k,per:p,last:ctx.last}; return o; }
+    let last=null;
     let out;
     if(/^ (hi|hello|hey|hii|namaste|good morning|good evening|good afternoon|hola|yo) $/.test(t)) out=`Hi${firstName()?" "+firstName():""}! 👋 How can I help you?`;
     else if(has(t,"thanks","thank you","thx","ty","shukriya","dhanyavad")) out="You're welcome! 😊";
@@ -2530,23 +2536,24 @@ setConn("Connecting…", false);
     else if(howTo && has(t,"user","users","colleague","colleagues","access","login","account","add")) out=HELP.users;
     else if(has(t,"password")) out=HELP.password;
     else if(howTo && has(t,"install","home screen","app","apk")) out=HELP.install;
-    else if(has(t,"what is achd","what does achd","meaning","mean","matlab","asking rate mean","what is asking")) out=HELP.pct;
-    else if(has(t,"compare","comparison","vs","versus","than last month","compared")) out=compareAnswer(keys,per&&per.k==="month"&&!has(t,"last month","previous month","prev month","pichle mahine","pichla mahina","pichhle mahine")?per.m:curMonth());
-    else if(has(t,"summary","summarise","summarize","status","overview","update","brief","how are we doing","how is it going","kaisa chal","report card")) out=summaryAnswer(per&&per.k==="month"?per.m:curMonth());
-    else if(has(t,"asking","asking rate","required","per day needed","need per day","run rate","remaining","balance","kitna chahiye")) out=askAnswer(keys,per&&per.k==="month"?per.m:curMonth());
-    else if(has(t,"worst day","weakest day","lowest day","bad day")) out=bestDayAnswer(keys,per&&per.k==="month"?per.m:curMonth(),true);
-    else if(has(t,"best day","highest day","top day","max day","record day","best date")) out=bestDayAnswer(keys,per&&per.k==="month"?per.m:curMonth(),false);
-    else if(!keys.length && has(t,"behind","lagging","short","shortfall","worst","lowest","weak","poor","below","red","peeche","peechhe","failing","failure")) out=behindAnswer(per);
-    else if(!keys.length && has(t,"best","top","highest","leading","strongest","sabse zyada","most","ahead","winner")) out=topAnswer(per);
-    else if(has(t,"target","plan","lakshya")&&!has(t,"passing","passed","achieved","achd","production","output","pass")) out=targetAnswer(keys,per);
+    else if(/ (what is|what s|whats|what does|what do|meaning of|matlab) .*(achd|achievement|asking|percent|%|need per day|failure) /.test(t)||/ (achd|asking rate|failure) (means?|matlab) /.test(t)) out=HELP.pct;
+    else if(has(t,"compare","comparison","vs","versus","than last month","compared")) { last=(k,p)=>compareAnswer(k,p&&p.k==="month"?p.m:curMonth()); out=compareAnswer(keys,per&&per.k==="month"&&!has(t,"last month","previous month","prev month","pichle mahine","pichla mahina","pichhle mahine")?per.m:curMonth()); }
+    else if(has(t,"summary","summarise","summarize","status","overview","update","brief","how are we doing","how is it going","kaisa chal","report card")) { last=(k,p)=>summaryAnswer(p&&p.k==="month"?p.m:curMonth()); out=summaryAnswer(per&&per.k==="month"?per.m:curMonth()); }
+    else if(has(t,"asking","asking rate","required","per day needed","need per day","run rate","remaining","balance","kitna chahiye")) { last=(k,p)=>askAnswer(k,p&&p.k==="month"?p.m:curMonth()); out=askAnswer(keys,per&&per.k==="month"?per.m:curMonth()); }
+    else if(has(t,"worst day","weakest day","lowest day","bad day")) { last=(k,p)=>bestDayAnswer(k,p&&p.k==="month"?p.m:curMonth(),true); out=bestDayAnswer(keys,per&&per.k==="month"?per.m:curMonth(),true); }
+    else if(has(t,"best day","highest day","top day","max day","record day","best date")) { last=(k,p)=>bestDayAnswer(k,p&&p.k==="month"?p.m:curMonth(),false); out=bestDayAnswer(keys,per&&per.k==="month"?per.m:curMonth(),false); }
+    else if(!keys.length && has(t,"behind","lagging","short","shortfall","worst","lowest","weak","poor","below","red","peeche","peechhe","failing","failure")) { last=(k,p)=>behindAnswer(p); out=behindAnswer(per); }
+    else if(!keys.length && has(t,"best","top","highest","leading","strongest","sabse zyada","most","ahead","winner")) { last=(k,p)=>topAnswer(p); out=topAnswer(per); }
+    else if(has(t,"target","plan","lakshya")&&!has(t,"passing","passed","achieved","achd","production","output","pass")) { last=(k,p)=>targetAnswer(k,p); out=targetAnswer(keys,per); }
     else if(per&&per.k==="week") out=weekAnswer(keys);
     else if(per&&per.k==="day") out=dayAnswer(keys,per.d,per.word);
     else if(per&&per.k==="month") out=monthAnswer(keys,per.m);
-    else if(keys.length||has(t,"passing","passed","pass","production","achieved","achd","output","value","kitna","kitni","how much","total","plant")){
+    else if(keys.length||has(t,"passing","passed","pass","production","achieved","achd","output","value","kitna","kitni","how much","total","plant","all","sections","section wise","sectionwise","section-wise","sab","sabhi","every section","line wise","lines")){
       const last=combineDays(pickSecs(curMonth(),keys)).filter(d=>d.a!=null).pop();
       out=(last?dayAnswer(keys,last.date)+"<hr>":"")+monthAnswer(keys,curMonth()); }
     else out=`Sorry, I didn't catch that. Try asking like:<br>• <i>Today B.P Shaft passing</i><br>• <i>Which sections are behind?</i><br>• <i>JCB this month</i><br>• <i>Asking rate</i>`;
-    ctx={keys,per:per||ctx.per};
+    if(!last) last=(k,p)=> !p?monthAnswer(k,curMonth()) : p.k==="week"?weekAnswer(k) : p.k==="day"?dayAnswer(k,p.d,p.word) : monthAnswer(k,p.m);
+    ctx={keys,per:per||ctx.per,last};
     return out;
   }
   function chips(){
