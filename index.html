@@ -610,6 +610,65 @@ html.light .theme-tg .sw2{background:#3b82f6}
 html.light .theme-tg .sw2::after{transform:translateX(16px)}
 html.theme-anim body *{transition:background-color .35s,color .35s,border-color .35s!important}
 @media (prefers-reduced-motion:reduce){.theme-tg .sw2,.theme-tg .sw2::after{transition:none}html.theme-anim body *{transition:none!important}}
+/* ---------- loading placeholders ---------- */
+:root{--skc:rgba(255,255,255,.09);--skh:rgba(255,255,255,.07)}
+html.light{--skc:rgba(15,23,42,.08);--skh:rgba(255,255,255,.65)}
+body.loading-data :is(#v-dash .dcard,#v-daily .kpi,#v-daily .card,#v-report .kpi,#v-report .card){position:relative;min-height:120px;pointer-events:none}
+body.loading-data :is(#v-dash .dcard,#v-daily .kpi,#v-daily .card,#v-report .kpi,#v-report .card) > *{visibility:hidden}
+body.loading-data :is(#v-dash .dcard,#v-daily .kpi,#v-daily .card,#v-report .kpi,#v-report .card)::after{content:"";position:absolute;inset:18px 20px;border-radius:10px;
+  background:linear-gradient(100deg,transparent 44%,var(--skh) 50%,transparent 56%) 0 0/250% 100% no-repeat,
+    linear-gradient(var(--skc),var(--skc)) 0 0/34% 11px no-repeat,
+    linear-gradient(var(--skc),var(--skc)) 0 24px/58% 26px no-repeat,
+    linear-gradient(var(--skc),var(--skc)) 0 66px/92% 9px no-repeat,
+    linear-gradient(var(--skc),var(--skc)) 0 84px/76% 9px no-repeat,
+    linear-gradient(var(--skc),var(--skc)) 0 102px/84% 9px no-repeat;
+  -webkit-mask:linear-gradient(#000,#000);animation:skShim 1.3s ease-in-out infinite}
+body.loading-data :is(#v-daily .kpi,#v-report .kpi){min-height:96px}
+body.loading-data :is(#v-daily .kpi,#v-report .kpi)::after{inset:16px 16px;background:linear-gradient(100deg,transparent 44%,var(--skh) 50%,transparent 56%) 0 0/250% 100% no-repeat,linear-gradient(var(--skc),var(--skc)) 0 0/55% 10px no-repeat,linear-gradient(var(--skc),var(--skc)) 0 22px/75% 24px no-repeat,linear-gradient(var(--skc),var(--skc)) 0 56px/60% 9px no-repeat;animation:skShimK 1.3s ease-in-out infinite}
+body.loading-data #v-dash .dhero{min-height:300px}
+body.loading-data #v-dash .dcard.dhot{background:var(--card);border-color:rgba(255,255,255,.1);box-shadow:none}
+@keyframes skShim{from{background-position:130% 0,0 0,0 24px,0 66px,0 84px,0 102px}to{background-position:-30% 0,0 0,0 24px,0 66px,0 84px,0 102px}}
+@keyframes skShimK{from{background-position:130% 0,0 0,0 22px,0 56px}to{background-position:-30% 0,0 0,0 22px,0 56px}}
+@media (prefers-reduced-motion:reduce){body.loading-data *::after{animation:none!important}}
+/* ---------- line detail page ---------- */
+.lsheet{position:fixed;inset:0;z-index:55;background:rgba(5,8,15,.35);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);overflow-y:auto;overscroll-behavior:contain;animation:lsIn .22s ease-out}
+.lsheet[hidden]{display:none}
+@keyframes lsIn{from{opacity:0}to{opacity:1}}
+.lbox{margin:16px 16px 16px 268px;padding:24px 28px 28px;border-radius:30px;background:rgba(30,27,25,.62);-webkit-backdrop-filter:blur(34px) saturate(140%);backdrop-filter:blur(34px) saturate(140%);border:1px solid var(--glass-b);box-shadow:0 30px 70px rgba(0,0,0,.35);animation:lbIn .28s cubic-bezier(.2,.8,.2,1)}
+@keyframes lbIn{from{transform:translateY(18px);opacity:.4}to{transform:none;opacity:1}}
+html.light .lbox{background:rgba(255,255,255,.72);box-shadow:0 30px 70px rgba(15,23,42,.2)}
+html.light .lsheet{background:rgba(15,23,42,.18)}
+.lhead{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.ltitle{flex:1;min-width:0}
+.ltitle small{display:block;color:var(--mut);font-size:12.5px}
+.ltitle h2{margin:2px 0 0;font-family:var(--serif);font-weight:400;font-size:34px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lnav{width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.07);color:var(--ink);font-size:22px;line-height:1;cursor:pointer;flex:none}
+.lnav:hover{background:rgba(255,255,255,.14)}
+html.light .lnav{background:rgba(255,255,255,.8)}
+.lnav.lx{font-size:14px}
+#lineMonth{width:auto;max-width:170px}
+.lkpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:14px}
+.lgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.lgrid .card,.lbox>.card{margin:0}
+.lbox>.card{margin-bottom:14px}
+.lhl{display:grid;gap:10px}
+.lhl>div{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:10px 12px;border-radius:14px;background:var(--soft)}
+.lhl span{color:var(--mut);font-size:12.5px}
+.lhl b{font-family:var(--serif);font-weight:400;font-size:20px;color:var(--ink);white-space:nowrap}
+.lhl small{display:block;color:var(--mut);font-size:11.5px;text-align:right}
+.lhl>div>span:first-child,.lhl>div>span:first-child small{text-align:left}
+body.line-open .fri-btn{display:none}
+@media (max-width:900px){
+  .lbox{margin:8px;padding:16px 14px 18px;border-radius:22px}
+  .ltitle h2{font-size:26px}
+  .lhead{flex-wrap:wrap}
+  .ltitle{order:1;flex:1 1 calc(100% - 150px)}
+  #linePrev{order:0}#lineNext{order:2}.lnav.lx{order:3}
+  #lineMonth{order:4;flex:1 1 100%;max-width:none}
+  .lkpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .lgrid{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){.lsheet,.lbox{animation:none}}
 footer{text-align:center;color:var(--mut);font-size:11.5px;padding:8px 0 30px}
 @media (max-width:700px){
   .appbar .sub{display:none}
@@ -974,6 +1033,26 @@ footer{text-align:center;color:var(--mut);font-size:11.5px;padding:8px 0 30px}
 </main>
 <footer>MGL PPC · Production Planning &amp; Control</footer>
 
+<div class="lsheet" id="lineSheet" hidden role="dialog" aria-label="Line details"><div class="lbox" id="lineBox">
+  <header class="lhead">
+    <button type="button" class="lnav" id="linePrev" aria-label="Previous line">‹</button>
+    <div class="ltitle"><small id="lineSub">Line · November 2026</small><h2 id="lineName">Line</h2></div>
+    <button type="button" class="lnav" id="lineNext" aria-label="Next line">›</button>
+    <select id="lineMonth" aria-label="Month"></select>
+    <button type="button" class="lnav lx" id="lineClose" aria-label="Close">✕</button>
+  </header>
+  <div class="lkpis" id="lineKpis"></div>
+  <div class="lgrid">
+    <div class="card"><h3>Cumulative: achieved vs target</h3><div class="legend"><span><i style="background:var(--brand)"></i>Achieved</span><span><i style="background:#2563eb"></i>Target</span></div><div class="chart" id="lineCum"></div></div>
+    <div class="card"><h3>Day by day</h3><div class="legend"><span><i style="background:var(--brand)"></i>Achieved</span><span><i style="background:#2563eb"></i>Target</span></div><div class="chart" id="lineDay"></div></div>
+  </div>
+  <div class="lgrid">
+    <div class="card"><h3>Last 6 months</h3><div class="legend"><span><i style="background:var(--brand)"></i>Achieved</span><span><i style="background:#2563eb;width:4px"></i>Month target</span></div><div class="chart" id="lineMon"></div></div>
+    <div class="card"><h3>Highlights</h3><div class="lhl" id="lineHl"></div></div>
+  </div>
+  <div class="card"><h3>Day-wise</h3><div class="twrap"><table><thead><tr><th>Day</th><th class="n">Target</th><th class="n">Achieved</th><th class="n">Failure</th><th class="n">Achd %</th><th class="n">Cum. Achd %</th></tr></thead><tbody id="lineRows"></tbody></table></div></div>
+  <div class="row" style="justify-content:flex-end;margin-top:4px"><button type="button" class="btn ghost" id="lineToDaily">Open in Daily T&amp;A</button></div>
+</div></div>
 <div class="modal" id="confirmM"><div class="box">
   <h3 id="cTitle">Delete entry?</h3><p class="note" id="cMsg"></p>
   <div class="row" style="justify-content:flex-end"><button class="btn ghost" id="cNo">Cancel</button><button class="btn" style="background:var(--bad)" id="cYes">Delete</button></div>
@@ -1403,7 +1482,7 @@ function ensureMonth(ym){
   return S.subs[ym];
 }
 const ensureRange = (from,to) => Promise.all(monthsBetween(from,to).map(ensureMonth));
-function stopAll(){ unsubs.forEach(f=>{ try{f();}catch(e){} }); unsubs=[]; S.months={}; S.tmonths={}; S.subs={}; S.users=[]; S.daily=[]; rebuild(); }
+function stopAll(){ document.body.classList.remove("loading-data"); unsubs.forEach(f=>{ try{f();}catch(e){} }); unsubs=[]; S.months={}; S.tmonths={}; S.subs={}; S.users=[]; S.daily=[]; rebuild(); }
 
 async function saveEntry(e){ await setDoc(doc(db,"entries",e.id), e); }
 async function deleteEntry(id){ await deleteDoc(doc(db,"entries",id)); }
@@ -1453,7 +1532,13 @@ function applyRole(){
 function startData(){
   unsubs.push(onSnapshot(doc(db,"config","main"), snap => { if(snap.exists()) S.cfg=normCfg(snap.data()); rerender(); }, err=>toast("Couldn't load settings: "+authMsg(err))));
   if(S.profile.role==="admin") unsubs.push(onSnapshot(collection(db,"users"), snap => { S.users=snap.docs.map(d=>Object.assign({},d.data(),{uid:d.id})); renderUsers(); }, ()=>{}));
-  unsubs.push(onSnapshot(query(collection(db,"config"), where("kind","==","daily")), snap => { S.daily=snap.docs.map(d=>Object.assign({},d.data(),{id:d.id})); rerender(); }, err=>toast("Couldn't load daily data: "+authMsg(err))));
+  document.body.classList.add("loading-data"); clearTimeout(window.__skT); window.__skT=setTimeout(()=>document.body.classList.remove("loading-data"),15000);
+  unsubs.push(onSnapshot(query(collection(db,"config"), where("kind","==","daily")), { includeMetadataChanges:true }, snap => {
+    if(snap.empty && snap.metadata.fromCache) return;   // nothing saved on this device yet: keep the placeholders until the server answers
+    const was=document.body.classList.contains("loading-data");
+    S.daily=snap.docs.map(d=>Object.assign({},d.data(),{id:d.id}));
+    if(was){ document.body.classList.remove("loading-data"); clearTimeout(window.__skT); }
+    rerender(); }, err=>{ document.body.classList.remove("loading-data"); toast("Couldn't load daily data: "+authMsg(err)); }));
   ensureMonth(today().slice(0,7)).then(()=>{ setConn(navigator.onLine?"Live · synced":"Offline", navigator.onLine); });
   const lm=monthOf($("listDate").value); if(lm) ensureMonth(lm);
 }
@@ -1932,10 +2017,56 @@ function renderDash(){
 $("dbMonth").addEventListener("change",()=>{ DB.month=$("dbMonth").value; DB.day=""; DB.anim=true; renderDash(); });
 function openDaily(secKey){ D.month=DB.month; D.sec=secKey||""; hideDTip(); location.hash="daily"; window.scrollTo(0,0); }
 function openReport(){ $("rPeriod").value="month"; $("rMonth").value=DB.month; $("rLine").value=""; hideDTip(); location.hash="report"; window.scrollTo(0,0); }
+/* ---------- line detail page ---------- */
+const LP={key:"",month:""};
+function openLine(key){ if(!key) return; LP.key=key; LP.month=DB.month||dMonths()[0]; hideDTip(); const sh=$("lineSheet");
+  if(sh.hidden){ sh.hidden=false; document.body.style.overflow="hidden"; document.body.classList.add("line-open"); if(window.FRI) FRI.close(); try{ history.pushState({mglLine:1},""); }catch(e){} }
+  renderLine(); sh.scrollTop=0; }
+function closeLine(fromPop){ const sh=$("lineSheet"); if(sh.hidden) return; sh.hidden=true; document.body.style.overflow=""; document.body.classList.remove("line-open");
+  if(!fromPop){ try{ if(history.state&&history.state.mglLine) history.back(); }catch(e){} } }
+function renderLine(){
+  const m=LP.month, secs=dSections(m); let i=secs.findIndex(s=>s.key===LP.key);
+  if(i<0){ const ms=dMonths(); for(const mm of ms){ if(dSections(mm).some(s=>s.key===LP.key)){ LP.month=mm; return renderLine(); } } closeLine(); return; }
+  const s=secs[i], x=statsOf(s.days);
+  $("lineName").textContent=s.name; $("lineSub").textContent=`Line ${i+1} of ${secs.length} · ${monthName(m)}${x.lastDate?" · data up to "+fmtD(x.lastDate):""}`;
+  $("lineMonth").innerHTML=dMonths().filter(mm=>dSections(mm).some(z=>z.key===LP.key)).map(mm=>`<option value="${mm}"${mm===m?" selected":""}>${monthName(mm)}</option>`).join("");
+  const pp=x.pct;
+  $("lineKpis").innerHTML=`<div class="kpi accent"><div class="k">Achieved till date</div><div class="v">${fl(x.A)} L</div><div class="s">${lakhCr(x.A)}</div></div>
+    <div class="kpi"><div class="k">Target to date</div><div class="v">${fl(x.TT)} L</div><div class="s">Month target ${fl(x.T)} L</div></div>
+    <div class="kpi"><div class="k">Achd %</div><div class="v" style="color:${pp==null?"var(--ink)":pp>=100?"var(--ok)":pp<60?"var(--bad)":"var(--warn)"}">${pctTxt(pp)}</div><div class="meter"><div style="width:${Math.min(100,pp||0).toFixed(1)}%"></div></div></div>
+    <div class="kpi"><div class="k">Asking rate / day</div><div class="v">${x.ask==null?"–":fl(x.ask)+" L"}</div><div class="s">${x.ask==null?"Month complete":"Balance "+fl(Math.max(0,x.T-x.A))+" L"}</div></div>
+    <div class="kpi"><div class="k">Failure</div><div class="v" style="color:${x.fail<0?"var(--bad)":"var(--ok)"}">${fl(x.fail)} L</div><div class="s">${x.fail<0?"short of plan to date":"ahead of plan"}</div></div>`;
+  chartCumulative($("lineCum"), s.days); chartDaily($("lineDay"), s.days);
+  // last 6 months for this line
+  const ms=dMonths().filter(mm=>mm<=m).slice(0,6).reverse(); const rows=ms.map(mm=>{ const z=dSections(mm).find(q=>q.key===LP.key); if(!z) return null; const y=statsOf(z.days); return {label:monthName(mm).replace(/ (\d{4})$/," '$1").replace(/'(\d\d)(\d\d)$/,"'$2"), A:y.A, T:y.T, sel:mm===m}; }).filter(Boolean);
+  if(rows.length) chartMonths($("lineMon"), rows); else $("lineMon").innerHTML='<p class="note">No earlier months uploaded.</p>';
+  // highlights
+  const ds=s.days.filter(d=>d.a!=null); const best=ds.slice().sort((a,b)=>b.a-a.a)[0], worst=ds.slice().filter(d=>d.t>0).sort((a,b)=>a.a/a.t-b.a/b.t)[0];
+  const pm=(()=>{ const [y,mm]=m.split("-").map(Number); return mm===1?`${y-1}-12`:`${y}-${String(mm-1).padStart(2,"0")}`; })();
+  const ps=dSections(pm).find(q=>q.key===LP.key); const cut=x.lastDate?+x.lastDate.slice(8):31;
+  const tillPrev=ps?ps.days.filter(d=>d.a!=null&&+d.date.slice(8)<=cut).reduce((a,d)=>a+d.a,0):null;
+  const met=ds.filter(d=>d.a>=d.t).length;
+  $("lineHl").innerHTML=(best?`<div><span>Best day<small>${esc(yLbl(best))}</small></span><span style="text-align:right"><b>${fl(best.a)} L</b><small>${pctTxt(best.t?best.a*100/best.t:null)} of ${fl(best.t)} L</small></span></div>`:"")
+    +(worst?`<div><span>Weakest day<small>${esc(yLbl(worst))}</small></span><span style="text-align:right"><b>${fl(worst.a)} L</b><small>${pctTxt(worst.a*100/worst.t)} of ${fl(worst.t)} L</small></span></div>`:"")
+    +`<div><span>Days on target<small>${ds.length} days entered</small></span><b>${met} / ${ds.length}</b></div>`
+    +(tillPrev!=null?`<div><span>vs ${monthName(pm)}<small>up to day ${cut}</small></span><span style="text-align:right"><b style="color:${x.A>=tillPrev?"var(--ok)":"var(--bad)"}">${x.A>=tillPrev?"+":"−"}${fl(Math.abs(x.A-tillPrev))} L</b><small>${fl(x.A)} vs ${fl(tillPrev)} L</small></span></div>`:"");
+  let ct=0,ca=0;
+  $("lineRows").innerHTML=s.days.map(d=>{ const has=d.a!=null; if(has){ ct+=d.t||0; ca+=d.a; } const f=has?d.a-d.t:null;
+    return `<tr${has?"":' style="opacity:.55"'}><td><b>${esc(yLbl(d))}</b></td><td class="n">${fl(d.t)}</td><td class="n">${has?`<b>${fl(d.a)}</b>`:"–"}</td><td class="n" style="color:${f==null?"inherit":f<0?"var(--bad)":"var(--ok)"}">${has?fl(f):"–"}</td><td class="n">${has?pctPill(d.t?d.a*100/d.t:null):"–"}</td><td class="n">${has?pctTxt(ct?ca*100/ct:null):"–"}</td></tr>`; }).join("");
+  $("linePrev").onclick=()=>{ LP.key=secs[(i-1+secs.length)%secs.length].key; renderLine(); };
+  $("lineNext").onclick=()=>{ LP.key=secs[(i+1)%secs.length].key; renderLine(); };
+}
+$("lineClose").addEventListener("click",()=>closeLine());
+$("lineSheet").addEventListener("click",ev=>{ if(ev.target.id==="lineSheet") closeLine(); });
+$("lineMonth").addEventListener("change",()=>{ LP.month=$("lineMonth").value; renderLine(); });
+$("lineToDaily").addEventListener("click",()=>{ const k=LP.key, mm=LP.month; closeLine(); setTimeout(()=>{ DB.month=mm; openDaily(k); },30); });
+document.addEventListener("keydown",ev=>{ if($("lineSheet").hidden) return; if(ev.key==="Escape") closeLine(); else if(ev.key==="ArrowLeft") $("linePrev").click(); else if(ev.key==="ArrowRight") $("lineNext").click(); });
+window.addEventListener("popstate",()=>{ if(!$("lineSheet").hidden) closeLine(true); });
+window.addEventListener("hashchange",()=>{ if(!$("lineSheet").hidden) closeLine(true); });
 $("v-dash").addEventListener("click", ev => {
   if(ev.target.closest(".dday")) return;            // day strip handled separately
   const sec = ev.target.closest("[data-sec]");
-  if(sec && sec.dataset.sec){ openDaily(sec.dataset.sec); return; }
+  if(sec && sec.dataset.sec){ openLine(sec.dataset.sec); return; }
   const go = ev.target.closest("[data-go]");
   if(go){ if(go.dataset.go==="report") openReport(); else openDaily(""); }
 });
@@ -2648,6 +2779,7 @@ setConn("Connecting…", false);
 
   let ctx={keys:[],per:null};
   function answer(q){
+    if(document.body.classList.contains("loading-data")) return "Still loading the latest figures — ask me again in a moment.";
     const t=norm(q); let keys=secsIn(t); let per=periodIn(t);
     const follow=/^ (and|what about|aur|or|how about|then|uska|iska) /.test(t);
     if(!keys.length && follow && ctx.keys.length && !has(t,"all","total","plant","overall","sab")) keys=ctx.keys;
