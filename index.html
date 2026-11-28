@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#0f172a">
+<script>try{if(localStorage.getItem("mgl-theme")==="light")document.documentElement.classList.add("light")}catch(e){}</script>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="MGL PPC">
 <meta name="application-name" content="MGL PPC">
@@ -297,6 +298,7 @@ body{background:transparent;color:var(--ink)}
 .side nav.tabs a.on{background:rgba(255,255,255,.14);color:#fff;box-shadow:0 1px 0 rgba(255,255,255,.1) inset}
 .side nav.tabs a.on svg{color:#93c5fd}
 .side nav.tabs a[data-v="setup"]{margin-top:auto}
+#conn[data-ok="1"]{color:#86efac}#conn[data-ok="0"]{color:#fdba74}html.light #conn[data-ok="1"]{color:#047857}html.light #conn[data-ok="0"]{color:#c2410c}
 .side .meta-r{display:block;margin:10px 0 0;padding:10px 12px;text-align:left;font-size:11.5px;color:var(--mut);border-top:1px solid var(--line2)}
 .side .userchip{position:relative;margin:8px 0 0;display:flex;align-items:center;gap:10px;padding:8px;border-radius:16px;background:rgba(255,255,255,.06);border:1px solid var(--line2)}
 .side .userchip:hover{background:rgba(255,255,255,.1)}
@@ -499,6 +501,114 @@ body.nav-open .fri-btn{display:none}
 @keyframes friGlow{0%,100%{box-shadow:0 1px 0 rgba(255,255,255,.35) inset,0 12px 30px rgba(29,78,216,.45)}50%{box-shadow:0 1px 0 rgba(255,255,255,.35) inset,0 12px 38px rgba(96,165,250,.75),0 0 0 6px rgba(96,165,250,.12)}}
 @media (prefers-reduced-motion:reduce){.fri-orb::before,.fri-orb .fs1,.fri-orb .fs2,.fri-btn{animation:none}}
 
+/* ---------- light mode (html.light) ---------- */
+html.light{
+  --ink:#0f172a;--ink2:#334155;--mut:#5b6474;--line:rgba(15,23,42,.12);--line2:rgba(15,23,42,.07);
+  --card:rgba(255,255,255,.6);--soft:rgba(15,23,42,.05);
+  --ok:#059669;--ok-l:#d1fae5;--bad:#dc2626;--bad-l:#fee2e2;--warn:#b45309;--warn-l:#fef3c7;
+  --brand-l:#ffedd5;--brand-d:#c2410c;--glass:rgba(255,255,255,.5);--glass-b:rgba(255,255,255,.85);
+  color-scheme:light;
+}
+html.light{background:linear-gradient(180deg,rgba(255,255,255,.18),rgba(255,255,255,.06) 40%,rgba(255,255,255,.32)),url("https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=2000&q=75&auto=format&fit=crop") 30% center / cover no-repeat fixed,url(mountain-bg.svg) center bottom / cover no-repeat fixed,#c9d6ec}
+@media (max-width:900px){html.light{background:linear-gradient(180deg,rgba(255,255,255,.18),rgba(255,255,255,.06) 40%,rgba(255,255,255,.32)),url("https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&q=70&auto=format&fit=crop") 28% center / cover no-repeat fixed,url(mountain-bg.svg) center bottom / cover no-repeat fixed,#c9d6ec}}
+html.light,html.light body{background-color:#c9d6ec}
+html.light ::selection{background:rgba(59,130,246,.25)}
+html.light .side{background:rgba(255,255,255,.62);box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 24px 60px rgba(15,23,42,.18)}
+html.light .side-brand b,html.light .side-user b{color:#0f172a}
+html.light .side-lbl{color:#64748b}
+html.light .side nav.tabs a{color:#334155}
+html.light .side nav.tabs a:hover{background:rgba(15,23,42,.06);color:#0f172a}
+html.light .side nav.tabs a.on{background:#fff;color:#0f172a;box-shadow:0 1px 3px rgba(15,23,42,.12)}
+html.light .side nav.tabs a.on svg{color:#2563eb}
+html.light .side .userchip{background:rgba(255,255,255,.7)}
+html.light .side .userchip:hover{background:#fff}
+html.light .appbar{background:rgba(255,255,255,.7)}
+html.light .appbar h1{color:#0f172a}
+html.light .menubtn{background:rgba(255,255,255,.8);color:#0f172a;border-color:rgba(15,23,42,.12)}
+html.light body>main{box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 30px 70px rgba(15,23,42,.18)}
+html.light footer{color:rgba(15,23,42,.6)!important}
+html.light .dgreet h2,html.light .pagehead h2,html.light .card h3,html.light .dt,html.light .gbox h2{color:#0f172a}
+html.light .card,html.light .kpi,html.light .dcard,html.light .paper{border-color:rgba(255,255,255,.9);box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 6px 18px rgba(15,23,42,.06)}
+html.light .dgo:hover{background:rgba(255,255,255,.8);box-shadow:0 16px 40px rgba(15,23,42,.14)}
+html.light .kpi.accent{border-top-color:rgba(255,255,255,.9)}
+html.light input,html.light select{background:rgba(255,255,255,.85);border-color:rgba(15,23,42,.15);color:#0f172a}
+html.light input::placeholder{color:#94a3b8}
+html.light select option{background:#fff;color:#0f172a}
+html.light input[readonly]{background:rgba(15,23,42,.04)}
+html.light .dgreet select{background:rgba(255,255,255,.8);border-color:rgba(15,23,42,.12)}
+html.light .btn.ghost{background:rgba(255,255,255,.8);color:#0f172a;border-color:rgba(15,23,42,.14)}
+html.light .btn.ghost:hover{background:#fff}
+html.light .btn.del{background:#fff1f2;color:#b91c1c;border-color:#fecaca}
+html.light .pill{background:rgba(15,23,42,.06);color:#334155}
+html.light .pill.g{background:#d1fae5;color:#047857}html.light .pill.r{background:#fee2e2;color:#b91c1c}html.light .pill.w{background:#fef3c7;color:#92400e}
+html.light th{background:rgba(15,23,42,.04)}
+html.light tbody tr:hover td{background:rgba(15,23,42,.03)}
+html.light tr.tot td{background:rgba(15,23,42,.05);border-top-color:#0f172a}
+html.light tr.sub td{background:rgba(15,23,42,.03)}
+html.light tr.lineh td{background:#dbeafe;color:#1e3a8a}
+html.light tr.bad td{color:#991b1b}
+html.light .sw{border-color:rgba(15,23,42,.25)}
+html.light details{background:rgba(255,255,255,.5)}
+html.light summary{background:rgba(15,23,42,.04)}
+html.light .bars .tg,html.light .legend i.tgsw{background:#fed7aa!important}
+html.light .drop{background:rgba(255,255,255,.55);border-color:rgba(15,23,42,.25);color:#334155}
+html.light .drop svg.i,html.light .drop b{color:#2563eb}
+html.light .banner{color:#92400e;border-color:#fde68a}
+html.light .ok{color:#047857}html.light .err{color:#b91c1c}
+html.light .gbox,html.light .modal .box,html.light .acct{background:rgba(255,255,255,.88);color:#0f172a;box-shadow:0 30px 80px rgba(15,23,42,.3)}
+html.light .acct-item{color:#0f172a}
+html.light .acct-item:hover{background:rgba(15,23,42,.05)}
+html.light .acct-role{background:rgba(15,23,42,.07);color:#334155}
+html.light .modal{background:rgba(15,23,42,.35)}
+html.light .chart .base{stroke:rgba(15,23,42,.35)}
+html.light .gate{background:linear-gradient(180deg,rgba(255,255,255,.1),rgba(255,255,255,0) 50%,rgba(255,255,255,.25)),url("https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=2000&q=75&auto=format&fit=crop") 30% center / cover no-repeat,url(mountain-bg.svg) center bottom / cover no-repeat,#c9d6ec}
+html.light #v-dash{--soft:rgba(15,23,42,.05)}
+html.light .dpill{background:#d1fae5;color:#047857}
+html.light .dpill.w{background:#ffedd5;color:#c2410c}html.light .dpill.r{background:#fee2e2;color:#b91c1c}
+html.light .dbar{background:repeating-linear-gradient(135deg,rgba(15,23,42,.08) 0 6px,rgba(15,23,42,.03) 6px 12px)}
+html.light .dbar .mark{background:#0f172a}
+html.light .dbar .mark span{background:#0f172a;color:#fff}
+html.light .dtile{background:rgba(255,255,255,.65);border-color:rgba(255,255,255,.9)}
+html.light .dday{background:rgba(255,255,255,.65);color:#0f172a}
+html.light .dday i{background:rgba(15,23,42,.25)}
+html.light .dday.on{background:#0f172a;color:#fff}html.light .dday.on small{color:#cbd5e1}
+html.light .dli:hover,html.light .drings>div:hover{background:rgba(15,23,42,.04)}
+html.light .dli .ic.ok{background:#d1fae5;color:#047857}html.light .dli .ic.mid{background:#ffedd5;color:#c2410c}html.light .dli .ic.bad{background:#fee2e2;color:#b91c1c}html.light .dli .ic.na{background:rgba(15,23,42,.06)}
+html.light .dlc .col{background:repeating-linear-gradient(135deg,rgba(15,23,42,.08) 0 6px,rgba(15,23,42,.025) 6px 12px)}
+html.light .dlc .col .p100{border-top-color:rgba(15,23,42,.55)}
+html.light .dlc.sel .col{outline-color:#0f172a}
+html.light .dlc:hover .col{outline-color:rgba(15,23,42,.3)}
+html.light .dtop{background:rgba(15,23,42,.82)}
+/* Friday in light mode */
+html.light .fri-panel{background:rgba(255,255,255,.86);border-color:rgba(255,255,255,.95);box-shadow:0 30px 80px rgba(15,23,42,.3)}
+html.light .fri-head{border-bottom-color:rgba(15,23,42,.08)}
+html.light .fri-head b,html.light .fri-m b,html.light .fri-t tr.tot td{color:#0f172a}
+html.light .fri-x{background:rgba(15,23,42,.06);color:#0f172a}
+html.light .fri-m.bot{background:rgba(15,23,42,.05);border-color:rgba(15,23,42,.06)}
+html.light .fri-m.me b{color:#fff}
+html.light .fri-m .up{color:#047857}html.light .fri-m .dn{color:#b91c1c}
+html.light .fri-m hr{border-top-color:rgba(15,23,42,.1)}
+html.light .fri-t th{border-bottom-color:rgba(15,23,42,.12)}
+html.light .fri-t td{border-bottom-color:rgba(15,23,42,.06)}
+html.light .fri-t tr.tot td{border-top-color:rgba(15,23,42,.3)}
+html.light .fri-chip{background:#fff;border-color:rgba(15,23,42,.12);color:#0f172a}
+html.light .fri-chip:hover{background:#eff6ff;border-color:#93c5fd}
+html.light .fri-in{border-top-color:rgba(15,23,42,.08)}
+html.light .fri-dots i{background:rgba(15,23,42,.45)}
+/* theme switch */
+.theme-tg{display:flex;align-items:center;gap:10px;width:100%;margin:8px 0 0;padding:9px 12px;border-radius:14px;border:1px solid var(--line2);background:rgba(255,255,255,.05);color:var(--ink);font:500 13px Inter,system-ui,sans-serif;cursor:pointer;text-align:left}
+.theme-tg:hover{background:rgba(255,255,255,.1)}
+html.light .theme-tg{background:rgba(255,255,255,.7)}
+html.light .theme-tg:hover{background:#fff}
+.theme-tg .ti{width:18px;height:18px;flex:none;color:#fbbf24}
+html.light .theme-tg .ti{color:#2563eb}
+.theme-tg span{flex:1}
+.theme-tg .sw2{width:36px;height:20px;border-radius:999px;background:rgba(255,255,255,.18);position:relative;flex:none;transition:background .2s}
+.theme-tg .sw2::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .2s}
+html.light .theme-tg .sw2{background:#3b82f6}
+html.light .theme-tg .sw2::after{transform:translateX(16px)}
+html.theme-anim body *{transition:background-color .35s,color .35s,border-color .35s!important}
+@media (prefers-reduced-motion:reduce){.theme-tg .sw2,.theme-tg .sw2::after{transition:none}html.theme-anim body *{transition:none!important}}
 footer{text-align:center;color:var(--mut);font-size:11.5px;padding:8px 0 30px}
 @media (max-width:700px){
   .appbar .sub{display:none}
@@ -528,6 +638,7 @@ footer{text-align:center;color:var(--mut);font-size:11.5px;padding:8px 0 30px}
   <a href="#upload" data-v="upload" class="up-only"><svg class="i" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></svg>Upload</a>
   <a href="#setup" data-v="setup"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Setup</a>
 </div></nav>
+  <button type="button" class="theme-tg" id="themeTg" aria-pressed="false"><svg class="ti" id="themeIc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg><span id="themeLbl">Light mode</span><i class="sw2"></i></button>
   <div class="meta-r"><div id="clock">--</div><div id="conn">Connecting…</div></div>
   <div class="userchip">
     <div class="side-user" id="sideUser" role="button" tabindex="0"><b id="sideName">Account</b><small id="sideRole"></small></div>
@@ -1269,7 +1380,7 @@ const authMsg = e => { const c=(e&&e.code)||""; return ({ "auth/invalid-credenti
 let fbApp=null, auth=null, db=null, CFG=null;
 let unsubs=[];
 const pad2 = n => String(n).padStart(2,"0");
-function setConn(txt, ok){ $("conn").textContent = txt; $("conn").style.color = ok ? "#86efac" : "#fdba74"; }
+function setConn(txt, ok){ $("conn").textContent = txt; $("conn").dataset.ok = ok?"1":"0"; $("conn").style.color = ""; }
 function normCfg(d){ const c=Object.assign({ name:"",unit:"",sections:[],sectionLine:{},rates:{} }, d||{}); if(!Array.isArray(c.sections)) c.sections=[]; c.sectionLine=c.sectionLine||{}; c.rates=c.rates||{}; return c; }
 S.months={}; S.tmonths={}; S.subs={}; S.users=[]; S.profile=null; S.daily=[];
 function rebuild(){ S.entries=[].concat(...Object.values(S.months)); S.targets=[].concat(...Object.values(S.tmonths)); }
@@ -1745,7 +1856,7 @@ function growIn(root){
 }
 const band = f => f==null ? "na" : f>=1 ? "ok" : f>=0.6 ? "mid" : "bad";
 function ring(f, color){ const r=22, c=2*Math.PI*r, v=Math.max(0,Math.min(1,f||0));
-  return `<svg width="56" height="56" viewBox="0 0 56 56"><circle cx="28" cy="28" r="${r}" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="6"/><circle class="rg" cx="28" cy="28" r="${r}" fill="none" stroke="${color}" stroke-width="6" stroke-linecap="round" data-dash="${(c*v).toFixed(1)} ${c.toFixed(1)}" stroke-dasharray="${(c*v).toFixed(1)} ${c.toFixed(1)}" transform="rotate(-90 28 28)"/></svg>`; }
+  return `<svg width="56" height="56" viewBox="0 0 56 56"><circle cx="28" cy="28" r="${r}" fill="none" style="stroke:var(--line)" stroke-width="6"/><circle class="rg" cx="28" cy="28" r="${r}" fill="none" stroke="${color}" stroke-width="6" stroke-linecap="round" data-dash="${(c*v).toFixed(1)} ${c.toFixed(1)}" stroke-dasharray="${(c*v).toFixed(1)} ${c.toFixed(1)}" transform="rotate(-90 28 28)"/></svg>`; }
 const crS = n => n==null ? "–" : cr(n*1e5).replace(" Cr"," Cr").replace(" L"," L");
 function renderDash(){
   const months=dMonths();
@@ -2363,6 +2474,19 @@ $("fVal").value=inr(0);
 document.body.dataset.role="viewer";
 renderAll(); route();
 setConn("Connecting…", false);
+/* ---------- dark / light switch ---------- */
+(function(){
+  const SUN='<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>';
+  const MOON='<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>';
+  const meta=document.querySelector('meta[name="theme-color"]');
+  function paint(){ const lt=document.documentElement.classList.contains("light");
+    $("themeIc").innerHTML = lt ? MOON : SUN; $("themeLbl").textContent = lt ? "Dark mode" : "Light mode";
+    $("themeTg").setAttribute("aria-pressed", lt?"true":"false"); if(meta) meta.content = lt ? "#e8eef7" : "#0f172a"; }
+  $("themeTg").addEventListener("click",()=>{ const h=document.documentElement; h.classList.add("theme-anim");
+    const lt=h.classList.toggle("light"); try{ localStorage.setItem("mgl-theme", lt?"light":"dark"); }catch(e){}
+    paint(); setTimeout(()=>h.classList.remove("theme-anim"),450); });
+  paint();
+})();
 /* ---------- Friday: built-in assistant. Answers from the app's own data; nothing leaves the app. ---------- */
 (function(){
   const MONS=["jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec"];
